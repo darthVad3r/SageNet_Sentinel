@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SageNetSentinel.Contracts;
-using SageNetSentinel.ML.Services;
+using SageNetSentinel.ML.Abstractions;
 
 namespace SageNetSentinel.Api.Controllers;
 
@@ -8,11 +8,11 @@ namespace SageNetSentinel.Api.Controllers;
 [Route("api/[controller]")]
 public class FraudDetectionController : ControllerBase
 {
-    private readonly EnsembleFraudDetectionService _fraudDetectionService;
+    private readonly IFraudDetectionService _fraudDetectionService;
     private readonly ILogger<FraudDetectionController> _logger;
 
     public FraudDetectionController(
-        EnsembleFraudDetectionService fraudDetectionService,
+        IFraudDetectionService fraudDetectionService,
         ILogger<FraudDetectionController> logger)
     {
         _fraudDetectionService = fraudDetectionService ?? throw new ArgumentNullException(nameof(fraudDetectionService));

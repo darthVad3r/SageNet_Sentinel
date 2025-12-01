@@ -5,6 +5,7 @@ using Microsoft.ML.Trainers.LightGbm;
 using SageNetSentinel.Contracts;
 using SageNetSentinel.ML.Abstractions;
 using SageNetSentinel.ML.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SageNetSentinel.ML.Services;
 
@@ -17,21 +18,29 @@ public class MLNetFraudDetectionService : IFraudDetectionService, IModelTrainer
     private ITransformer? _model;
     private readonly IModelRepository _modelRepository;
     private readonly IRiskAnalyzer _riskAnalyzer;
+    private readonly ILogger<MLNetFraudDetectionService> _logger;
 
     public string ServiceName => "MLNet";
 
     public MLNetFraudDetectionService(
         IModelRepository modelRepository,
-        IRiskAnalyzer riskAnalyzer)
+        IRiskAnalyzer riskAnalyzer,
+        ILogger<MLNetFraudDetectionService> logger)
     {
         _mlContext = new MLContext(seed: 42);
         _modelRepository = modelRepository ?? throw new ArgumentNullException(nameof(modelRepository));
         _riskAnalyzer = riskAnalyzer ?? throw new ArgumentNullException(nameof(riskAnalyzer));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
         // Load existing model if available
         if (_modelRepository.ModelExists())
         {
             _model = _modelRepository.LoadModel(out _);
+            _logger.LogInformation("ML.NET model loaded successfully");
+        }
+        else
+        {
+            _logger.LogWarning("No existing ML.NET model found");
         }
     }
 
@@ -128,59 +137,35 @@ public class MLNetFraudDetectionService : IFraudDetectionService, IModelTrainer
             throw new InvalidOperationException("Model not loaded. Train or load a model first.");
         }
 
-        // Create prediction engine
-        var predictionEngine = _mlContext.Model
-            .CreatePredictionEngine<FraudTrainingData, FraudPredictionOutput>(_model);
-
-        // Convert transaction to training data format
-        var input = ConvertToTrainingData(transaction);
-
-        // Make prediction
-        var output = predictionEngine.Predict(input);
-
-        return new FraudPrediction
+        try
         {
-            TransactionId = transaction.TransactionId,
-            IsFraudulent = output.IsFraud,
-            FraudProbability = output.Probability,
-            ConfidenceScore = Math.Abs(output.Score),
-            PredictionSource = ServiceName,
-            RecommendedAction = DetermineAction(output.Probability),
-            PredictionTimestamp = DateTime.UtcNow,
-            RiskFactors = _riskAnalyzer.IdentifyRiskFactors(transaction, output.Probability)
-        };
-    }
+            // Create prediction engine
+            var predictionEngine = _mlContext.Model
+                .CreatePredictionEngine<FraudTrainingData, FraudPredictionOutput>(_model);
 
-    /// <summary>
-    /// Convert TransactionData to FraudTrainingData format
-    /// </summary>
-    private static FraudTrainingData ConvertToTrainingData(TransactionData transaction)
-    {
-        return new FraudTrainingData
-        {
-            Amount = (float)transaction.Amount,
-            TransactionCountLast24Hours = transaction.TransactionCountLast24Hours,
-            AmountSpentLast24Hours = (float)transaction.AmountSpentLast24Hours,
-            TimeSinceLastTransaction = (float)(transaction.TimeSinceLastTransaction ?? 0),
-            DistanceFromLastTransaction = (float)(transaction.DistanceFromLastTransaction ?? 0),
-            IsInternational = transaction.IsInternational,
-            IsHighRiskMerchant = transaction.IsHighRiskMerchant,
-            HourOfDay = transaction.Timestamp.Hour,
-            DayOfWeek = (float)transaction.Timestamp.DayOfWeek
-        };
-    }
+            // Convert transaction to training data format
+            var input = TransactionDataConverter.ToTrainingData(transaction);
 
-    /// <summary>
-    /// Determine recommended action based on fraud probability
-    /// </summary>
-    private static string DetermineAction(float probability)
-    {
-        return probability switch
+            // Make prediction
+            var output = predictionEngine.Predict(input);
+
+            return new FraudPrediction
+            {
+                TransactionId = transaction.TransactionId,
+                IsFraudulent = output.IsFraud,
+                FraudProbability = output.Probability,
+                ConfidenceScore = Math.Abs(output.Score),
+                PredictionSource = ServiceName,
+                RecommendedAction = ActionRecommendationService.DetermineAction(output.Probability),
+                PredictionTimestamp = DateTime.UtcNow,
+                RiskFactors = _riskAnalyzer.IdentifyRiskFactors(transaction, output.Probability)
+            };
+        }
+        catch (Exception ex)
         {
-            >= 0.8f => "Decline",
-            >= 0.5f => "Review",
-            _ => "Approve"
-        };
+            _logger.LogError(ex, "Error making prediction for transaction {TransactionId}", transaction.TransactionId);
+            throw;
+        }
     }
 
     public bool IsModelLoaded => _model != null;
