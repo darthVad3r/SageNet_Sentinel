@@ -15,8 +15,8 @@ public class FraudDetectionController : ControllerBase
         EnsembleFraudDetectionService fraudDetectionService,
         ILogger<FraudDetectionController> logger)
     {
-        _fraudDetectionService = fraudDetectionService;
-        _logger = logger;
+        _fraudDetectionService = fraudDetectionService ?? throw new ArgumentNullException(nameof(fraudDetectionService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class FraudDetectionController : ControllerBase
                 "Analyzing transaction {TransactionId} for fraud",
                 request.Transaction.TransactionId);
 
-            var prediction = await _fraudDetectionService.PredictWithEnsembleAsync(
+            var prediction = await _fraudDetectionService.PredictAsync(
                 request.Transaction);
 
             _logger.LogInformation(
@@ -70,7 +70,7 @@ public class FraudDetectionController : ControllerBase
             
             foreach (var transaction in transactions)
             {
-                var prediction = await _fraudDetectionService.PredictWithEnsembleAsync(transaction);
+                var prediction = await _fraudDetectionService.PredictAsync(transaction);
                 predictions.Add(prediction);
             }
 

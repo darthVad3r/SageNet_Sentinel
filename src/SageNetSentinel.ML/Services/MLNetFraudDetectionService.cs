@@ -3,6 +3,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.LightGbm;
 using SageNetSentinel.Contracts;
+using SageNetSentinel.ML.Abstractions;
 using SageNetSentinel.ML.Models;
 
 namespace SageNetSentinel.ML.Services;
@@ -10,21 +11,27 @@ namespace SageNetSentinel.ML.Services;
 /// <summary>
 /// Service for training and predicting fraud detection using ML.NET
 /// </summary>
-public class MLNetFraudDetectionService
+public class MLNetFraudDetectionService : IFraudDetectionService, IModelTrainer
 {
     private readonly MLContext _mlContext;
     private ITransformer? _model;
-    private readonly string _modelPath;
+    private readonly IModelRepository _modelRepository;
+    private readonly IRiskAnalyzer _riskAnalyzer;
 
-    public MLNetFraudDetectionService(string modelPath = "fraud_model.zip")
+    public string ServiceName => "MLNet";
+
+    public MLNetFraudDetectionService(
+        IModelRepository modelRepository,
+        IRiskAnalyzer riskAnalyzer)
     {
         _mlContext = new MLContext(seed: 42);
-        _modelPath = modelPath;
+        _modelRepository = modelRepository ?? throw new ArgumentNullException(nameof(modelRepository));
+        _riskAnalyzer = riskAnalyzer ?? throw new ArgumentNullException(nameof(riskAnalyzer));
         
         // Load existing model if available
-        if (File.Exists(_modelPath))
+        if (_modelRepository.ModelExists())
         {
-            LoadModel();
+            _model = _modelRepository.LoadModel(out _);
         }
     }
 
@@ -85,7 +92,7 @@ public class MLNetFraudDetectionService
         Console.WriteLine($"Recall: {metrics.PositiveRecall:P2}");
 
         // Save the model
-        SaveModel(trainingData.Schema);
+        _modelRepository.SaveModel(_model, trainingData.Schema);
     }
 
     /// <summary>
@@ -105,7 +112,16 @@ public class MLNetFraudDetectionService
     /// <summary>
     /// Predict fraud for a single transaction
     /// </summary>
-    public FraudPrediction Predict(TransactionData transaction)
+    public Task<FraudPrediction> PredictAsync(TransactionData transaction)
+    {
+        var result = Predict(transaction);
+        return Task.FromResult(result);
+    }
+
+    /// <summary>
+    /// Synchronous prediction (internal use)
+    /// </summary>
+    private FraudPrediction Predict(TransactionData transaction)
     {
         if (_model == null)
         {
@@ -128,10 +144,10 @@ public class MLNetFraudDetectionService
             IsFraudulent = output.IsFraud,
             FraudProbability = output.Probability,
             ConfidenceScore = Math.Abs(output.Score),
-            PredictionSource = "MLNet",
+            PredictionSource = ServiceName,
             RecommendedAction = DetermineAction(output.Probability),
             PredictionTimestamp = DateTime.UtcNow,
-            RiskFactors = IdentifyRiskFactors(transaction, output.Probability)
+            RiskFactors = _riskAnalyzer.IdentifyRiskFactors(transaction, output.Probability)
         };
     }
 
@@ -165,56 +181,6 @@ public class MLNetFraudDetectionService
             >= 0.5f => "Review",
             _ => "Approve"
         };
-    }
-
-    /// <summary>
-    /// Identify risk factors contributing to fraud score
-    /// </summary>
-    private static List<string> IdentifyRiskFactors(TransactionData transaction, float probability)
-    {
-        var factors = new List<string>();
-
-        if (probability < 0.3f) return factors;
-
-        if (transaction.Amount > 1000)
-            factors.Add("High transaction amount");
-
-        if (transaction.IsInternational)
-            factors.Add("International transaction");
-
-        if (transaction.IsHighRiskMerchant)
-            factors.Add("High-risk merchant category");
-
-        if (transaction.TransactionCountLast24Hours > 10)
-            factors.Add("Unusual transaction frequency");
-
-        if (transaction.DistanceFromLastTransaction > 500)
-            factors.Add("Large distance from previous transaction");
-
-        if (transaction.Timestamp.Hour < 6 || transaction.Timestamp.Hour > 23)
-            factors.Add("Unusual transaction time");
-
-        return factors;
-    }
-
-    /// <summary>
-    /// Save the trained model to disk
-    /// </summary>
-    private void SaveModel(DataViewSchema schema)
-    {
-        if (_model == null) return;
-
-        _mlContext.Model.Save(_model, schema, _modelPath);
-        Console.WriteLine($"Model saved to {_modelPath}");
-    }
-
-    /// <summary>
-    /// Load a previously trained model from disk
-    /// </summary>
-    private void LoadModel()
-    {
-        _model = _mlContext.Model.Load(_modelPath, out _);
-        Console.WriteLine($"Model loaded from {_modelPath}");
     }
 
     public bool IsModelLoaded => _model != null;
