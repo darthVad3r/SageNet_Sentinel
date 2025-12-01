@@ -3,6 +3,7 @@ using Amazon.SageMaker.Model;
 using Amazon.SageMakerRuntime;
 using Amazon.SageMakerRuntime.Model;
 using SageNetSentinel.Contracts;
+using SageNetSentinel.ML.Abstractions;
 using System.Text;
 using System.Text.Json;
 
@@ -11,23 +12,28 @@ namespace SageNetSentinel.SageMaker.Services;
 /// <summary>
 /// Service for AWS SageMaker integration for fraud detection
 /// </summary>
-public class SageMakerFraudDetectionService
+public class SageMakerFraudDetectionService : IFraudDetectionService
 {
     private readonly IAmazonSageMaker _sageMakerClient;
     private readonly IAmazonSageMakerRuntime _sageMakerRuntime;
     private readonly string _endpointName;
     private readonly string _roleArn;
     private readonly string _s3BucketName;
+    private readonly IRiskAnalyzer _riskAnalyzer;
+
+    public string ServiceName => "SageMaker";
 
     public SageMakerFraudDetectionService(
         string endpointName,
         string roleArn,
         string s3BucketName,
+        IRiskAnalyzer riskAnalyzer,
         string? awsRegion = null)
     {
         _endpointName = endpointName;
         _roleArn = roleArn;
         _s3BucketName = s3BucketName;
+        _riskAnalyzer = riskAnalyzer ?? throw new ArgumentNullException(nameof(riskAnalyzer));
 
         if (!string.IsNullOrEmpty(awsRegion))
         {
@@ -235,10 +241,10 @@ public class SageMakerFraudDetectionService
                 IsFraudulent = probability >= 0.5f,
                 FraudProbability = probability,
                 ConfidenceScore = Math.Abs(probability - 0.5f) * 2, // Scale to 0-1
-                PredictionSource = "SageMaker",
+                PredictionSource = ServiceName,
                 RecommendedAction = DetermineAction(probability),
                 PredictionTimestamp = DateTime.UtcNow,
-                RiskFactors = IdentifyRiskFactors(transaction, probability)
+                RiskFactors = _riskAnalyzer.IdentifyRiskFactors(transaction, probability)
             };
         }
         catch (Exception ex)
@@ -300,32 +306,5 @@ public class SageMakerFraudDetectionService
             >= 0.5f => "Review",
             _ => "Approve"
         };
-    }
-
-    /// <summary>
-    /// Identify risk factors contributing to fraud score
-    /// </summary>
-    private List<string> IdentifyRiskFactors(TransactionData transaction, float probability)
-    {
-        var factors = new List<string>();
-
-        if (probability < 0.3f) return factors;
-
-        if (transaction.Amount > 1000)
-            factors.Add("High transaction amount");
-
-        if (transaction.IsInternational)
-            factors.Add("International transaction");
-
-        if (transaction.IsHighRiskMerchant)
-            factors.Add("High-risk merchant category");
-
-        if (transaction.TransactionCountLast24Hours > 10)
-            factors.Add("Unusual transaction frequency");
-
-        if (transaction.DistanceFromLastTransaction > 500)
-            factors.Add("Large distance from previous transaction");
-
-        return factors;
     }
 }

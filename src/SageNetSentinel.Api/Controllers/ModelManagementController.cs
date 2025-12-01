@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SageNetSentinel.Contracts;
+using SageNetSentinel.ML.Abstractions;
 using SageNetSentinel.ML.Services;
 
 namespace SageNetSentinel.Api.Controllers;
@@ -8,15 +9,15 @@ namespace SageNetSentinel.Api.Controllers;
 [Route("api/[controller]")]
 public class ModelManagementController : ControllerBase
 {
-    private readonly MLNetFraudDetectionService _mlNetService;
+    private readonly IModelTrainer _modelTrainer;
     private readonly ILogger<ModelManagementController> _logger;
 
     public ModelManagementController(
-        MLNetFraudDetectionService mlNetService,
+        IModelTrainer modelTrainer,
         ILogger<ModelManagementController> logger)
     {
-        _mlNetService = mlNetService;
-        _logger = logger;
+        _modelTrainer = modelTrainer ?? throw new ArgumentNullException(nameof(modelTrainer));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -34,13 +35,13 @@ public class ModelManagementController : ControllerBase
 
             if (request.ModelType == "AutoML")
             {
-                _mlNetService.TrainWithAutoML(
+                _modelTrainer.TrainModel(
                     request.DataSourcePath,
                     request.MaxTrainingTimeSeconds);
             }
             else
             {
-                _mlNetService.TrainModel(
+                _modelTrainer.TrainModel(
                     request.DataSourcePath,
                     request.MaxTrainingTimeSeconds);
             }
@@ -70,7 +71,7 @@ public class ModelManagementController : ControllerBase
     {
         return Ok(new
         {
-            mlNetModelLoaded = _mlNetService.IsModelLoaded,
+            mlNetModelLoaded = _modelTrainer.IsModelLoaded,
             modelVersion = "1.0.0",
             lastTrainingDate = DateTime.UtcNow.AddDays(-7),
             framework = "ML.NET 5.0",

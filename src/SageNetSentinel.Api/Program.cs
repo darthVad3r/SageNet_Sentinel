@@ -1,3 +1,6 @@
+using Microsoft.ML;
+using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.ML.Infrastructure;
 using SageNetSentinel.ML.Services;
 using SageNetSentinel.SageMaker.Services;
 
@@ -15,9 +18,23 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Register shared services
+builder.Services.AddSingleton<IRiskAnalyzer, TransactionRiskAnalyzer>();
+
 // Configure ML.NET service
 var mlModelPath = builder.Configuration["MLNet:ModelPath"] ?? "fraud_model.zip";
-builder.Services.AddSingleton(new MLNetFraudDetectionService(mlModelPath));
+builder.Services.AddSingleton<MLContext>(sp => new MLContext(seed: 42));
+builder.Services.AddSingleton<IModelRepository>(sp =>
+{
+    var mlContext = sp.GetRequiredService<MLContext>();
+    return new FileModelRepository(mlContext, mlModelPath);
+});
+
+builder.Services.AddSingleton<MLNetFraudDetectionService>();
+builder.Services.AddSingleton<IFraudDetectionService>(sp => 
+    sp.GetRequiredService<MLNetFraudDetectionService>());
+builder.Services.AddSingleton<IModelTrainer>(sp => 
+    sp.GetRequiredService<MLNetFraudDetectionService>());
 
 // Configure AWS SageMaker service (optional)
 var useSageMaker = builder.Configuration.GetValue<bool>("SageMaker:Enabled");
@@ -30,8 +47,15 @@ if (useSageMaker)
 
     if (!string.IsNullOrEmpty(endpointName) && !string.IsNullOrEmpty(roleArn))
     {
-        builder.Services.AddSingleton(new SageMakerFraudDetectionService(
-            endpointName, roleArn, s3Bucket, awsRegion));
+        builder.Services.AddSingleton<SageMakerFraudDetectionService>(sp =>
+        {
+            var riskAnalyzer = sp.GetRequiredService<IRiskAnalyzer>();
+            return new SageMakerFraudDetectionService(
+                endpointName, roleArn, s3Bucket, riskAnalyzer, awsRegion);
+        });
+        
+        builder.Services.AddSingleton<IFraudDetectionService>(sp => 
+            sp.GetRequiredService<SageMakerFraudDetectionService>());
     }
 }
 
@@ -44,12 +68,19 @@ var fpConfig = new FalsePositiveReductionConfig
     DisagreementThreshold = builder.Configuration.GetValue<float>("FalsePositiveReduction:DisagreementThreshold", 0.7f)
 };
 
-// Register Ensemble service
-builder.Services.AddSingleton(sp =>
+// Register Ensemble Strategy and Service
+builder.Services.AddSingleton<IEnsembleStrategy>(sp =>
 {
-    var mlNetService = sp.GetRequiredService<MLNetFraudDetectionService>();
-    var sageMakerService = sp.GetService<SageMakerFraudDetectionService>();
-    return new EnsembleFraudDetectionService(mlNetService, sageMakerService, fpConfig);
+    var riskAnalyzer = sp.GetRequiredService<IRiskAnalyzer>();
+    return new WeightedAverageEnsembleStrategy(fpConfig, riskAnalyzer);
+});
+
+builder.Services.AddSingleton<EnsembleFraudDetectionService>(sp =>
+{
+    var detectionServices = sp.GetServices<IFraudDetectionService>()
+        .Where(s => s is not EnsembleFraudDetectionService);
+    var ensembleStrategy = sp.GetRequiredService<IEnsembleStrategy>();
+    return new EnsembleFraudDetectionService(detectionServices, ensembleStrategy, fpConfig);
 });
 
 // Add CORS
