@@ -1,0 +1,264 @@
+﻿import { Component, OnInit, inject } from '@angular/core';
+import { SectionBlockComponent } from '../../shared/ui/section-block.component';
+import { CtaButtonComponent } from '../../shared/ui/cta-button.component';
+import { PricingCardComponent } from '../../shared/ui/pricing-card.component';
+import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.component';
+import { LandingContentService } from '../../core/services/landing-content.service';
+import { SeoService } from '../../core/services/seo.service';
+
+@Component({
+  selector: 'app-landing-page',
+  standalone: true,
+  imports: [
+    SectionBlockComponent,
+    CtaButtonComponent,
+    PricingCardComponent,
+    TestimonialCardComponent
+  ],
+  template: `
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a routerLink="/" class="brand" aria-label="Go to homepage">AI Workflow Studio</a>
+        <nav class="nav" aria-label="Main navigation">
+          <a routerLink="/">Home</a>
+          <a routerLink="/book">Book</a>
+          <a routerLink="/kit">Starter Kit</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero__inner">
+          <p class="hero__eyebrow">AI Automation + Agent Workflows</p>
+          <h1>Ship AI workflows that reduce manual work and scale with your team.</h1>
+          <p class="hero__subtitle">
+            We design and deliver practical automation systems plus an AI Agent Starter Kit
+            so you can launch quickly with confidence.
+          </p>
+          <div class="hero__actions">
+            <app-cta-button label="Book a discovery call" link="/book"></app-cta-button>
+            <app-cta-button label="View Starter Kit" link="/kit"></app-cta-button>
+          </div>
+        </div>
+      </section>
+
+      <app-section-block
+        eyebrow="Problem"
+        title="Most teams know AI can help, but execution gets stuck."
+        subtitle="Without a reliable workflow architecture, automation projects become slow, fragile, and hard to scale."
+        variant="light"
+      >
+        <ul class="list">
+          @for (item of problemPoints; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </app-section-block>
+
+      <app-section-block
+        eyebrow="Solution"
+        title="A complete service + product path to implementation"
+        subtitle="Get done-for-you architecture and delivery support, or start independently with our AI Agent Starter Kit."
+        variant="muted"
+      >
+        <ul class="list">
+          @for (item of solutionPoints; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </app-section-block>
+
+      <app-section-block
+        eyebrow="Pricing"
+        title="Simple plans for different stages"
+        subtitle="Choose the engagement model that matches your current automation maturity."
+        variant="light"
+      >
+        <div class="pricing-grid">
+          @for (plan of pricingPlans; track plan.name) {
+            <app-pricing-card [plan]="plan"></app-pricing-card>
+          }
+        </div>
+      </app-section-block>
+
+      <app-section-block
+        eyebrow="Starter Kit"
+        title="AI Agent Starter Kit"
+        subtitle="A practical starter package to help you launch workflow-driven AI projects in days, not months."
+        variant="muted"
+      >
+        <div class="kit-grid">
+          <ul class="list">
+            @for (item of starterKitPoints; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+          <app-cta-button label="Go to kit checkout" link="/kit"></app-cta-button>
+        </div>
+      </app-section-block>
+
+      <app-section-block
+        eyebrow="Testimonials"
+        title="What clients say"
+        subtitle="Placeholder content below. Replace with real customer proof."
+        variant="light"
+      >
+        <div class="testimonial-grid">
+          @for (testimonial of testimonials; track testimonial.quote) {
+            <app-testimonial-card
+              [quote]="testimonial.quote"
+              [name]="testimonial.name"
+              [role]="testimonial.role"
+            ></app-testimonial-card>
+          }
+        </div>
+      </app-section-block>
+
+      <app-section-block
+        eyebrow="Next Step"
+        title="Ready to map your first AI workflow?"
+        subtitle="Book a call and we will identify the highest-ROI automation opportunities for your team."
+        variant="muted"
+      >
+        <app-cta-button label="Book your call" link="/book"></app-cta-button>
+      </app-section-block>
+    </main>
+  `,
+  styles: [
+    `
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid #e5e7eb;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(8px);
+      }
+
+      .topbar__inner {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0.9rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .brand {
+        font-weight: 700;
+        text-decoration: none;
+        color: #111827;
+      }
+
+      .nav {
+        display: flex;
+        gap: 0.9rem;
+      }
+
+      .nav a {
+        text-decoration: none;
+        color: #374151;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .hero {
+        padding: 4.5rem 1.25rem 3.5rem;
+        background: linear-gradient(180deg, #eef2ff 0%, #f7f8fa 100%);
+      }
+
+      .hero__inner {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+
+      .hero__eyebrow {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #4338ca;
+        font-weight: 700;
+        font-size: 0.75rem;
+      }
+
+      h1 {
+        margin: 0.75rem 0 0;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        line-height: 1.1;
+        max-width: 850px;
+      }
+
+      .hero__subtitle {
+        margin-top: 1rem;
+        max-width: 760px;
+        color: #4b5563;
+        font-size: 1.06rem;
+      }
+
+      .hero__actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+
+      .list {
+        margin: 1rem 0 0;
+        padding-left: 1.25rem;
+        display: grid;
+        gap: 0.55rem;
+        color: #374151;
+      }
+
+      .pricing-grid,
+      .testimonial-grid {
+        margin-top: 1rem;
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .kit-grid {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      @media (max-width: 900px) {
+        .pricing-grid,
+        .testimonial-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav {
+          gap: 0.65rem;
+        }
+
+        .pricing-grid,
+        .testimonial-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    `
+  ]
+})
+export class LandingPageComponent implements OnInit {
+  private readonly landingContentService = inject(LandingContentService);
+  private readonly seoService = inject(SeoService);
+
+  readonly problemPoints = this.landingContentService.getProblemPoints();
+  readonly solutionPoints = this.landingContentService.getSolutionPoints();
+  readonly pricingPlans = this.landingContentService.getPricingPlans();
+  readonly starterKitPoints = this.landingContentService.getStarterKitPoints();
+  readonly testimonials = this.landingContentService.getTestimonials();
+
+  ngOnInit(): void {
+    this.seoService.setPageMeta(
+      'AI Automation & Agent Workflow Service | Landing',
+      'Single-page overview of AI automation services, workflow implementation plans, pricing, and AI Agent Starter Kit.'
+    );
+  }
+}
