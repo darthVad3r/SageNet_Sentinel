@@ -13,15 +13,16 @@ describe('LandingPageComponent', () => {
   it('should create', () => {
     const fixture = TestBed.createComponent(LandingPageComponent);
     const component = fixture.componentInstance;
+
     expect(component).toBeTruthy();
   });
 
-  it('should render hero title and pricing section', () => {
+  it('should render modular architecture messaging and pricing', () => {
     const fixture = TestBed.createComponent(LandingPageComponent);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
 
-    expect(el.querySelector('h1')?.textContent).toContain('Ship AI workflows');
-    expect(el.textContent).toContain('Simple plans for different stages');
+    expect(el.querySelector('h1')?.textContent).toContain('Launch AI workflow offers');
+    expect(el.textContent).toContain('Reusable pricing tiers');
   });
 });

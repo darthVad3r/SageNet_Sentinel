@@ -2,6 +2,18 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
+export interface SeoStructuredDataEntry {
+  id: string;
+  schema: object;
+}
+
+export interface SeoMetadata {
+  title: string;
+  description: string;
+  canonicalUrl?: string;
+  structuredData?: SeoStructuredDataEntry[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class SeoService {
   private readonly document = inject(DOCUMENT);
@@ -10,6 +22,18 @@ export class SeoService {
     private readonly title: Title,
     private readonly meta: Meta
   ) {}
+
+  applyMetadata(metadata: SeoMetadata): void {
+    this.setPageMeta(metadata.title, metadata.description);
+
+    if (metadata.canonicalUrl) {
+      this.setCanonicalUrl(metadata.canonicalUrl);
+    }
+
+    metadata.structuredData?.forEach((entry) => {
+      this.setStructuredData(entry.id, entry.schema);
+    });
+  }
 
   setPageMeta(pageTitle: string, description: string): void {
     this.title.setTitle(pageTitle);
