@@ -5,6 +5,7 @@ import { AppState, AppTheme, NotificationItem, UserMetadata, initialAppState } f
 @Injectable()
 export class AppStore {
   private readonly state = signal<AppState>(initialAppState);
+  private notificationIdCounter = 0;
 
   readonly ui = computed(() => this.state().ui);
   readonly auth = computed(() => this.state().auth);
@@ -34,6 +35,15 @@ export class AppStore {
 
       document.documentElement.dataset['theme'] = this.theme();
     });
+  }
+
+  private createNotificationId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+
+    this.notificationIdCounter += 1;
+    return `notification-${this.notificationIdCounter}`;
   }
 
   toggleSidebar(): void {
@@ -85,7 +95,7 @@ export class AppStore {
 
   addNotification(message: string, level: NotificationItem['level'] = 'info'): void {
     const notification: NotificationItem = {
-      id: `${Date.now()}-${this.notifications().length + 1}`,
+      id: this.createNotificationId(),
       message,
       level,
       read: false,

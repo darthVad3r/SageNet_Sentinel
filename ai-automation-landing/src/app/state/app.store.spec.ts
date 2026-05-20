@@ -4,12 +4,17 @@ import { AppStore } from './app.store';
 describe('AppStore', () => {
   let store: AppStore;
 
+  const flushPendingEffects = (): void => {
+    (TestBed as unknown as { flushEffects?: () => void }).flushEffects?.();
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [AppStore],
     });
     document.documentElement.removeAttribute('data-theme');
     store = TestBed.inject(AppStore);
+    flushPendingEffects();
   });
 
   it('should toggle sidebarOpen state', () => {
@@ -27,10 +32,12 @@ describe('AppStore', () => {
     expect(document.documentElement.dataset['theme']).toBe('light');
 
     store.setTheme('dark');
+    flushPendingEffects();
     expect(store.theme()).toBe('dark');
     expect(document.documentElement.dataset['theme']).toBe('dark');
 
     store.setTheme('system');
+    flushPendingEffects();
     expect(store.theme()).toBe('system');
     expect(document.documentElement.dataset['theme']).toBe('system');
   });

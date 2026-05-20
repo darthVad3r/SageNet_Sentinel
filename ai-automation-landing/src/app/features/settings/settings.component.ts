@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * Settings Component
@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-settings',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="settings-container">
       <h1>Settings</h1>
@@ -45,12 +46,12 @@ import { Component } from '@angular/core';
           <section class="settings-section">
             <h2>Security</h2>
             <div class="settings-group">
-              <label>Password</label>
-              <button class="btn btn-secondary">Change Password</button>
+              <label for="settings-change-password">Password</label>
+              <button id="settings-change-password" class="btn btn-secondary">Change Password</button>
             </div>
             <div class="settings-group">
-              <label>Two-Factor Authentication</label>
-              <button class="btn btn-secondary">Enable 2FA</button>
+              <label for="settings-enable-2fa">Two-Factor Authentication</label>
+              <button id="settings-enable-2fa" class="btn btn-secondary">Enable 2FA</button>
             </div>
           </section>
         </main>
