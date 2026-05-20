@@ -187,7 +187,9 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
 })
 export class SiteShellComponent implements OnInit {
   private readonly activatedRoute = inject(ActivatedRoute);
+
   private readonly router = inject(Router);
+
   private readonly seoService = inject(SeoService);
 
   ngOnInit(): void {
@@ -203,7 +205,7 @@ export class SiteShellComponent implements OnInit {
           }
 
           return route.snapshot.data['seo'] as SeoMetadata | undefined;
-        }),
+        })
       )
       .subscribe((metadata) => {
         if (metadata) {

@@ -16,7 +16,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       <div class="settings-layout">
         <aside class="settings-sidebar">
           <nav class="settings-nav">
-            <button type="button" class="nav-item active">Account</button>
+            <button type="button" class="nav-item active" aria-current="page">Account</button>
             <button type="button" class="nav-item">Preferences</button>
             <button type="button" class="nav-item">Notifications</button>
             <button type="button" class="nav-item">Integrations</button>
@@ -46,11 +46,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           <section class="settings-section">
             <h2>Security</h2>
             <div class="settings-group">
-              <label for="settings-change-password">Password</label>
-              <button id="settings-change-password" class="btn btn-secondary">Change Password</button>
+              <span class="settings-label">Password</span>
+              <button id="settings-change-password" class="btn btn-secondary">
+                Change Password
+              </button>
             </div>
             <div class="settings-group">
-              <label for="settings-enable-2fa">Two-Factor Authentication</label>
+              <span class="settings-label">Two-Factor Authentication</span>
               <button id="settings-enable-2fa" class="btn btn-secondary">Enable 2FA</button>
             </div>
           </section>
@@ -141,7 +143,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         margin-bottom: 1.5rem;
       }
 
-      .settings-group label {
+      .settings-group label,
+      .settings-group .settings-label {
         display: block;
         font-weight: 600;
         margin-bottom: 0.5rem;
@@ -154,7 +157,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         border-radius: 4px;
         font-size: 1rem;
       }
-
 
       @media (max-width: 768px) {
         .settings-layout {

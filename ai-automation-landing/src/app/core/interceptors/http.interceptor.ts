@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
  */
 @Injectable()
 export class HttpInterceptorService implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     // Add custom headers, error handling, or request transformation here
     return next.handle(req);
   }

@@ -35,11 +35,13 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         color: #6b7280;
         font-size: 0.9rem;
       }
-    `
-  ]
+    `,
+  ],
 })
 export class TestimonialCardComponent {
   @Input({ required: true }) quote = '';
+
   @Input({ required: true }) name = '';
+
   @Input({ required: true }) role = '';
 }

@@ -55,12 +55,15 @@ import { NgClass, NgIf } from '@angular/common';
         max-width: 720px;
         color: #4b5563;
       }
-    `
-  ]
+    `,
+  ],
 })
 export class SectionBlockComponent {
   @Input({ required: true }) title = '';
+
   @Input() eyebrow = '';
+
   @Input() subtitle = '';
+
   @Input() variant: 'light' | 'muted' = 'light';
 }

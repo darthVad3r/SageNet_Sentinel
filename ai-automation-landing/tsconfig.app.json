@@ -6,14 +6,8 @@
     "ignoreDeprecations": "5.0",
     "outDir": "./out-tsc/app",
     "rootDir": "./src",
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"]
 }

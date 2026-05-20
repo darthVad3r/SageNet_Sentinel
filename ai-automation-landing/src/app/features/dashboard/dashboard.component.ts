@@ -247,6 +247,7 @@ import { AppStore } from '@app/state/app.store';
 })
 export class DashboardComponent {
   readonly store: AppStore = inject(AppStore);
+
   private readonly themeOrder: AppTheme[] = ['light', 'dark', 'system'];
 
   toggleSidebar(): void {

@@ -47,12 +47,14 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         color: var(--lab-ink-soft);
         line-height: 1.6;
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeatureCardComponent {
   @Input() eyebrow = '';
+
   @Input({ required: true }) title = '';
+
   @Input({ required: true }) body = '';
 }

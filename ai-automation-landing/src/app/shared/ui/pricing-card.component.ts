@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { CtaButtonComponent } from './cta-button.component';
 import { PricingPlan } from '../../core/services/landing-content.service';
+import { CtaButtonComponent } from './cta-button.component';
 
 @Component({
   selector: 'app-pricing-card',
@@ -65,8 +65,8 @@ import { PricingPlan } from '../../core/services/landing-content.service';
         display: grid;
         gap: 0.35rem;
       }
-    `
-  ]
+    `,
+  ],
 })
 export class PricingCardComponent {
   @Input({ required: true }) plan!: PricingPlan;

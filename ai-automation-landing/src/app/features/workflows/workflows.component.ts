@@ -85,7 +85,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         margin-bottom: 2rem;
       }
 
-
       .search-input {
         flex: 1;
         padding: 0.75rem;
@@ -139,7 +138,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         background: color-mix(in srgb, var(--lab-ink-soft) 18%, var(--lab-surface-strong));
         color: var(--lab-ink);
       }
-
     `,
   ],
 })

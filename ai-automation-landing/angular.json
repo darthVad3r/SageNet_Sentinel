@@ -35,9 +35,7 @@
                 "output": "/assets"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ],
+            "styles": ["src/styles.scss"],
             "security": {
               "allowedHosts": []
             }
