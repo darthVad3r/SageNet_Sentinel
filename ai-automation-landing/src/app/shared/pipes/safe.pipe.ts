@@ -14,7 +14,7 @@ export class SafePipe implements PipeTransform {
 
   transform(
     value: string,
-    type: 'html' | 'url' | 'style' | 'script' | 'resource' = 'html',
+    type: 'html' | 'url' | 'style' | 'script' | 'resource' = 'html'
   ): SafeHtml | SafeUrl | SafeResourceUrl {
     if (!value) {
       return value;

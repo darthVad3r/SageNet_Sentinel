@@ -43,11 +43,13 @@ import { NgIf } from '@angular/common';
         background: #1f2937;
         border-color: #1f2937;
       }
-    `
-  ]
+    `,
+  ],
 })
 export class CtaButtonComponent {
   @Input({ required: true }) label = '';
+
   @Input({ required: true }) link = '';
+
   @Input() external = false;
 }

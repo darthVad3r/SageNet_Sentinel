@@ -5,26 +5,36 @@ import { AppState, AppTheme, NotificationItem, UserMetadata, initialAppState } f
 @Injectable()
 export class AppStore {
   private readonly state = signal<AppState>(initialAppState);
+
   private notificationIdCounter = 0;
 
   readonly ui = computed(() => this.state().ui);
+
   readonly auth = computed(() => this.state().auth);
+
   readonly app = computed(() => this.state().app);
 
   readonly sidebarOpen = computed(() => this.ui().sidebarOpen);
+
   readonly theme = computed(() => this.ui().theme);
+
   readonly isAuthenticated = computed(() => this.auth().isAuthenticated);
+
   readonly user = computed(() => this.auth().user);
+
   readonly isLoading = computed(() => this.app().isLoading);
+
   readonly notifications = computed(() => this.app().notifications);
+
   readonly unreadNotificationsCount = computed(
-    () => this.notifications().filter((notification) => !notification.read).length,
+    () => this.notifications().filter((notification) => !notification.read).length
   );
+
   readonly activeNotificationMessage = computed(
     () =>
-      this.notifications().find((notification) => !notification.read)?.message ??
-      'No notifications',
+      this.notifications().find((notification) => !notification.read)?.message ?? 'No notifications'
   );
+
   readonly hasActiveSession = computed(() => this.isAuthenticated() && !!this.user().id);
 
   constructor() {
@@ -116,7 +126,7 @@ export class AppStore {
       app: {
         ...current.app,
         notifications: current.app.notifications.map((notification) =>
-          notification.id === notificationId ? { ...notification, read: true } : notification,
+          notification.id === notificationId ? { ...notification, read: true } : notification
         ),
       },
     }));

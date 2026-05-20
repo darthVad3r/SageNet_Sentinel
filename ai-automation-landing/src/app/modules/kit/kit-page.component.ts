@@ -14,8 +14,8 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
           <p class="page-shell__eyebrow">Digital product route</p>
           <h1>Sell the starter kit from the same Angular shell.</h1>
           <p>
-            Keep the productized offer in its own module while still sharing navigation,
-            SEO handling, CTA styles, and responsive layout primitives.
+            Keep the productized offer in its own module while still sharing navigation, SEO
+            handling, CTA styles, and responsive layout primitives.
           </p>
           <app-cta-button
             label="Continue to checkout"
@@ -110,9 +110,9 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
           width: min(1020px, calc(100% - 1.25rem));
         }
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KitPageComponent {
   private readonly contentService = inject(LandingContentService);

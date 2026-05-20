@@ -47,9 +47,7 @@ export class SeoService {
   }
 
   setCanonicalUrl(url: string): void {
-    let link = this.document.querySelector(
-      'link[rel="canonical"]'
-    ) as HTMLLinkElement | null;
+    let link = this.document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
 
     if (!link) {
       link = this.document.createElement('link');

@@ -13,13 +13,14 @@ export interface PricingPlan {
 @Injectable({ providedIn: 'root' })
 export class LandingContentService {
   readonly bookingUrl = 'https://calendly.com/your-handle/discovery-call';
+
   readonly kitCheckoutUrl = 'https://checkout.example.com/ai-agent-starter-kit';
 
   getProblemPoints(): string[] {
     return [
       'Manual workflows slow down delivery and create bottlenecks.',
       'Teams struggle to connect tools, data, and AI agents reliably.',
-      'Most automations break when ownership and architecture are unclear.'
+      'Most automations break when ownership and architecture are unclear.',
     ];
   }
 
@@ -27,7 +28,7 @@ export class LandingContentService {
     return [
       'Production-ready AI agent workflows aligned to your process.',
       'Clear architecture, observability, and handoff documentation.',
-      'Fast implementation with reusable templates and components.'
+      'Fast implementation with reusable templates and components.',
     ];
   }
 
@@ -40,10 +41,10 @@ export class LandingContentService {
         features: [
           '1 workflow automation map',
           '1 custom AI agent setup',
-          '1 team enablement session'
+          '1 team enablement session',
         ],
         ctaLabel: 'Start with Starter',
-        ctaLink: '/book'
+        ctaLink: '/book',
       },
       {
         name: 'Growth',
@@ -52,11 +53,11 @@ export class LandingContentService {
         features: [
           'Up to 3 workflow automations',
           'Agent orchestration blueprint',
-          'Implementation support + QA'
+          'Implementation support + QA',
         ],
         ctaLabel: 'Book Growth Plan',
         ctaLink: '/book',
-        highlighted: true
+        highlighted: true,
       },
       {
         name: 'Scale',
@@ -65,11 +66,11 @@ export class LandingContentService {
         features: [
           'Multi-team automation architecture',
           'Security and compliance alignment',
-          'Dedicated technical advisory'
+          'Dedicated technical advisory',
         ],
         ctaLabel: 'Talk to Sales',
-        ctaLink: '/book'
-      }
+        ctaLink: '/book',
+      },
     ];
   }
 
@@ -77,7 +78,7 @@ export class LandingContentService {
     return [
       'Angular-ready starter project structure',
       'Reusable prompts and agent workflow templates',
-      'Deployment checklist and scaling notes'
+      'Deployment checklist and scaling notes',
     ];
   }
 
@@ -86,13 +87,13 @@ export class LandingContentService {
       {
         name: 'Client Name',
         role: 'Operations Lead',
-        quote: 'Placeholder testimonial: add a real customer success quote here.'
+        quote: 'Placeholder testimonial: add a real customer success quote here.',
       },
       {
         name: 'Client Name',
         role: 'Founder',
-        quote: 'Placeholder testimonial: describe measurable impact from automation.'
-      }
+        quote: 'Placeholder testimonial: describe measurable impact from automation.',
+      },
     ];
   }
 }

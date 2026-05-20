@@ -14,7 +14,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
     CtaButtonComponent,
     PricingTierComponent,
     TestimonialCardComponent,
-    FeatureCardComponent
+    FeatureCardComponent,
   ],
   template: `
     <section class="hero">
@@ -23,8 +23,8 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
           <p class="hero__eyebrow">Angular + Vite-ready AI delivery system</p>
           <h1>Launch AI workflow offers on a modular Angular architecture.</h1>
           <p class="hero__subtitle">
-            AI Automation Lab gives you a landing scaffold with route-level SEO,
-            reusable UI, and service modules for consulting, booking, and digital kit sales.
+            AI Automation Lab gives you a landing scaffold with route-level SEO, reusable UI, and
+            service modules for consulting, booking, and digital kit sales.
           </p>
 
           <div class="hero__actions">
@@ -103,11 +103,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
     >
       <div class="feature-grid">
         @for (item of starterKitPoints; track item) {
-          <app-feature-card
-            eyebrow="Kit"
-            title="Reusable asset"
-            [body]="item"
-          ></app-feature-card>
+          <app-feature-card eyebrow="Kit" title="Reusable asset" [body]="item"></app-feature-card>
         }
       </div>
     </app-section-block>
@@ -232,16 +228,20 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
           width: min(1120px, calc(100% - 1.25rem));
         }
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingPageComponent {
   private readonly landingContentService = inject(LandingContentService);
 
   readonly problemPoints = this.landingContentService.getProblemPoints();
+
   readonly solutionPoints = this.landingContentService.getSolutionPoints();
+
   readonly pricingPlans = this.landingContentService.getPricingPlans();
+
   readonly starterKitPoints = this.landingContentService.getStarterKitPoints();
+
   readonly testimonials = this.landingContentService.getTestimonials();
 }

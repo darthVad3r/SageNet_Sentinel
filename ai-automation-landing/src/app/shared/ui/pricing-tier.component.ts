@@ -77,9 +77,9 @@ import { CtaButtonComponent } from './cta-button.component';
         gap: 0.45rem;
         color: var(--lab-ink-soft);
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PricingTierComponent {
   @Input({ required: true }) plan!: PricingPlan;

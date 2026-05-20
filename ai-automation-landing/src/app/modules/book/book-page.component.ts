@@ -14,8 +14,8 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
           <p class="page-shell__eyebrow">Strategy booking</p>
           <h1>Book the architecture call.</h1>
           <p>
-            Use this route for your consultation CTA. It stays visually aligned with the landing page,
-            but narrows the message to one conversion action.
+            Use this route for your consultation CTA. It stays visually aligned with the landing
+            page, but narrows the message to one conversion action.
           </p>
           <app-cta-button
             label="Open booking calendar"
@@ -98,9 +98,9 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
           width: min(960px, calc(100% - 1.25rem));
         }
       }
-    `
+    `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BookPageComponent {
   private readonly contentService = inject(LandingContentService);
