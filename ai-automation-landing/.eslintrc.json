@@ -1,6 +1,6 @@
 {
   "root": true,
-  "ignorePatterns": ["dist", "out-tsc", "coverage", "node_modules"],
+  "ignorePatterns": ["dist", "out-tsc", "coverage", "node_modules", ".vs"],
   "settings": {
     "react": {
       "version": "detect"

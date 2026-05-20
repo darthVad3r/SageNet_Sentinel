@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "prepare": "cd .. && husky install .husky",
+    "type-check": "npm run typecheck",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx,.json,.md && prettier --check .",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx,.json,.md --fix && prettier --write ."
