@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { LandingContentService } from '../../core/services/landing-content.service';
 import { CtaButtonComponent } from '../../shared/ui/cta-button.component';
 import { FeatureCardComponent } from '../../shared/ui/feature-card.component';

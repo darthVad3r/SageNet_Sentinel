@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { AppTheme } from '@app/state/app.state';
 import { AppStore } from '@app/state/app.store';
@@ -24,7 +24,7 @@ import { AppStore } from '@app/state/app.store';
             {{ store.sidebarOpen() ? 'Close Sidebar' : 'Open Sidebar' }}
           </button>
           <button type="button" class="action-button" (click)="toggleTheme()">
-            Theme: {{ store.theme() }} â†’ {{ nextTheme() }}
+            Theme: {{ store.theme() }} -> {{ nextTheme() }}
           </button>
           <button type="button" class="action-button" (click)="toggleLoading()">
             {{ store.isLoading() ? 'Stop Loading' : 'Start Loading' }}

@@ -1,4 +1,4 @@
-﻿import { NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { PricingPlan } from '../../core/services/landing-content.service';
 import { CtaButtonComponent } from './cta-button.component';
