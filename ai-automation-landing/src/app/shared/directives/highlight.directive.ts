@@ -1,4 +1,4 @@
-import { Directive, HostBinding, Input } from '@angular/core';
+import { Directive, Input } from '@angular/core';
 
 /**
  * Highlight Directive placeholder
@@ -10,13 +10,13 @@ import { Directive, HostBinding, Input } from '@angular/core';
   host: {
     '(mouseenter)': 'onMouseEnter()',
     '(mouseleave)': 'onMouseLeave()',
+    '[style.backgroundColor]': 'backgroundColor',
   },
 })
 export class HighlightDirective {
   @Input() highlightColor = 'yellow';
 
-  @HostBinding('style.backgroundColor')
-  protected backgroundColor = '';
+  backgroundColor = '';
 
   onMouseEnter() {
     this.backgroundColor = this.highlightColor;

@@ -25,17 +25,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: ai-automation-landing/package-lock.json
 
-      - name: Cache node_modules
-        id: cache-node-modules-install
-        uses: actions/cache@v4
-        with:
-          path: ai-automation-landing/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('ai-automation-landing/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
       - name: Install Dependencies
-        if: steps.cache-node-modules-install.outputs.cache-hit != 'true'
         run: npm ci
 
   lint:
@@ -48,18 +38,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+          cache: "npm"
+          cache-dependency-path: ai-automation-landing/package-lock.json
 
-      - name: Cache node_modules
-        id: cache-node-modules-lint
-        uses: actions/cache@v4
-        with:
-          path: ai-automation-landing/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('ai-automation-landing/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - if: steps.cache-node-modules-lint.outputs.cache-hit != 'true'
-        run: npm ci
+      - run: npm ci
       - run: npm run lint
 
   typecheck:
@@ -72,18 +54,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+          cache: "npm"
+          cache-dependency-path: ai-automation-landing/package-lock.json
 
-      - name: Cache node_modules
-        id: cache-node-modules-typecheck
-        uses: actions/cache@v4
-        with:
-          path: ai-automation-landing/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('ai-automation-landing/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - if: steps.cache-node-modules-typecheck.outputs.cache-hit != 'true'
-        run: npm ci
+      - run: npm ci
       - run: npm run typecheck
 
   test:
@@ -96,18 +70,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+          cache: "npm"
+          cache-dependency-path: ai-automation-landing/package-lock.json
 
-      - name: Cache node_modules
-        id: cache-node-modules-test
-        uses: actions/cache@v4
-        with:
-          path: ai-automation-landing/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('ai-automation-landing/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - if: steps.cache-node-modules-test.outputs.cache-hit != 'true'
-        run: npm ci
+      - run: npm ci
       - run: npm test -- --coverage
       - name: Upload Coverage
         uses: actions/upload-artifact@v4
@@ -125,18 +91,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+          cache: "npm"
+          cache-dependency-path: ai-automation-landing/package-lock.json
 
-      - name: Cache node_modules
-        id: cache-node-modules-build
-        uses: actions/cache@v4
-        with:
-          path: ai-automation-landing/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('ai-automation-landing/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - if: steps.cache-node-modules-build.outputs.cache-hit != 'true'
-        run: npm ci
+      - run: npm ci
       - run: npm run build
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
