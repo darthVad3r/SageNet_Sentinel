@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-not-found-page',
   standalone: true,
+  imports: [RouterLink],
   template: `
     <section class="not-found">
       <div class="not-found__inner">
@@ -12,7 +14,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           The route you requested does not exist. Use the primary navigation or return to the
           homepage.
         </p>
-        <a class="not-found__cta" href="/">Return home</a>
+        <a class="not-found__cta" routerLink="/">Return home</a>
       </div>
     </section>
   `,

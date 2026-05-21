@@ -88,14 +88,14 @@ a {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 $spacing-md;
+  padding: 0 $spacing-xs;
 
   @include respond-to('sm') {
     padding: 0 $spacing-sm;
   }
 
-  @include respond-to('xs') {
-    padding: 0 $spacing-xs;
+  @include respond-to('md') {
+    padding: 0 $spacing-md;
   }
 }
 

@@ -6,7 +6,7 @@ This repository uses GitHub Actions workflow `.github/workflows/ci.yml` to enfor
 
 The CI workflow runs on:
 
-- `push` to any branch
+- `push` (no branch filter configured, so all branches trigger CI)
 - `pull_request` targeting `main`
 
 This ensures both direct branch updates and pull request updates to the default branch are validated.
