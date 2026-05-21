@@ -18,10 +18,9 @@ export interface SeoMetadata {
 export class SeoService {
   private readonly document = inject(DOCUMENT);
 
-  constructor(
-    private readonly title: Title,
-    private readonly meta: Meta
-  ) {}
+  private readonly title = inject(Title);
+
+  private readonly meta = inject(Meta);
 
   applyMetadata(metadata: SeoMetadata): void {
     this.setPageMeta(metadata.title, metadata.description);

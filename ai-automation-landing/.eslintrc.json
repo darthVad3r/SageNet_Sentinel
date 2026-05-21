@@ -1,6 +1,14 @@
 {
   "root": true,
-  "ignorePatterns": ["dist", "out-tsc", "coverage", "node_modules", ".vs"],
+  "ignorePatterns": [
+    "dist",
+    "out-tsc",
+    "coverage",
+    "node_modules",
+    ".vs",
+    "**/package-lock.json",
+    "**/npm-shrinkwrap.json"
+  ],
   "settings": {
     "react": {
       "version": "detect"
