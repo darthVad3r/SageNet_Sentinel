@@ -1,16 +1,23 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-section-block',
   standalone: true,
-  imports: [NgClass, NgIf],
+  imports: [],
   template: `
-    <section class="section" [ngClass]="variant">
+    <section
+      class="section"
+      [class.light]="variant === 'light'"
+      [class.muted]="variant === 'muted'"
+    >
       <div class="section__inner">
-        <p class="section__eyebrow" *ngIf="eyebrow">{{ eyebrow }}</p>
+        @if (eyebrow) {
+          <p class="section__eyebrow">{{ eyebrow }}</p>
+        }
         <h2 class="section__title">{{ title }}</h2>
-        <p class="section__subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+        @if (subtitle) {
+          <p class="section__subtitle">{{ subtitle }}</p>
+        }
         <ng-content></ng-content>
       </div>
     </section>

@@ -1,16 +1,10 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import {
-  DomSanitizer,
-  SafeHtml,
-  SafeResourceUrl,
-  SafeScript,
-  SafeStyle,
-  SafeUrl,
-} from '@angular/platform-browser';
+import { Pipe, PipeTransform, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 /**
  * Safe Pipe placeholder
- * Sanitizes HTML/URL content for safe template binding
+ * Sanitizes potentially unsafe content for template binding.
+ * This pipe does not bypass Angular security.
  */
 @Pipe({
   name: 'safe',
@@ -22,22 +16,24 @@ export class SafePipe implements PipeTransform {
   transform(
     value: string | null | undefined,
     type: 'html' | 'url' | 'style' | 'script' | 'resource' = 'html'
-  ): SafeHtml | SafeUrl | SafeResourceUrl | SafeStyle | SafeScript | null {
+  ): string | null {
     if (value == null) {
       return null;
     }
 
     switch (type) {
       case 'html':
-        return this.sanitizer.bypassSecurityTrustHtml(value);
+        return this.sanitizer.sanitize(SecurityContext.HTML, value);
       case 'url':
-        return this.sanitizer.bypassSecurityTrustUrl(value);
+        return this.sanitizer.sanitize(SecurityContext.URL, value);
       case 'style':
-        return this.sanitizer.bypassSecurityTrustStyle(value);
+        return this.sanitizer.sanitize(SecurityContext.STYLE, value);
       case 'script':
-        return this.sanitizer.bypassSecurityTrustScript(value);
+        return this.sanitizer.sanitize(SecurityContext.SCRIPT, value);
       case 'resource':
-        return this.sanitizer.bypassSecurityTrustResourceUrl(value);
+        return this.sanitizer.sanitize(SecurityContext.RESOURCE_URL, value);
+      default:
+        return null;
     }
   }
 }

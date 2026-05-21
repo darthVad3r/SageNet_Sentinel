@@ -91,8 +91,8 @@ The workflow uses two cache mechanisms:
 
 `node_modules` cache configuration:
 
-- Cache path: `node_modules`
-- Cache key: `${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}`
+- Cache path: `ai-automation-landing/node_modules`
+- Cache key: `${{ runner.os }}-node-modules-${{ hashFiles('ai-automation-landing/package-lock.json') }}`
 - Restore key prefix: `${{ runner.os }}-node-modules-`
 
 This keeps cache invalidation tied to lockfile changes while reducing repeated dependency installs.
