@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { LandingContentService } from '../../core/services/landing-content.service';
 import { CtaButtonComponent } from '../../shared/ui/cta-button.component';
 import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
@@ -51,8 +51,8 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
         padding: clamp(1.5rem, 3vw, 2.4rem);
         border-radius: 1.6rem;
         border: 1px solid var(--lab-line);
-        background: var(--lab-surface-strong);
-        box-shadow: var(--lab-shadow);
+        background: var(--lab-surface);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .page-shell__eyebrow,
@@ -66,7 +66,7 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
         letter-spacing: 0.12em;
         font-size: 0.74rem;
         font-weight: 700;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
       }
 
       h1 {

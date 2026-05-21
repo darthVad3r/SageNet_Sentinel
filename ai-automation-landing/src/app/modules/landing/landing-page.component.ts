@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { LandingContentService } from '../../core/services/landing-content.service';
 import { CtaButtonComponent } from '../../shared/ui/cta-button.component';
 import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
@@ -143,7 +143,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
       .hero__copy,
       .hero__panel {
         border: 1px solid var(--lab-line);
-        box-shadow: var(--lab-shadow);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .hero__copy {
@@ -163,7 +163,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
         letter-spacing: 0.14em;
         font-size: 0.76rem;
         font-weight: 700;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
       }
 
       h1 {

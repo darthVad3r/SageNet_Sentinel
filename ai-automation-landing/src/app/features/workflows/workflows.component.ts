@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * Workflows Component
@@ -100,7 +100,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       table {
         width: 100%;
         border-collapse: collapse;
-        background: var(--lab-surface-strong);
+        background: var(--lab-surface);
         border: 1px solid var(--lab-line);
         border-radius: 4px;
         overflow: hidden;
@@ -130,12 +130,12 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       }
 
       .badge-active {
-        background: color-mix(in srgb, var(--lab-accent) 16%, var(--lab-surface-strong));
-        color: var(--lab-accent-strong);
+        background: color-mix(in srgb, var(--lab-color-primary) 16%, var(--lab-surface));
+        color: var(--lab-color-primary-strong);
       }
 
       .badge-inactive {
-        background: color-mix(in srgb, var(--lab-ink-soft) 18%, var(--lab-surface-strong));
+        background: color-mix(in srgb, var(--lab-ink-soft) 18%, var(--lab-surface));
         color: var(--lab-ink);
       }
     `,

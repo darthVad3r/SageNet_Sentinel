@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-feature-card',
@@ -20,7 +20,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         border-radius: 1.2rem;
         border: 1px solid var(--lab-line);
         background: var(--lab-surface);
-        box-shadow: var(--lab-shadow);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .card__eyebrow,
@@ -35,7 +35,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         letter-spacing: 0.1em;
         font-size: 0.72rem;
         font-weight: 700;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
       }
 
       h3 {

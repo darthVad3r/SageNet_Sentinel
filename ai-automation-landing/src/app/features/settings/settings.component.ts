@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * Settings Component
@@ -119,13 +119,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
       .nav-item:hover,
       .nav-item.active {
-        background-color: color-mix(in srgb, var(--lab-accent) 12%, transparent);
-        color: var(--lab-accent);
+        background-color: color-mix(in srgb, var(--lab-color-primary) 12%, transparent);
+        color: var(--lab-color-primary);
         font-weight: 600;
       }
 
       .settings-content {
-        background: var(--lab-surface-strong);
+        background: var(--lab-surface);
         border: 1px solid var(--lab-line);
         border-radius: 8px;
         padding: 2rem;

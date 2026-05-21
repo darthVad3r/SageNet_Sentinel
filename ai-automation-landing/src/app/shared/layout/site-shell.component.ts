@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   ActivatedRoute,
@@ -104,7 +104,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
         display: grid;
         place-items: center;
         border-radius: 0.9rem;
-        background: linear-gradient(135deg, var(--lab-accent), #14b8a6);
+        background: linear-gradient(135deg, var(--lab-color-primary), #14b8a6);
         color: #ffffff;
         font-weight: 800;
       }
@@ -144,7 +144,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
       .nav a:hover,
       .nav a.is-active {
         background: rgba(15, 118, 110, 0.1);
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
       }
 
       .shell__footer {
@@ -165,7 +165,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
       }
 
       .shell__footer-inner a {
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
         font-weight: 700;
         text-decoration: none;
       }

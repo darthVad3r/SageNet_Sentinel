@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+﻿import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { PricingPlan } from '../../core/services/landing-content.service';
 import { CtaButtonComponent } from './cta-button.component';
@@ -32,8 +32,8 @@ import { CtaButtonComponent } from './cta-button.component';
         padding: 1.5rem;
         border-radius: 1.4rem;
         border: 1px solid var(--lab-line);
-        background: var(--lab-surface-strong);
-        box-shadow: var(--lab-shadow);
+        background: var(--lab-surface);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .tier--featured {
@@ -52,7 +52,7 @@ import { CtaButtonComponent } from './cta-button.component';
         text-transform: uppercase;
         letter-spacing: 0.1em;
         font-size: 0.72rem;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
         font-weight: 700;
       }
 
