@@ -1,32 +1,36 @@
 import { Routes } from '@angular/router';
 import { routes } from './app.routes';
-import { LoginPageComponent } from './modules/login/login-page.component';
-import { NotFoundPageComponent } from './modules/not-found/not-found-page.component';
+import { AgentsComponent } from './features/agents/agents.component';
 
 describe('routes', () => {
-  it('should map login route to the dedicated login component', async () => {
+  it('should redirect empty child path to dashboard', () => {
     const shellRoute = routes.find((route) => route.path === '');
     const childRoutes = shellRoute?.children as Routes | undefined;
-    const loginRoute = childRoutes?.find((route) => route.path === 'login');
+    const defaultChildRoute = childRoutes?.find((route) => route.path === '');
 
-    expect(loginRoute).toBeDefined();
-    expect(loginRoute?.redirectTo).toBeUndefined();
-
-    const loadedComponent = await loginRoute?.loadComponent?.();
-
-    expect(loadedComponent).toBe(LoginPageComponent);
+    expect(defaultChildRoute).toBeDefined();
+    expect(defaultChildRoute?.redirectTo).toBe('dashboard');
+    expect(defaultChildRoute?.pathMatch).toBe('full');
   });
 
-  it('should map wildcard route to the dedicated not-found component', async () => {
+  it('should lazy-load agents route component', async () => {
+    const shellRoute = routes.find((route) => route.path === '');
+    const childRoutes = shellRoute?.children as Routes | undefined;
+    const agentsRoute = childRoutes?.find((route) => route.path === 'agents');
+
+    expect(agentsRoute).toBeDefined();
+
+    const loadedComponent = await agentsRoute?.loadComponent?.();
+
+    expect(loadedComponent).toBe(AgentsComponent);
+  });
+
+  it('should redirect wildcard child route to dashboard', () => {
     const shellRoute = routes.find((route) => route.path === '');
     const childRoutes = shellRoute?.children as Routes | undefined;
     const wildcardRoute = childRoutes?.find((route) => route.path === '**');
 
     expect(wildcardRoute).toBeDefined();
-    expect(wildcardRoute?.redirectTo).toBeUndefined();
-
-    const loadedComponent = await wildcardRoute?.loadComponent?.();
-
-    expect(loadedComponent).toBe(NotFoundPageComponent);
+    expect(wildcardRoute?.redirectTo).toBe('dashboard');
   });
 });
