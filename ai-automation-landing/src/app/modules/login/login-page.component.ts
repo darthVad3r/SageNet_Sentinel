@@ -14,7 +14,7 @@ import { RouterLink } from '@angular/router';
           Your session is not authenticated. Use your sign-in flow here before accessing protected
           routes.
         </p>
-        <a class="login-page__cta" routerLink="/">Return home</a>
+        <a class="login-page__cta" routerLink="/landing">Return home</a>
       </div>
     </section>
   `,
