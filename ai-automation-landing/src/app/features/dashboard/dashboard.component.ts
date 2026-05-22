@@ -24,7 +24,7 @@ import { AppStore } from '@app/state/app.store';
             {{ store.sidebarOpen() ? 'Close Sidebar' : 'Open Sidebar' }}
           </button>
           <button type="button" class="action-button" (click)="toggleTheme()">
-            Theme: {{ store.theme() }} → {{ nextTheme() }}
+            Theme: {{ store.theme() }} -> {{ nextTheme() }}
           </button>
           <button type="button" class="action-button" (click)="toggleLoading()">
             {{ store.isLoading() ? 'Stop Loading' : 'Start Loading' }}
@@ -125,7 +125,7 @@ import { AppStore } from '@app/state/app.store';
 
       .action-button {
         border: 1px solid var(--lab-line);
-        background: var(--lab-surface-strong);
+        background: var(--lab-surface);
         border-radius: 999px;
         padding: 0.7rem 1rem;
         font-weight: 600;
@@ -134,8 +134,8 @@ import { AppStore } from '@app/state/app.store';
       }
 
       .action-button:hover {
-        border-color: var(--lab-accent);
-        color: var(--lab-accent);
+        border-color: var(--lab-color-primary);
+        color: var(--lab-color-primary);
       }
 
       .action-button:disabled {
@@ -144,9 +144,9 @@ import { AppStore } from '@app/state/app.store';
       }
 
       .action-button--primary {
-        background: var(--lab-accent);
-        border-color: var(--lab-accent);
-        color: var(--lab-surface-strong);
+        background: var(--lab-color-primary);
+        border-color: var(--lab-color-primary);
+        color: var(--lab-on-primary);
       }
 
       .state-panel {
@@ -157,8 +157,8 @@ import { AppStore } from '@app/state/app.store';
         padding: 1.5rem;
         border: 1px solid var(--lab-line);
         border-radius: 12px;
-        background: var(--lab-surface-strong);
-        box-shadow: var(--lab-shadow);
+        background: var(--lab-surface);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .state-panel__card h2 {
@@ -195,7 +195,7 @@ import { AppStore } from '@app/state/app.store';
 
       .state-panel__message {
         margin: 1rem 0 0;
-        color: var(--lab-accent);
+        color: var(--lab-color-primary);
         font-weight: 600;
       }
 
@@ -224,7 +224,7 @@ import { AppStore } from '@app/state/app.store';
       }
 
       .card:hover {
-        box-shadow: var(--lab-shadow);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .card h2 {

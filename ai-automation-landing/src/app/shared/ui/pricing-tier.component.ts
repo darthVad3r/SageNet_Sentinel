@@ -32,12 +32,12 @@ import { CtaButtonComponent } from './cta-button.component';
         padding: 1.5rem;
         border-radius: 1.4rem;
         border: 1px solid var(--lab-line);
-        background: var(--lab-surface-strong);
-        box-shadow: var(--lab-shadow);
+        background: var(--lab-surface);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .tier--featured {
-        border-color: rgba(15, 118, 110, 0.35);
+        border-color: color-mix(in srgb, var(--lab-color-primary) 35%, transparent);
         transform: translateY(-0.35rem);
       }
 
@@ -52,7 +52,7 @@ import { CtaButtonComponent } from './cta-button.component';
         text-transform: uppercase;
         letter-spacing: 0.1em;
         font-size: 0.72rem;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
         font-weight: 700;
       }
 

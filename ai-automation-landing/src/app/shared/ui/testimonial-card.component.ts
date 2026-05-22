@@ -14,15 +14,15 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   styles: [
     `
       .testimonial {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
+        background: var(--lab-surface);
+        border: 1px solid var(--lab-line);
         border-radius: 1rem;
         padding: 1.25rem;
       }
 
       .testimonial__quote {
         margin: 0 0 0.85rem;
-        color: #1f2937;
+        color: var(--lab-ink);
       }
 
       .testimonial__author {
@@ -32,7 +32,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
       .testimonial__role {
         margin: 0.15rem 0 0;
-        color: #6b7280;
+        color: var(--lab-ink-soft);
         font-size: 0.9rem;
       }
     `,

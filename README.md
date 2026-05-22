@@ -86,6 +86,17 @@ npm test
 npm run build
 ```
 
+### Styling System
+
+This project uses a SCSS-token-first design system (not TailwindCSS).
+
+- Core theme tokens (color, typography, spacing, radius, elevation, semantic states) live in `ai-automation-landing/src/styles/_tokens.scss`.
+- Global reset, base typography, layout primitives, and reusable component surface styles live in `ai-automation-landing/src/styles/global.scss`.
+- SCSS aliases and breakpoint utilities live in `ai-automation-landing/src/styles/_variables.scss` and `ai-automation-landing/src/styles/_mixins.scss`.
+- App-wide styles are loaded from `ai-automation-landing/src/styles.scss`.
+
+Theme modes are controlled via `data-theme` on `:root` with supported values: `light`, `dark`, and `system`.
+
 ### Vercel Deployment (Optional)
 
 If you deploy this app with Vercel, use these project settings to avoid 404 errors on Angular client routes:

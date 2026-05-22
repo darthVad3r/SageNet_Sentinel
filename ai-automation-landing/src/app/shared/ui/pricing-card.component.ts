@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { PricingPlan } from '../../core/services/landing-content.service';
 import { CtaButtonComponent } from './cta-button.component';
 
@@ -26,8 +26,8 @@ import { CtaButtonComponent } from './cta-button.component';
   styles: [
     `
       .card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
+        background: var(--lab-surface);
+        border: 1px solid var(--lab-line);
         border-radius: 1rem;
         padding: 1.25rem;
         display: grid;
@@ -35,8 +35,8 @@ import { CtaButtonComponent } from './cta-button.component';
       }
 
       .card.highlighted {
-        border-color: #4f46e5;
-        box-shadow: 0 8px 24px rgba(79, 70, 229, 0.14);
+        border-color: var(--lab-color-primary-strong);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .card__title,
@@ -55,13 +55,13 @@ import { CtaButtonComponent } from './cta-button.component';
       }
 
       .card__description {
-        color: #4b5563;
+        color: var(--lab-ink-soft);
       }
 
       .card__features {
         margin: 0;
         padding-left: 1.1rem;
-        color: #374151;
+        color: var(--lab-ink-soft);
         display: grid;
         gap: 0.35rem;
       }
