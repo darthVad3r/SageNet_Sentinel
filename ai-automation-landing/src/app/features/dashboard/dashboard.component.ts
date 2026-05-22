@@ -20,7 +20,11 @@ import { AppStore } from '@app/state/app.store';
         </div>
 
         <div class="dashboard-actions">
-          <button type="button" class="action-button" (click)="toggleSidebar()">
+          <button
+            type="button"
+            class="action-button action-button--mobile-only"
+            (click)="toggleSidebar()"
+          >
             {{ store.sidebarOpen() ? 'Close Sidebar' : 'Open Sidebar' }}
           </button>
           <button type="button" class="action-button" (click)="toggleTheme()">
@@ -149,6 +153,10 @@ import { AppStore } from '@app/state/app.store';
         color: var(--lab-on-primary);
       }
 
+      .action-button--mobile-only {
+        display: none;
+      }
+
       .state-panel {
         margin-bottom: 2rem;
       }
@@ -240,6 +248,10 @@ import { AppStore } from '@app/state/app.store';
       @media (max-width: 900px) {
         .dashboard-header {
           flex-direction: column;
+        }
+
+        .action-button--mobile-only {
+          display: inline-flex;
         }
       }
     `,

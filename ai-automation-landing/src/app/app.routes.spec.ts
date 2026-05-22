@@ -3,13 +3,13 @@ import { AgentsComponent } from './features/agents/agents.component';
 import { LoginPageComponent } from './modules/login/login-page.component';
 
 describe('routes', () => {
-  it('should redirect empty child path to dashboard', () => {
+  it('should redirect empty child path to landing', () => {
     const shellRoute = routes.find((route) => route.path === '');
     const childRoutes = shellRoute?.children;
     const defaultChildRoute = childRoutes?.find((route) => route.path === '');
 
     expect(defaultChildRoute).toBeDefined();
-    expect(defaultChildRoute?.redirectTo).toBe('dashboard');
+    expect(defaultChildRoute?.redirectTo).toBe('landing');
     expect(defaultChildRoute?.pathMatch).toBe('full');
   });
 
