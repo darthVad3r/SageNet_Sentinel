@@ -30,8 +30,16 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--lab-color-primary) 14%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at top right, color-mix(in srgb, var(--lab-color-accent-cyan) 10%, transparent) 0%, transparent 35%),
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--lab-color-primary) 14%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--lab-color-accent-cyan) 10%, transparent) 0%,
+      transparent 35%
+    ),
     linear-gradient(180deg, var(--lab-bg) 0%, color-mix(in srgb, var(--lab-bg) 94%, #ffffff) 100%);
 }
 
