@@ -30,8 +30,8 @@ import { RouterLink } from '@angular/router';
         padding: clamp(1.5rem, 3vw, 2.5rem);
         border-radius: 1.6rem;
         border: 1px solid var(--lab-line);
-        background: var(--lab-surface-strong);
-        box-shadow: var(--lab-shadow);
+        background: var(--lab-surface);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .login-page__eyebrow,
@@ -45,7 +45,7 @@ import { RouterLink } from '@angular/router';
         letter-spacing: 0.12em;
         font-size: 0.8rem;
         font-weight: 700;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
       }
 
       h1 {

@@ -143,13 +143,13 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
       .hero__copy,
       .hero__panel {
         border: 1px solid var(--lab-line);
-        box-shadow: var(--lab-shadow);
+        box-shadow: var(--lab-shadow-2);
       }
 
       .hero__copy {
         padding: clamp(1.5rem, 3vw, 3rem);
         border-radius: 1.8rem;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.72));
+        background: linear-gradient(135deg, var(--lab-surface), var(--lab-surface-muted));
       }
 
       .hero__eyebrow,
@@ -163,7 +163,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
         letter-spacing: 0.14em;
         font-size: 0.76rem;
         font-weight: 700;
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
       }
 
       h1 {
@@ -193,7 +193,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
         gap: 1rem;
         padding: 1rem;
         border-radius: 1.8rem;
-        background: rgba(255, 255, 255, 0.55);
+        background: var(--lab-surface-overlay);
       }
 
       .feature-grid,

@@ -30,11 +30,11 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
       }
 
       .section.light {
-        background: #ffffff;
+        background: var(--lab-surface);
       }
 
       .section.muted {
-        background: #f3f4f6;
+        background: var(--lab-surface-muted);
       }
 
       .section__inner {
@@ -47,7 +47,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0.08em;
-        color: #4f46e5;
+        color: var(--lab-color-primary-strong);
         font-weight: 700;
       }
 
@@ -60,7 +60,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
       .section__subtitle {
         margin-top: 0.75rem;
         max-width: 720px;
-        color: #4b5563;
+        color: var(--lab-ink-soft);
       }
     `,
   ],

@@ -73,7 +73,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
         top: 0;
         z-index: 30;
         backdrop-filter: blur(18px);
-        background: rgba(251, 248, 242, 0.88);
+        background: var(--lab-surface-overlay);
         border-bottom: 1px solid var(--lab-line);
       }
 
@@ -104,8 +104,8 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
         display: grid;
         place-items: center;
         border-radius: 0.9rem;
-        background: linear-gradient(135deg, var(--lab-accent), #14b8a6);
-        color: #ffffff;
+        background: linear-gradient(135deg, var(--lab-color-primary), var(--lab-color-accent-cyan));
+        color: var(--lab-on-primary);
         font-weight: 800;
       }
 
@@ -143,8 +143,8 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
 
       .nav a:hover,
       .nav a.is-active {
-        background: rgba(15, 118, 110, 0.1);
-        color: var(--lab-accent-strong);
+        background: var(--lab-surface-overlay);
+        color: var(--lab-color-primary-strong);
       }
 
       .shell__footer {
@@ -165,7 +165,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
       }
 
       .shell__footer-inner a {
-        color: var(--lab-accent-strong);
+        color: var(--lab-color-primary-strong);
         font-weight: 700;
         text-decoration: none;
       }
