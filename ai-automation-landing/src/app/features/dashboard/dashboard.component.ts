@@ -1,8 +1,17 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+import { KpiCardComponent } from './kpi-card.component';
+
+interface KpiMetric {
+  readonly title: string;
+  readonly value: string;
+  readonly icon?: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  imports: [KpiCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard">
@@ -13,6 +22,16 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
       <section class="kpi-section" aria-label="KPI placeholders">
         <h2>KPIs</h2>
+
+        <div class="kpi-section__grid">
+          @for (metric of kpiMetrics; track metric.title) {
+            <app-kpi-card
+              [title]="metric.title"
+              [value]="metric.value"
+              [icon]="metric.icon ?? ''"
+            />
+          }
+        </div>
       </section>
 
       <section class="progress-section" aria-label="Progress placeholders">
@@ -69,13 +88,52 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         font-size: var(--lab-text-xl);
       }
 
+      .kpi-section__grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--lab-space-3);
+      }
+
+      @media (max-width: 860px) {
+        .kpi-section__grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
       @media (max-width: 640px) {
         .dashboard {
           width: min(1120px, calc(100% - (var(--lab-space-3) * 2)));
           padding-top: var(--lab-space-6);
         }
+
+        .kpi-section__grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
       }
     `,
   ],
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  readonly kpiMetrics: readonly KpiMetric[] = [
+    {
+      title: 'Workflows Run',
+      value: '148',
+      icon: 'WF',
+    },
+    {
+      title: 'Active Automations',
+      value: '23',
+      icon: 'AU',
+    },
+    {
+      title: 'Success Rate',
+      value: '97%',
+      icon: 'OK',
+    },
+    {
+      title: 'Tasks Completed',
+      value: '412',
+      icon: 'TSK',
+    },
+  ];
+}
