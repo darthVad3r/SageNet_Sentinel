@@ -10,6 +10,7 @@ import {
 } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { SeoMetadata, SeoService } from '../../core/services/seo.service';
+import { AppStore } from '../../state/app.store';
 
 type NavigationItem = {
   label: string;
@@ -21,12 +22,12 @@ type NavigationItem = {
   standalone: true,
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <div class="app-shell" [class.app-shell--sidebar-open]="isSidebarOpen">
+    <div class="app-shell" [class.app-shell--sidebar-open]="store.sidebarOpen()">
       <header class="app-shell__header">
         <button
           type="button"
           class="app-shell__menu-toggle"
-          [attr.aria-expanded]="isSidebarOpen"
+          [attr.aria-expanded]="store.sidebarOpen()"
           aria-controls="app-shell-sidebar"
           aria-label="Toggle navigation"
           (click)="toggleSidebar()"
@@ -246,7 +247,7 @@ export class AppShellComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  isSidebarOpen = false;
+  readonly store = inject(AppStore);
 
   readonly navigationItems: NavigationItem[] = [
     { label: 'Dashboard', path: '/dashboard' },
@@ -280,10 +281,10 @@ export class AppShellComponent implements OnInit {
   }
 
   toggleSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
+    this.store.toggleSidebar();
   }
 
   closeSidebar(): void {
-    this.isSidebarOpen = false;
+    this.store.setSidebarOpen(false);
   }
 }

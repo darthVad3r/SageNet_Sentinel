@@ -66,6 +66,16 @@ export class AppStore {
     }));
   }
 
+  setSidebarOpen(sidebarOpen: boolean): void {
+    this.state.update((current) => ({
+      ...current,
+      ui: {
+        ...current.ui,
+        sidebarOpen,
+      },
+    }));
+  }
+
   setTheme(theme: AppTheme): void {
     this.state.update((current) => ({
       ...current,

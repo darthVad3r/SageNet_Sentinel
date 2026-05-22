@@ -14,7 +14,7 @@ import { RouterLink } from '@angular/router';
           The route you requested does not exist. Use the primary navigation or return to the
           homepage.
         </p>
-        <a class="not-found__cta" routerLink="/">Return home</a>
+        <a class="not-found__cta" routerLink="/landing">Return home</a>
       </div>
     </section>
   `,
