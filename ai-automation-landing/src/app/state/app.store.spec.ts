@@ -27,6 +27,16 @@ describe('AppStore', () => {
     expect(store.sidebarOpen()).toBe(false);
   });
 
+  it('should set sidebarOpen state explicitly', () => {
+    expect(store.sidebarOpen()).toBe(false);
+
+    store.setSidebarOpen(true);
+    expect(store.sidebarOpen()).toBe(true);
+
+    store.setSidebarOpen(false);
+    expect(store.sidebarOpen()).toBe(false);
+  });
+
   it('should set theme and sync data-theme on documentElement', () => {
     expect(store.theme()).toBe('light');
     expect(document.documentElement.dataset['theme']).toBe('light');
