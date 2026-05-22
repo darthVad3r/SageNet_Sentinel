@@ -37,7 +37,7 @@ import { CtaButtonComponent } from './cta-button.component';
       }
 
       .tier--featured {
-        border-color: rgba(15, 118, 110, 0.35);
+        border-color: color-mix(in srgb, var(--lab-color-primary) 35%, transparent);
         transform: translateY(-0.35rem);
       }
 

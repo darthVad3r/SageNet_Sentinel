@@ -31,15 +31,15 @@ import { RouterLink } from '@angular/router';
         border-radius: 0.75rem;
         text-decoration: none;
         font-weight: 600;
-        border: 1px solid #111827;
-        background: #111827;
-        color: #ffffff;
+        border: 1px solid var(--lab-color-primary);
+        background: var(--lab-color-primary);
+        color: var(--lab-on-primary);
         transition: all 0.2s ease;
       }
 
       .cta:hover {
-        background: #1f2937;
-        border-color: #1f2937;
+        background: var(--lab-color-primary-strong);
+        border-color: var(--lab-color-primary-strong);
       }
     `,
   ],
