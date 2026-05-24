@@ -10,15 +10,18 @@
         <button
           class="quick-actions__shortcut"
           type="button"
-          [attr.aria-label]="shortcutAriaLabel(shortcut)"
+          [attr.aria-labelledby]="shortcutLabelledBy(shortcut)"
           (click)="activateShortcut(shortcut)"
         >
           <span class="quick-actions__icon" aria-hidden="true">{{ iconGlyph(shortcut) }}</span>
-          <span class="quick-actions__sr-only">{{ iconAriaLabel(shortcut) }}</span>
           <span class="quick-actions__content">
-            <span class="quick-actions__title">{{ shortcut.title }}</span>
+            <span class="quick-actions__title" [id]="shortcutTitleId(shortcut)">{{
+              shortcut.title
+            }}</span>
             @if (shortcut.description) {
-              <span class="quick-actions__description">{{ shortcut.description }}</span>
+              <span class="quick-actions__description" [id]="shortcutDescriptionId(shortcut)">
+                {{ shortcut.description }}
+              </span>
             }
           </span>
         </button>

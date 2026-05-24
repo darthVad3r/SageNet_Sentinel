@@ -1,4 +1,10 @@
-export type QuickActionIcon = 'add_task' | 'edit_note' | 'receipt_long' | 'hub' | 'settings';
+export type QuickActionIcon =
+  | 'add_task'
+  | 'edit_note'
+  | 'receipt_long'
+  | 'hub'
+  | 'settings'
+  | 'assistant';
 
 export interface QuickAction {
   readonly id: string;

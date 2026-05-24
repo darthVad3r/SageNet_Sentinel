@@ -11,6 +11,7 @@ const ICON_GLYPHS: Readonly<Record<QuickActionIcon, string>> = {
   edit_note: '✎',
   receipt_long: '≣',
   hub: '◎',
+  assistant: '✦',
   settings: '⚙',
 };
 
@@ -32,16 +33,20 @@ export class QuickActionShortcutsComponent {
     void this.router.navigateByUrl(shortcut.route ?? DEFAULT_ROUTE);
   }
 
-  shortcutAriaLabel(shortcut: QuickAction): string {
-    if (!shortcut.description) {
-      return shortcut.title;
-    }
-
-    return `${shortcut.title}. ${shortcut.description}`;
+  shortcutTitleId(shortcut: QuickAction): string {
+    return `quick-action-title-${shortcut.id}`;
   }
 
-  iconAriaLabel(shortcut: QuickAction): string {
-    return `${shortcut.title} icon`;
+  shortcutDescriptionId(shortcut: QuickAction): string {
+    return `quick-action-description-${shortcut.id}`;
+  }
+
+  shortcutLabelledBy(shortcut: QuickAction): string {
+    if (shortcut.description) {
+      return `${this.shortcutTitleId(shortcut)} ${this.shortcutDescriptionId(shortcut)}`;
+    }
+
+    return this.shortcutTitleId(shortcut);
   }
 
   iconGlyph(shortcut: QuickAction): string {

@@ -30,6 +30,13 @@ export const QUICK_ACTION_SHORTCUTS_MOCK: readonly QuickAction[] = [
     description: 'Configure third-party connections used by your automations.',
   },
   {
+    id: 'launch-ai-assistant',
+    title: 'Launch AI Assistant',
+    icon: 'assistant',
+    route: '/dashboard',
+    description: 'Open the assistant workspace to plan and execute automation tasks.',
+  },
+  {
     id: 'open-settings',
     title: 'Open Settings',
     icon: 'settings',
