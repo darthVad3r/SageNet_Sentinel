@@ -101,28 +101,25 @@ const STATUS_LABELS: Record<ProgressStatus, string> = {
         letter-spacing: 0.04em;
         text-transform: uppercase;
         border: 1px solid transparent;
+        color: var(--lab-ink);
       }
 
       .progress__status--done {
-        color: color-mix(in srgb, var(--lab-success) 70%, var(--lab-ink) 30%);
         background: color-mix(in srgb, var(--lab-success) 20%, var(--lab-surface) 80%);
         border-color: color-mix(in srgb, var(--lab-success) 45%, var(--lab-line) 55%);
       }
 
       .progress__status--in-progress {
-        color: color-mix(in srgb, var(--lab-info) 70%, var(--lab-ink) 30%);
         background: color-mix(in srgb, var(--lab-info) 20%, var(--lab-surface) 80%);
         border-color: color-mix(in srgb, var(--lab-info) 45%, var(--lab-line) 55%);
       }
 
       .progress__status--in-review {
-        color: color-mix(in srgb, var(--lab-warning) 70%, var(--lab-ink) 30%);
         background: color-mix(in srgb, var(--lab-warning) 20%, var(--lab-surface) 80%);
         border-color: color-mix(in srgb, var(--lab-warning) 45%, var(--lab-line) 55%);
       }
 
       .progress__status--not-started {
-        color: color-mix(in srgb, var(--lab-danger) 70%, var(--lab-ink) 30%);
         background: color-mix(in srgb, var(--lab-danger) 20%, var(--lab-surface) 80%);
         border-color: color-mix(in srgb, var(--lab-danger) 45%, var(--lab-line) 55%);
       }

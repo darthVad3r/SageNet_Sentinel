@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -14,6 +16,12 @@ import { RouterLink } from '@angular/router';
           Your session is not authenticated. Use your sign-in flow here before accessing protected
           routes.
         </p>
+        @if (showDemoAction) {
+          <button type="button" class="login-page__demo" (click)="continueWithDemo()">
+            Continue with QA Demo Session
+          </button>
+          <p class="login-page__hint">Available in non-production environments only.</p>
+        }
         <a class="login-page__cta" routerLink="/">Return home</a>
       </div>
     </section>
@@ -61,9 +69,27 @@ import { RouterLink } from '@angular/router';
         max-width: 56ch;
       }
 
+      .login-page__demo {
+        margin-top: 1.4rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        background: var(--lab-color-primary);
+        color: var(--lab-on-primary);
+        text-decoration: none;
+        font-weight: 700;
+        padding: 0.75rem 1.15rem;
+        cursor: pointer;
+      }
+
+      .login-page__hint {
+        margin: 0.7rem 0 0;
+        color: var(--lab-ink-soft);
+        font-size: var(--lab-text-sm);
+      }
+
       .login-page__cta {
         display: inline-block;
-        margin-top: 1.4rem;
+        margin-top: 1rem;
         border-radius: 999px;
         border: 1px solid var(--lab-line);
         background: var(--lab-surface);
@@ -82,4 +108,26 @@ import { RouterLink } from '@angular/router';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginPageComponent {}
+export class LoginPageComponent {
+  private readonly authService = inject(AuthService);
+
+  private readonly router = inject(Router);
+
+  private readonly route = inject(ActivatedRoute);
+
+  readonly showDemoAction = this.authService.canUseQaDemoAuth();
+
+  constructor() {
+    if (this.route.snapshot.queryParamMap.get('demo') === 'true') {
+      this.continueWithDemo();
+    }
+  }
+
+  continueWithDemo(): void {
+    if (!this.authService.tryEnableQaDemoSession()) {
+      return;
+    }
+
+    void this.router.navigateByUrl('/dashboard');
+  }
+}

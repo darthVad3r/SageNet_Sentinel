@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, UrlTree } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+} from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
 
@@ -16,8 +22,15 @@ export class AuthGuard implements CanActivate {
     private readonly router: Router
   ) {}
 
-  canActivate(): boolean | UrlTree {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (this.authService.isAuthenticated()) {
+      return true;
+    }
+
+    if (
+      this.authService.isQaDemoBypassRequested(state.url) &&
+      this.authService.tryEnableQaDemoSession()
+    ) {
       return true;
     }
 
