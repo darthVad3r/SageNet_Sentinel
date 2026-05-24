@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import { KpiCardComponent } from './kpi-card.component';
+import { ProgressSectionComponent } from './progress-section.component';
 
 interface KpiMetric {
   readonly title: string;
@@ -11,7 +12,7 @@ interface KpiMetric {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [KpiCardComponent],
+  imports: [KpiCardComponent, ProgressSectionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard">
@@ -19,6 +20,8 @@ interface KpiMetric {
         <h1>Dashboard</h1>
         <p>Foundational dashboard scaffold. Future stories will populate each section.</p>
       </header>
+
+      <app-progress-section />
 
       <section class="kpi-section" aria-label="KPI placeholders">
         <h2>KPIs</h2>
@@ -32,10 +35,6 @@ interface KpiMetric {
             />
           }
         </div>
-      </section>
-
-      <section class="progress-section" aria-label="Progress placeholders">
-        <h2>Progress</h2>
       </section>
 
       <section class="quick-actions-section" aria-label="Quick actions placeholders">
@@ -70,7 +69,6 @@ interface KpiMetric {
       }
 
       .kpi-section,
-      .progress-section,
       .quick-actions-section {
         border: 1px solid var(--lab-line);
         border-radius: var(--lab-radius-lg);
@@ -82,7 +80,6 @@ interface KpiMetric {
       }
 
       .kpi-section h2,
-      .progress-section h2,
       .quick-actions-section h2 {
         margin: 0;
         font-size: var(--lab-text-xl);

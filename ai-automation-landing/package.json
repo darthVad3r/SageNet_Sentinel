@@ -30,6 +30,8 @@
     "@angular/cli": "^21.2.12",
     "@angular/compiler-cli": "^21.2.0",
     "@types/node": "^20.17.19",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitest/coverage-v8": "^4.0.8",
@@ -49,6 +51,8 @@
     "lint-staged": "^15.5.2",
     "markdown-eslint-parser": "^1.2.1",
     "prettier": "^3.8.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   },
