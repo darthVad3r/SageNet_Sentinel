@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { QuickActionShortcutsComponent } from '../../dashboard/components/quick-action-shortcuts/quick-action-shortcuts.component';
 
 import { KpiCardComponent } from './kpi-card.component';
 import { ProgressSectionComponent } from './progress-section.component';
@@ -12,7 +13,7 @@ interface KpiMetric {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [KpiCardComponent, ProgressSectionComponent],
+  imports: [KpiCardComponent, ProgressSectionComponent, QuickActionShortcutsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard">
@@ -20,6 +21,8 @@ interface KpiMetric {
         <h1>Dashboard</h1>
         <p>Foundational dashboard scaffold. Future stories will populate each section.</p>
       </header>
+
+      <app-quick-action-shortcuts />
 
       <app-progress-section />
 
@@ -35,10 +38,6 @@ interface KpiMetric {
             />
           }
         </div>
-      </section>
-
-      <section class="quick-actions-section" aria-label="Quick actions placeholders">
-        <h2>Quick Actions</h2>
       </section>
     </div>
   `,
@@ -68,8 +67,7 @@ interface KpiMetric {
         font-size: var(--lab-text-3xl);
       }
 
-      .kpi-section,
-      .quick-actions-section {
+      .kpi-section {
         border: 1px solid var(--lab-line);
         border-radius: var(--lab-radius-lg);
         background: var(--lab-surface);
@@ -79,8 +77,7 @@ interface KpiMetric {
         gap: var(--lab-space-2);
       }
 
-      .kpi-section h2,
-      .quick-actions-section h2 {
+      .kpi-section h2 {
         margin: 0;
         font-size: var(--lab-text-xl);
       }
