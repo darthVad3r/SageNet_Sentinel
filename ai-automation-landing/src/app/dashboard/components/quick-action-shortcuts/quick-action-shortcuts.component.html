@@ -1,0 +1,30 @@
+<section class="quick-actions surface-card" aria-labelledby="quick-actions-title">
+  <header class="quick-actions__header">
+    <h2 id="quick-actions-title">{{ sectionTitle }}</h2>
+    <p>Launch frequently used dashboard actions without leaving this workspace.</p>
+  </header>
+
+  <ul class="quick-actions__grid" aria-label="Quick action shortcuts">
+    @for (shortcut of shortcuts; track shortcut.id) {
+      <li>
+        <button
+          class="quick-actions__shortcut"
+          type="button"
+          [attr.aria-label]="shortcutAriaLabel(shortcut)"
+          (click)="activateShortcut(shortcut)"
+          (keydown.enter)="activateShortcut(shortcut)"
+          (keydown.space)="$event.preventDefault(); activateShortcut(shortcut)"
+        >
+          <span class="quick-actions__icon" aria-hidden="true">{{ shortcut.icon }}</span>
+          <span class="quick-actions__sr-only">{{ iconAriaLabel(shortcut) }}</span>
+          <span class="quick-actions__content">
+            <span class="quick-actions__title">{{ shortcut.title }}</span>
+            @if (shortcut.description) {
+              <span class="quick-actions__description">{{ shortcut.description }}</span>
+            }
+          </span>
+        </button>
+      </li>
+    }
+  </ul>
+</section>
