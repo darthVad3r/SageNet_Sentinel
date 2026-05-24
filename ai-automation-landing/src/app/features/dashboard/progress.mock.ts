@@ -29,7 +29,7 @@ export const projectProgressMock: readonly ProgressRecord[] = [
     id: 'automation-editor',
     title: 'Automation Editor',
     status: 'not-started',
-    percent: 28,
+    percent: 0,
   },
   {
     id: 'analytics-pipeline',
