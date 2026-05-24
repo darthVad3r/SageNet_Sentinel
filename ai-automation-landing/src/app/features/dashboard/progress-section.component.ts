@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { projectProgressMock } from './progress.mock';
+import type { ProgressRecord, ProgressStatus } from './progress.types';
 
-interface ProgressItem {
-  readonly stage: string;
-  readonly owner: string;
-  readonly completion: number;
-}
+const STATUS_LABELS: Record<ProgressStatus, string> = {
+  'not-started': 'Not Started',
+  'in-progress': 'In Progress',
+  'in-review': 'In Review',
+  done: 'Done',
+};
 
 @Component({
   selector: 'app-progress-section',
@@ -13,28 +16,28 @@ interface ProgressItem {
   template: `
     <section class="progress surface-card" aria-labelledby="progress-title">
       <header class="progress__header">
-        <h2 id="progress-title">Progress Tracking</h2>
-        <p>Placeholder rollout milestones for in-flight automation initiatives.</p>
+        <h2 id="progress-title">Project Progress</h2>
+        <p>Current delivery status for major platform modules.</p>
       </header>
 
-      <ul class="progress__list" aria-label="Automation initiative progress">
-        @for (item of items; track item.stage) {
+      <ul class="progress__list" aria-label="Project progress timeline">
+        @for (item of items; track item.id) {
           <li class="progress__item">
-            <div class="progress__line">
-              <p class="progress__stage">{{ item.stage }}</p>
-              <p class="progress__percent">{{ item.completion }}%</p>
+            <div class="progress__top">
+              <h3 class="progress__title">{{ item.title }}</h3>
+              <span class="progress__status" [class]="statusClass(item.status)">
+                {{ statusLabel(item.status) }}
+              </span>
             </div>
-            <p class="progress__owner">Owner: {{ item.owner }}</p>
-            <div
+
+            <p class="progress__percent">{{ percentage(item.percent) }}% complete</p>
+
+            <progress
               class="progress__bar"
-              role="progressbar"
-              [attr.aria-valuemin]="0"
-              [attr.aria-valuemax]="100"
-              [attr.aria-valuenow]="item.completion"
-              [attr.aria-label]="item.stage + ' completion'"
-            >
-              <span [style.width.%]="item.completion"></span>
-            </div>
+              [attr.aria-label]="item.title + ' progress'"
+              [value]="percentage(item.percent)"
+              [max]="100"
+            ></progress>
           </li>
         }
       </ul>
@@ -53,7 +56,8 @@ interface ProgressItem {
       }
 
       .progress__header h2 {
-        font-size: var(--lab-text-2xl);
+        margin: 0;
+        font-size: var(--lab-text-xl);
       }
 
       .progress__list {
@@ -61,7 +65,8 @@ interface ProgressItem {
         margin: 0;
         padding: 0;
         display: grid;
-        gap: var(--lab-space-4);
+        gap: var(--lab-space-3);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .progress__item {
@@ -69,65 +74,118 @@ interface ProgressItem {
         border: 1px solid var(--lab-line);
         border-radius: var(--lab-radius-md);
         background: var(--lab-surface-muted);
+        display: grid;
+        gap: var(--lab-space-3);
+        align-content: start;
         min-width: 0;
       }
 
-      .progress__line {
+      .progress__top {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: var(--lab-space-3);
+        gap: var(--lab-space-2);
       }
 
-      .progress__stage,
-      .progress__percent {
+      .progress__title {
         margin: 0;
         color: var(--lab-ink);
-        font-weight: 600;
+        font-size: var(--lab-text-md);
       }
 
-      .progress__owner {
-        margin: var(--lab-space-1) 0 var(--lab-space-3);
+      .progress__status {
+        border-radius: var(--lab-radius-pill);
+        padding: var(--lab-space-1) var(--lab-space-2);
+        font-size: var(--lab-text-xs);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+      }
+
+      .progress__status--done {
+        color: color-mix(in srgb, var(--lab-success) 70%, var(--lab-ink) 30%);
+        background: color-mix(in srgb, var(--lab-success) 20%, var(--lab-surface) 80%);
+        border-color: color-mix(in srgb, var(--lab-success) 45%, var(--lab-line) 55%);
+      }
+
+      .progress__status--in-progress {
+        color: color-mix(in srgb, var(--lab-info) 70%, var(--lab-ink) 30%);
+        background: color-mix(in srgb, var(--lab-info) 20%, var(--lab-surface) 80%);
+        border-color: color-mix(in srgb, var(--lab-info) 45%, var(--lab-line) 55%);
+      }
+
+      .progress__status--in-review {
+        color: color-mix(in srgb, var(--lab-warning) 70%, var(--lab-ink) 30%);
+        background: color-mix(in srgb, var(--lab-warning) 20%, var(--lab-surface) 80%);
+        border-color: color-mix(in srgb, var(--lab-warning) 45%, var(--lab-line) 55%);
+      }
+
+      .progress__status--not-started {
+        color: color-mix(in srgb, var(--lab-danger) 70%, var(--lab-ink) 30%);
+        background: color-mix(in srgb, var(--lab-danger) 20%, var(--lab-surface) 80%);
+        border-color: color-mix(in srgb, var(--lab-danger) 45%, var(--lab-line) 55%);
+      }
+
+      .progress__percent {
+        margin: 0;
         font-size: var(--lab-text-sm);
+        color: var(--lab-ink-soft);
       }
 
       .progress__bar {
-        height: var(--lab-space-2);
+        height: 0.625rem;
+        width: 100%;
+        border: 0;
         border-radius: var(--lab-radius-pill);
-        background: color-mix(in srgb, var(--lab-line) 70%, transparent);
+        background: color-mix(in srgb, var(--lab-line) 80%, transparent);
         overflow: hidden;
       }
 
-      .progress__bar span {
-        display: block;
-        height: 100%;
+      .progress__bar::-webkit-progress-bar {
+        background: color-mix(in srgb, var(--lab-line) 80%, transparent);
+        border-radius: var(--lab-radius-pill);
+      }
+
+      .progress__bar::-webkit-progress-value {
         background: linear-gradient(90deg, var(--lab-color-primary), var(--lab-color-accent-cyan));
-        border-radius: inherit;
+        border-radius: var(--lab-radius-pill);
+      }
+
+      .progress__bar::-moz-progress-bar {
+        background: linear-gradient(90deg, var(--lab-color-primary), var(--lab-color-accent-cyan));
+      }
+
+      @media (max-width: 1024px) {
+        .progress__list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .progress__list {
+          grid-template-columns: minmax(0, 1fr);
+        }
       }
     `,
   ],
 })
 export class ProgressSectionComponent {
-  readonly items: readonly ProgressItem[] = [
-    {
-      stage: 'Email Triage Agent',
-      owner: 'Ops Team Alpha',
-      completion: 72,
-    },
-    {
-      stage: 'CRM Sync Automation',
-      owner: 'RevOps Squad',
-      completion: 54,
-    },
-    {
-      stage: 'Onboarding Workflow Pack',
-      owner: 'Implementation Team',
-      completion: 39,
-    },
-    {
-      stage: 'Weekly Intelligence Digest',
-      owner: 'Knowledge Ops',
-      completion: 86,
-    },
-  ];
+  readonly items: readonly ProgressRecord[] = projectProgressMock;
+
+  percentage(value?: number): number {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+      return 0;
+    }
+
+    return Math.max(0, Math.min(100, Math.round(value)));
+  }
+
+  statusLabel(status: ProgressStatus): string {
+    return STATUS_LABELS[status];
+  }
+
+  statusClass(status: ProgressStatus): string {
+    return `progress__status progress__status--${status}`;
+  }
 }
