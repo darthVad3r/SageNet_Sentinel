@@ -159,7 +159,7 @@ const STATUS_LABELS: Record<ProgressStatus, string> = {
         }
       }
 
-      @media (max-width: 559px) {
+      @media (max-width: 560px) {
         .progress__list {
           grid-template-columns: minmax(0, 1fr);
         }

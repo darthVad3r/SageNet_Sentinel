@@ -100,7 +100,7 @@ interface KpiMetric {
         }
       }
 
-      @media (max-width: 559px) {
+      @media (max-width: 560px) {
         .dashboard {
           width: min(1120px, calc(100% - (var(--lab-space-3) * 2)));
           padding-top: var(--lab-space-6);
