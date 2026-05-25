@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { routes } from './app.routes';
+import { DASHBOARD_ROUTES } from './features/dashboard/dashboard.routes';
 import { LoginPageComponent } from './modules/login/login-page.component';
 import { NotFoundPageComponent } from './modules/not-found/not-found-page.component';
 
@@ -15,6 +16,19 @@ describe('routes', () => {
     const loadedComponent = await loginRoute?.loadComponent?.();
 
     expect(loadedComponent).toBe(LoginPageComponent);
+  });
+
+  it('should map dashboard route to the dashboard feature routes', async () => {
+    const shellRoute = routes.find((route) => route.path === '');
+    const childRoutes = shellRoute?.children as Routes | undefined;
+    const dashboardRoute = childRoutes?.find((route) => route.path === 'dashboard');
+
+    expect(dashboardRoute).toBeDefined();
+    expect(dashboardRoute?.redirectTo).toBeUndefined();
+
+    const loadedRoutes = await dashboardRoute?.loadChildren?.();
+
+    expect(loadedRoutes).toBe(DASHBOARD_ROUTES);
   });
 
   it('should map wildcard route to the dedicated not-found component', async () => {
