@@ -157,8 +157,8 @@ export const routes: Routes = [
         title: dashboardSeo.title,
         data: { seo: dashboardSeo },
         canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('@features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+        loadChildren: () =>
+          import('@features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
       {
         path: 'workflows',
