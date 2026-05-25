@@ -17,17 +17,20 @@ import { AuthService } from '../services/auth.service';
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
+  private static readonly DASHBOARD_ROUTE_PREFIX = '/dashboard';
+
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+  canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (this.authService.isAuthenticated()) {
       return true;
     }
 
     if (
+      this.isQaDemoRoute(state.url) &&
       this.authService.isQaDemoBypassRequested(state.url) &&
       this.authService.tryEnableQaDemoSession()
     ) {
@@ -35,5 +38,13 @@ export class AuthGuard implements CanActivate {
     }
 
     return this.router.createUrlTree(['/login']);
+  }
+
+  private isQaDemoRoute(url: string): boolean {
+    const path = url.split('?')[0]?.toLowerCase() ?? '';
+    return (
+      path === AuthGuard.DASHBOARD_ROUTE_PREFIX ||
+      path.startsWith(`${AuthGuard.DASHBOARD_ROUTE_PREFIX}/`)
+    );
   }
 }

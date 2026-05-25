@@ -19,7 +19,7 @@ export const QUICK_ACTION_SHORTCUTS_MOCK: readonly QuickAction[] = [
     id: 'view-logs',
     title: 'View Logs',
     icon: 'receipt_long',
-    route: '/dashboard',
+    route: '/dashboard?tab=logs',
     description: 'Review the latest execution events and delivery outcomes.',
   },
   {
@@ -33,7 +33,7 @@ export const QUICK_ACTION_SHORTCUTS_MOCK: readonly QuickAction[] = [
     id: 'launch-ai-assistant',
     title: 'Launch AI Assistant',
     icon: 'assistant',
-    route: '/dashboard',
+    route: '/dashboard?tab=assistant',
     description: 'Open the assistant workspace to plan and execute automation tasks.',
   },
   {
