@@ -1,115 +1,133 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './core/guards/auth.guard';
-import { SeoMetadata } from './core/services/seo.service';
-import { AppShellComponent } from './layout/shell/app-shell.component';
+import { AuthGuard } from '@core/guards/auth.guard';
+import { SeoMetadata } from '@core/services/seo.service';
+import { SiteShellComponent } from '@shared/layout/site-shell.component';
+
+const homeSeo: SeoMetadata = {
+  title: 'AI Automation Lab | Agent Workflow Architecture',
+  description:
+    'AI Automation Lab builds practical agent workflows, automation systems, and starter kits for teams shipping AI operations.',
+  canonicalUrl: 'https://example.com/',
+  structuredData: [
+    {
+      id: 'organization',
+      schema: {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'AI Automation Lab',
+        url: 'https://example.com/',
+        description:
+          'AI Automation Lab builds practical agent workflows, automation systems, and starter kits for teams shipping AI operations.',
+        sameAs: [],
+      },
+    },
+    {
+      id: 'service',
+      schema: {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        name: 'AI Workflow Architecture',
+        serviceType: 'AI Automation Consulting',
+        provider: {
+          '@type': 'Organization',
+          name: 'AI Automation Lab',
+        },
+        areaServed: 'Global',
+        url: 'https://example.com/',
+      },
+    },
+    {
+      id: 'website',
+      schema: {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'AI Automation Lab',
+        url: 'https://example.com/',
+      },
+    },
+  ],
+};
+
+const bookSeo: SeoMetadata = {
+  title: 'Book a Strategy Call | AI Automation Lab',
+  description:
+    'Schedule a strategy session to map AI automations, delivery priorities, and agent workflow opportunities for your team.',
+  canonicalUrl: 'https://example.com/book',
+};
+
+const kitSeo: SeoMetadata = {
+  title: 'AI Agent Starter Kit | AI Automation Lab',
+  description:
+    'Review the AI Agent Starter Kit for templates, delivery assets, and a reusable architecture scaffold for workflow-driven AI products.',
+  canonicalUrl: 'https://example.com/kit',
+  structuredData: [
+    {
+      id: 'product',
+      schema: {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: 'AI Agent Starter Kit',
+        description:
+          'Starter package with reusable AI agent templates, workflow assets, and implementation guidance.',
+        brand: {
+          '@type': 'Brand',
+          name: 'AI Automation Lab',
+        },
+        offers: {
+          '@type': 'Offer',
+          availability: 'https://schema.org/InStock',
+          priceCurrency: 'USD',
+          url: 'https://example.com/kit',
+        },
+      },
+    },
+  ],
+};
+
+const loginSeo: SeoMetadata = {
+  title: 'Login | AI Automation Lab',
+  description:
+    'Sign in to access protected AI Automation Lab routes, workflows, and account settings.',
+  canonicalUrl: 'https://example.com/login',
+};
 
 const dashboardSeo: SeoMetadata = {
   title: 'Dashboard | AI Automation Lab',
-  description: 'Track AI operations, workflow health, and delivery metrics.',
+  description:
+    'Track AI operations, workflow health, and delivery metrics from the AI Automation Lab dashboard.',
   canonicalUrl: 'https://example.com/dashboard',
 };
 
 const workflowsSeo: SeoMetadata = {
   title: 'Workflows | AI Automation Lab',
-  description: 'Manage and monitor automation workflow execution.',
+  description:
+    'Manage and review AI workflow automations, orchestration states, and execution paths.',
   canonicalUrl: 'https://example.com/workflows',
-};
-
-const agentsSeo: SeoMetadata = {
-  title: 'Agents | AI Automation Lab',
-  description: 'Manage agent definitions, runtime behavior, and policy controls.',
-  canonicalUrl: 'https://example.com/agents',
-};
-
-const kitsSeo: SeoMetadata = {
-  title: 'Kits | AI Automation Lab',
-  description: 'Review reusable implementation kits and versioned delivery assets.',
-  canonicalUrl: 'https://example.com/kits',
 };
 
 const settingsSeo: SeoMetadata = {
   title: 'Settings | AI Automation Lab',
-  description: 'Configure preferences, integrations, and environment options.',
+  description:
+    'Configure AI Automation Lab preferences, integrations, and environment-specific options.',
   canonicalUrl: 'https://example.com/settings',
-};
-
-const landingSeo: SeoMetadata = {
-  title: 'Landing | AI Automation Lab',
-  description: 'Explore the public landing page and productized offerings.',
-  canonicalUrl: 'https://example.com/landing',
-};
-
-const bookSeo: SeoMetadata = {
-  title: 'Book | AI Automation Lab',
-  description: 'Schedule strategy sessions and architecture advisory calls.',
-  canonicalUrl: 'https://example.com/book',
-};
-
-const loginSeo: SeoMetadata = {
-  title: 'Login | AI Automation Lab',
-  description: 'Sign in to access protected AI Automation Lab features.',
-  canonicalUrl: 'https://example.com/login',
 };
 
 const notFoundSeo: SeoMetadata = {
   title: '404 | AI Automation Lab',
-  description: 'The requested page could not be found.',
-  canonicalUrl: 'https://example.com/not-found',
+  description:
+    'The requested page could not be found. Return to AI Automation Lab to continue exploring workflows and resources.',
+  canonicalUrl: 'https://example.com/404',
 };
 
 export const routes: Routes = [
   {
     path: '',
-    component: AppShellComponent,
+    component: SiteShellComponent,
     children: [
       {
         path: '',
-        pathMatch: 'full',
-        redirectTo: 'landing',
-      },
-      {
-        path: 'dashboard',
-        title: dashboardSeo.title,
-        data: { seo: dashboardSeo },
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
-      },
-      {
-        path: 'workflows',
-        title: workflowsSeo.title,
-        data: { seo: workflowsSeo },
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('./features/workflows/workflows.component').then((m) => m.WorkflowsComponent),
-      },
-      {
-        path: 'agents',
-        title: agentsSeo.title,
-        data: { seo: agentsSeo },
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('./features/agents/agents.component').then((m) => m.AgentsComponent),
-      },
-      {
-        path: 'kits',
-        title: kitsSeo.title,
-        data: { seo: kitsSeo },
-        canActivate: [AuthGuard],
-        loadComponent: () => import('./features/kits/kits.component').then((m) => m.KitsComponent),
-      },
-      {
-        path: 'settings',
-        title: settingsSeo.title,
-        data: { seo: settingsSeo },
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('./features/settings/settings.component').then((m) => m.SettingsComponent),
-      },
-      {
-        path: 'landing',
-        title: landingSeo.title,
-        data: { seo: landingSeo },
+        title: homeSeo.title,
+        data: { seo: homeSeo },
         loadComponent: () =>
           import('./modules/landing/landing-page.component').then((m) => m.LandingPageComponent),
       },
@@ -122,8 +140,10 @@ export const routes: Routes = [
       },
       {
         path: 'kit',
-        pathMatch: 'full',
-        redirectTo: 'kits',
+        title: kitSeo.title,
+        data: { seo: kitSeo },
+        loadComponent: () =>
+          import('./modules/kit/kit-page.component').then((m) => m.KitPageComponent),
       },
       {
         path: 'login',
@@ -133,17 +153,37 @@ export const routes: Routes = [
           import('./modules/login/login-page.component').then((m) => m.LoginPageComponent),
       },
       {
-        path: 'not-found',
+        path: 'dashboard',
+        title: dashboardSeo.title,
+        data: { seo: dashboardSeo },
+        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('@features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+      },
+      {
+        path: 'workflows',
+        title: workflowsSeo.title,
+        data: { seo: workflowsSeo },
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('@features/workflows/workflows.component').then((m) => m.WorkflowsComponent),
+      },
+      {
+        path: 'settings',
+        title: settingsSeo.title,
+        data: { seo: settingsSeo },
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('@features/settings/settings.component').then((m) => m.SettingsComponent),
+      },
+      {
+        path: '**',
         title: notFoundSeo.title,
         data: { seo: notFoundSeo },
         loadComponent: () =>
           import('./modules/not-found/not-found-page.component').then(
             (m) => m.NotFoundPageComponent
           ),
-      },
-      {
-        path: '**',
-        redirectTo: 'not-found',
       },
     ],
   },
