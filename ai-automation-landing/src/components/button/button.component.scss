@@ -1,0 +1,76 @@
+:host {
+  display: inline-flex;
+}
+
+.ui-button {
+  align-items: center;
+  background: var(--lab-color-primary);
+  border: 1px solid transparent;
+  border-radius: var(--lab-radius-md);
+  color: var(--lab-on-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--lab-font-sans);
+  font-size: var(--lab-text-sm);
+  font-weight: 600;
+  gap: var(--lab-space-2);
+  justify-content: center;
+  line-height: 1.2;
+  min-inline-size: max-content;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.ui-button--sm {
+  padding: var(--lab-space-2) var(--lab-space-3);
+}
+
+.ui-button--md {
+  padding: var(--lab-space-3) var(--lab-space-4);
+}
+
+.ui-button--lg {
+  padding: var(--lab-space-4) var(--lab-space-6);
+}
+
+.ui-button--primary {
+  background: var(--lab-color-primary);
+  color: var(--lab-on-primary);
+}
+
+.ui-button--secondary {
+  background: var(--lab-surface);
+  border-color: var(--lab-line);
+  color: var(--lab-ink);
+}
+
+.ui-button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--lab-color-primary-strong);
+}
+
+.ui-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--lab-color-primary) 88%, black 12%);
+}
+
+.ui-button--secondary:hover:not(:disabled) {
+  background: var(--lab-surface-muted);
+}
+
+.ui-button--ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--lab-surface-overlay) 90%, transparent 10%);
+}
+
+.ui-button:focus-visible {
+  outline: 2px solid var(--lab-focus);
+  outline-offset: 2px;
+}
+
+.ui-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
