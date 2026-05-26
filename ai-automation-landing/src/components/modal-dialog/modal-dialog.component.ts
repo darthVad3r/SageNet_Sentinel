@@ -60,8 +60,12 @@ export class ModalDialogComponent implements OnChanges, OnDestroy {
     }
 
     if (changes['open']?.currentValue === false) {
+      const wasTopMostDialog = this.isTopMostDialog();
       this.unregisterOpenDialog();
-      this.restoreFocus();
+
+      if (wasTopMostDialog || !this.hasOpenDialogs()) {
+        this.restoreFocus();
+      }
     }
   }
 
@@ -195,5 +199,9 @@ export class ModalDialogComponent implements OnChanges, OnDestroy {
 
   private isTopMostDialog(): boolean {
     return ModalDialogComponent.openDialogIds.at(-1) === this.dialogInstanceId;
+  }
+
+  private hasOpenDialogs(): boolean {
+    return ModalDialogComponent.openDialogIds.length > 0;
   }
 }

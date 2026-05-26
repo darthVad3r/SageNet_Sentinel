@@ -2,14 +2,32 @@
   class="ui-button"
   [class.ui-button--primary]="variant() === 'primary'"
   [class.ui-button--secondary]="variant() === 'secondary'"
-  [class.ui-button--ghost]="variant() === 'ghost'"
+  [class.ui-button--danger]="variant() === 'danger'"
+  [class.ui-button--ghost]="isGhostVariant()"
+  [class.ui-button--text-only]="isTextVariant()"
   [class.ui-button--sm]="size() === 'sm'"
   [class.ui-button--md]="size() === 'md'"
   [class.ui-button--lg]="size() === 'lg'"
+  [class.ui-button--loading]="loading()"
+  [class.ui-button--full-width]="fullWidth()"
   [attr.aria-label]="ariaLabel() || null"
-  [disabled]="disabled()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  [attr.aria-disabled]="isInteractiveDisabled() ? 'true' : null"
+  [disabled]="isInteractiveDisabled()"
   [type]="type()"
   (click)="handleClick($event)"
 >
+  @if (iconLeft()) {
+    <span class="ui-button__icon ui-button__icon--left" aria-hidden="true">{{ iconLeft() }}</span>
+  }
+
+  @if (loading()) {
+    <span class="ui-button__spinner" aria-hidden="true"></span>
+  }
+
   <ng-content></ng-content>
+
+  @if (iconRight()) {
+    <span class="ui-button__icon ui-button__icon--right" aria-hidden="true">{{ iconRight() }}</span>
+  }
 </button>

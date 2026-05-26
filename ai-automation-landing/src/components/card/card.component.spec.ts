@@ -7,13 +7,15 @@ import { CardComponent } from './card.component';
   standalone: true,
   imports: [CardComponent],
   template: `
-    <app-card title="Platform Health" subtitle="Updated 2 minutes ago" [surface]="surface">
+    <app-card title="Platform Health" subtitle="Updated 2 minutes ago" [variant]="variant">
+      <div card-header>Header area</div>
       <p>All systems are operating normally.</p>
+      <div card-footer>Footer area</div>
     </app-card>
   `,
 })
 class HostComponent {
-  surface: 'default' | 'muted' = 'default';
+  variant: 'elevated' | 'flat' | 'outlined' = 'elevated';
 }
 
 describe('CardComponent', () => {
@@ -38,14 +40,14 @@ describe('CardComponent', () => {
     );
   });
 
-  it('applies muted surface class when configured', () => {
+  it('applies variant classes when configured', () => {
     const fixture = TestBed.createComponent(HostComponent);
-    fixture.componentInstance.surface = 'muted';
+    fixture.componentInstance.variant = 'outlined';
     fixture.detectChanges();
 
     const card = fixture.nativeElement.querySelector('.ui-card') as HTMLElement;
 
-    expect(card.classList.contains('ui-card--muted')).toBe(true);
+    expect(card.classList.contains('ui-card--outlined')).toBe(true);
   });
 
   it('provides aria-label when title is present', () => {
@@ -55,5 +57,17 @@ describe('CardComponent', () => {
     const card = fixture.nativeElement.querySelector('.ui-card') as HTMLElement;
 
     expect(card.getAttribute('aria-label')).toBe('Platform Health card');
+  });
+
+  it('projects header and footer content', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[card-header]')?.textContent?.trim()).toBe(
+      'Header area'
+    );
+    expect(fixture.nativeElement.querySelector('[card-footer]')?.textContent?.trim()).toBe(
+      'Footer area'
+    );
   });
 });

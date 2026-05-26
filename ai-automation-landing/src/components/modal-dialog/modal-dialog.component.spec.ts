@@ -290,4 +290,40 @@ describe('ModalDialogComponent', () => {
     firstFixture.destroy();
     secondFixture.destroy();
   });
+
+  it('does not restore background dialog focus while another dialog remains open', () => {
+    const firstTrigger = document.createElement('button');
+    document.body.appendChild(firstTrigger);
+    firstTrigger.focus();
+
+    const firstFixture = TestBed.createComponent(ModalDialogComponent);
+    firstFixture.componentRef.setInput('title', 'First Dialog');
+    firstFixture.componentRef.setInput('open', true);
+    firstFixture.detectChanges();
+
+    const secondTrigger = document.createElement('button');
+    document.body.appendChild(secondTrigger);
+    secondTrigger.focus();
+
+    const secondFixture = TestBed.createComponent(ModalDialogComponent);
+    secondFixture.componentRef.setInput('title', 'Second Dialog');
+    secondFixture.componentRef.setInput('open', true);
+    secondFixture.detectChanges();
+
+    const secondPanel = secondFixture.nativeElement.querySelector('.ui-dialog') as HTMLElement;
+    secondPanel.focus();
+
+    firstFixture.componentRef.setInput('open', false);
+    firstFixture.detectChanges();
+
+    expect(document.activeElement).toBe(secondPanel);
+
+    secondFixture.componentRef.setInput('open', false);
+    secondFixture.detectChanges();
+
+    firstFixture.destroy();
+    secondFixture.destroy();
+    firstTrigger.remove();
+    secondTrigger.remove();
+  });
 });

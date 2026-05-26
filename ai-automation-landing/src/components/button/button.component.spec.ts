@@ -11,6 +11,10 @@ import { ButtonComponent } from './button.component';
       [variant]="variant"
       [size]="size"
       [disabled]="disabled"
+      [loading]="loading"
+      [fullWidth]="fullWidth"
+      [iconLeft]="iconLeft"
+      [iconRight]="iconRight"
       [ariaLabel]="ariaLabel"
       (pressed)="onPressed($event)"
     >
@@ -19,11 +23,19 @@ import { ButtonComponent } from './button.component';
   `,
 })
 class HostComponent {
-  variant: 'primary' | 'secondary' | 'ghost' = 'primary';
+  variant: 'primary' | 'secondary' | 'danger' | 'text-only' | 'ghost' = 'primary';
 
   size: 'sm' | 'md' | 'lg' = 'md';
 
   disabled = false;
+
+  loading = false;
+
+  fullWidth = false;
+
+  iconLeft = '';
+
+  iconRight = '';
 
   ariaLabel = 'Save changes';
 
@@ -53,14 +65,49 @@ describe('ButtonComponent', () => {
 
   it('applies variant and size classes', () => {
     const fixture = TestBed.createComponent(HostComponent);
-    fixture.componentInstance.variant = 'secondary';
+    fixture.componentInstance.variant = 'text-only';
     fixture.componentInstance.size = 'lg';
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector('button.ui-button') as HTMLButtonElement;
 
-    expect(button.classList.contains('ui-button--secondary')).toBe(true);
+    expect(button.classList.contains('ui-button--text-only')).toBe(true);
     expect(button.classList.contains('ui-button--lg')).toBe(true);
+  });
+
+  it('supports ghost as a deprecated alias for text-only and warns once', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const fixture = TestBed.createComponent(HostComponent);
+
+    fixture.componentInstance.variant = 'ghost';
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('button.ui-button') as HTMLButtonElement;
+
+    expect(button.classList.contains('ui-button--ghost')).toBe(true);
+    expect(button.classList.contains('ui-button--text-only')).toBe(true);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+
+    warnSpy.mockRestore();
+  });
+
+  it('renders loading, width, and icon affordances', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.loading = true;
+    fixture.componentInstance.fullWidth = true;
+    fixture.componentInstance.iconLeft = '←';
+    fixture.componentInstance.iconRight = '→';
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('button.ui-button') as HTMLButtonElement;
+
+    expect(button.classList.contains('ui-button--loading')).toBe(true);
+    expect(button.classList.contains('ui-button--full-width')).toBe(true);
+    expect(button.querySelector('.ui-button__icon--left')?.textContent?.trim()).toBe('←');
+    expect(button.querySelector('.ui-button__icon--right')?.textContent?.trim()).toBe('→');
+    expect(button.querySelector('.ui-button__spinner')).not.toBeNull();
+    expect(button.disabled).toBe(true);
   });
 
   it('emits pressed event on click', () => {
@@ -76,6 +123,18 @@ describe('ButtonComponent', () => {
   it('does not emit when disabled', () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.disabled = true;
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('button.ui-button') as HTMLButtonElement;
+    button.click();
+
+    expect(fixture.componentInstance.pressCount).toBe(0);
+    expect(button.disabled).toBe(true);
+  });
+
+  it('does not emit when loading', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.loading = true;
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector('button.ui-button') as HTMLButtonElement;

@@ -11,6 +11,15 @@
   @case ('h3') {
     <h3 class="ui-type ui-type--h3">{{ text() }}</h3>
   }
+  @case ('h4') {
+    <h4 class="ui-type ui-type--h4">{{ text() }}</h4>
+  }
+  @case ('h5') {
+    <h5 class="ui-type ui-type--h5">{{ text() }}</h5>
+  }
+  @case ('h6') {
+    <h6 class="ui-type ui-type--h6">{{ text() }}</h6>
+  }
   @case ('body-sm') {
     <p class="ui-type ui-type--body-sm">{{ text() }}</p>
   }
@@ -19,6 +28,9 @@
   }
   @case ('caption') {
     <p class="ui-type ui-type--caption">{{ text() }}</p>
+  }
+  @case ('overline') {
+    <p class="ui-type ui-type--overline">{{ text() }}</p>
   }
   @default {
     <p class="ui-type ui-type--body">{{ text() }}</p>

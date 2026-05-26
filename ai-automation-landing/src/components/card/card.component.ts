@@ -12,5 +12,5 @@ export class CardComponent {
 
   readonly subtitle = input<string>('');
 
-  readonly surface = input<'default' | 'muted'>('default');
+  readonly variant = input<'elevated' | 'flat' | 'outlined'>('elevated');
 }

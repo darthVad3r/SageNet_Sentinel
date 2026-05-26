@@ -11,7 +11,13 @@ import {
   standalone: true,
   imports: [SpacingLayoutPrimitivesComponent],
   template: `
-    <app-spacing-layout-primitives [mode]="mode" [gap]="gap" [columns]="columns" [wrap]="wrap">
+    <app-spacing-layout-primitives
+      [mode]="mode"
+      [gap]="gap"
+      [padding]="padding"
+      [columns]="columns"
+      [wrap]="wrap"
+    >
       <span>One</span>
       <span>Two</span>
       <span>Three</span>
@@ -22,6 +28,8 @@ class HostComponent {
   mode: LayoutMode = 'stack';
 
   gap: GapToken = '6';
+
+  padding: GapToken = '4';
 
   columns = 3;
 
@@ -77,5 +85,30 @@ describe('SpacingLayoutPrimitivesComponent', () => {
 
     expect(layout.classList.contains('ui-layout--inline')).toBe(true);
     expect(layout.classList.contains('ui-layout--wrap')).toBe(true);
+  });
+
+  it('renders container mode with max width and padding', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.mode = 'container';
+    fixture.componentInstance.padding = '6';
+    fixture.componentInstance.gap = '4';
+    fixture.detectChanges();
+
+    const layout = fixture.nativeElement.querySelector('.ui-layout') as HTMLElement;
+
+    expect(layout.classList.contains('ui-layout--container')).toBe(true);
+    expect(layout.style.getPropertyValue('--ui-layout-max-width')).toBe('72rem');
+    expect(layout.style.getPropertyValue('--ui-layout-padding')).toBe('var(--lab-space-6)');
+  });
+
+  it('renders divider mode as a horizontal rule', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.mode = 'divider';
+    fixture.detectChanges();
+
+    const divider = fixture.nativeElement.querySelector('hr.ui-divider') as HTMLHRElement;
+
+    expect(divider).not.toBeNull();
+    expect(divider.getAttribute('aria-hidden')).toBeNull();
   });
 });

@@ -69,6 +69,21 @@ describe('TypographySystemComponent', () => {
     h3Fixture.detectChanges();
     expect(h3Fixture.nativeElement.querySelector('h3.ui-type--h3')).not.toBeNull();
 
+    const h4Fixture = TestBed.createComponent(HostComponent);
+    h4Fixture.componentInstance.variant = 'h4';
+    h4Fixture.detectChanges();
+    expect(h4Fixture.nativeElement.querySelector('h4.ui-type--h4')).not.toBeNull();
+
+    const h5Fixture = TestBed.createComponent(HostComponent);
+    h5Fixture.componentInstance.variant = 'h5';
+    h5Fixture.detectChanges();
+    expect(h5Fixture.nativeElement.querySelector('h5.ui-type--h5')).not.toBeNull();
+
+    const h6Fixture = TestBed.createComponent(HostComponent);
+    h6Fixture.componentInstance.variant = 'h6';
+    h6Fixture.detectChanges();
+    expect(h6Fixture.nativeElement.querySelector('h6.ui-type--h6')).not.toBeNull();
+
     const bodySmFixture = TestBed.createComponent(HostComponent);
     bodySmFixture.componentInstance.variant = 'body-sm';
     bodySmFixture.detectChanges();
@@ -78,5 +93,10 @@ describe('TypographySystemComponent', () => {
     labelFixture.componentInstance.variant = 'label';
     labelFixture.detectChanges();
     expect(labelFixture.nativeElement.querySelector('p.ui-type--label')).not.toBeNull();
+
+    const overlineFixture = TestBed.createComponent(HostComponent);
+    overlineFixture.componentInstance.variant = 'overline';
+    overlineFixture.detectChanges();
+    expect(overlineFixture.nativeElement.querySelector('p.ui-type--overline')).not.toBeNull();
   });
 });

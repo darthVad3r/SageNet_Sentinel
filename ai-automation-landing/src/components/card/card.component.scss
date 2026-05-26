@@ -3,18 +3,28 @@
 }
 
 .ui-card {
-  background: var(--lab-surface);
   border: 1px solid var(--lab-line);
   border-radius: var(--lab-radius-lg);
-  box-shadow: var(--lab-shadow-1);
   color: var(--lab-ink);
   display: grid;
   gap: var(--lab-space-4);
   padding: var(--lab-space-6);
 }
 
-.ui-card--muted {
+.ui-card--elevated {
+  background: var(--lab-surface);
+  box-shadow: var(--lab-shadow-1);
+}
+
+.ui-card--flat {
   background: var(--lab-surface-muted);
+  box-shadow: none;
+}
+
+.ui-card--outlined {
+  background: var(--lab-surface);
+  border-color: var(--lab-line-strong, var(--lab-line));
+  box-shadow: none;
 }
 
 .ui-card__header {
