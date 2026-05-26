@@ -1,0 +1,38 @@
+@switch (variant()) {
+  @case ('display') {
+    <p class="ui-type ui-type--display">{{ text() }}</p>
+  }
+  @case ('h1') {
+    <h1 class="ui-type ui-type--h1">{{ text() }}</h1>
+  }
+  @case ('h2') {
+    <h2 class="ui-type ui-type--h2">{{ text() }}</h2>
+  }
+  @case ('h3') {
+    <h3 class="ui-type ui-type--h3">{{ text() }}</h3>
+  }
+  @case ('h4') {
+    <h4 class="ui-type ui-type--h4">{{ text() }}</h4>
+  }
+  @case ('h5') {
+    <h5 class="ui-type ui-type--h5">{{ text() }}</h5>
+  }
+  @case ('h6') {
+    <h6 class="ui-type ui-type--h6">{{ text() }}</h6>
+  }
+  @case ('body-sm') {
+    <p class="ui-type ui-type--body-sm">{{ text() }}</p>
+  }
+  @case ('label') {
+    <p class="ui-type ui-type--label">{{ text() }}</p>
+  }
+  @case ('caption') {
+    <p class="ui-type ui-type--caption">{{ text() }}</p>
+  }
+  @case ('overline') {
+    <p class="ui-type ui-type--overline">{{ text() }}</p>
+  }
+  @default {
+    <p class="ui-type ui-type--body">{{ text() }}</p>
+  }
+}

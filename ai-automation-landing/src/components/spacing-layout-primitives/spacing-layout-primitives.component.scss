@@ -1,0 +1,75 @@
+:host {
+  display: block;
+}
+
+.ui-layout {
+  gap: var(--ui-layout-gap, var(--lab-space-4));
+}
+
+.ui-layout--stack,
+.ui-layout--inline {
+  display: flex;
+}
+
+.ui-layout--stack {
+  flex-direction: column;
+}
+
+.ui-layout--inline {
+  flex-direction: row;
+}
+
+.ui-layout--grid {
+  display: grid;
+  grid-template-columns: repeat(var(--ui-layout-columns, 2), minmax(0, 1fr));
+}
+
+.ui-layout--container {
+  margin-inline: auto;
+  max-inline-size: var(--ui-layout-max-width, 72rem);
+  padding-inline: var(--ui-layout-padding, var(--lab-space-4));
+  width: 100%;
+}
+
+.ui-layout--wrap {
+  flex-wrap: wrap;
+}
+
+.ui-layout--align-start {
+  align-items: flex-start;
+}
+
+.ui-layout--align-center {
+  align-items: center;
+}
+
+.ui-layout--align-end {
+  align-items: flex-end;
+}
+
+.ui-layout--align-stretch {
+  align-items: stretch;
+}
+
+.ui-layout--justify-start {
+  justify-content: flex-start;
+}
+
+.ui-layout--justify-center {
+  justify-content: center;
+}
+
+.ui-layout--justify-end {
+  justify-content: flex-end;
+}
+
+.ui-layout--justify-space-between {
+  justify-content: space-between;
+}
+
+.ui-divider {
+  border: 0;
+  border-block-start: 1px solid var(--lab-line);
+  inline-size: 100%;
+  margin: 0;
+}

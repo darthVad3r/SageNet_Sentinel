@@ -1,0 +1,75 @@
+:host {
+  display: contents;
+}
+
+.ui-dialog__backdrop {
+  align-items: center;
+  backdrop-filter: blur(var(--lab-space-1));
+  background: color-mix(in srgb, var(--lab-ink) 30%, transparent);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: var(--lab-space-4);
+  position: fixed;
+  z-index: 1100;
+}
+
+.ui-dialog {
+  background: var(--lab-surface);
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-lg);
+  box-shadow: var(--lab-shadow-3);
+  color: var(--lab-ink);
+  display: grid;
+  gap: var(--lab-space-4);
+  inline-size: min(100%, 40rem);
+  max-block-size: calc(100dvh - (var(--lab-space-8)));
+  overflow: auto;
+  padding: var(--lab-space-6);
+}
+
+.ui-dialog:focus-visible {
+  outline: 2px solid var(--lab-focus);
+  outline-offset: 2px;
+}
+
+.ui-dialog__header {
+  align-items: start;
+  display: flex;
+  gap: var(--lab-space-4);
+  justify-content: space-between;
+}
+
+.ui-dialog__title {
+  font-size: var(--lab-text-2xl);
+  margin: 0;
+}
+
+.ui-dialog__close {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius-pill);
+  color: var(--lab-ink);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--lab-text-md);
+  justify-content: center;
+  min-block-size: calc(var(--lab-space-6) + var(--lab-space-2));
+  min-inline-size: calc(var(--lab-space-6) + var(--lab-space-2));
+}
+
+.ui-dialog__close:focus-visible {
+  outline: 2px solid var(--lab-focus);
+  outline-offset: 2px;
+}
+
+.ui-dialog__description {
+  color: var(--lab-ink-soft);
+  margin: 0;
+}
+
+.ui-dialog__content {
+  display: grid;
+  gap: var(--lab-space-4);
+}
