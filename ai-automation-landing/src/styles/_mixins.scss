@@ -45,6 +45,8 @@
     @media (min-width: #{ds.$breakpoint-xxl}) {
       @content;
     }
+  } @else {
+    @error "Unknown breakpoint `#{$breakpoint}`. Supported breakpoints are: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'.";
   }
 }
 
