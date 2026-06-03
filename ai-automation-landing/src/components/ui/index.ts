@@ -1,3 +1,7 @@
-// Intentionally empty scaffold barrel for UI primitives.
-// Add per-primitive exports here as components are introduced.
-export {};
+export * from '../button';
+export * from '../card';
+export * from '../input-field';
+export * from '../modal-dialog';
+export * from '../select-dropdown';
+export * from '../spacing-layout-primitives';
+export * from '../typography-system';
