@@ -15,10 +15,33 @@ interface LayoutStoryArgs {
   columns: number;
 }
 
+const demoStyles = `
+  <style>
+    .layout-story-frame {
+      width: 560px;
+      max-width: 100%;
+    }
+
+    .layout-story-modes {
+      display: grid;
+      gap: var(--lab-space-6);
+      width: 560px;
+      max-width: 100%;
+    }
+
+    .layout-story-item {
+      padding: var(--lab-space-3);
+      border: 1px solid var(--lab-line);
+      background: var(--lab-surface-muted);
+      border-radius: var(--lab-radius-sm);
+    }
+  </style>
+`;
+
 const box = `
-  <div style="padding:var(--lab-space-3);border:1px solid var(--lab-line);background:var(--lab-surface-muted);border-radius:var(--lab-radius-sm);">Item A</div>
-  <div style="padding:var(--lab-space-3);border:1px solid var(--lab-line);background:var(--lab-surface-muted);border-radius:var(--lab-radius-sm);">Item B</div>
-  <div style="padding:var(--lab-space-3);border:1px solid var(--lab-line);background:var(--lab-surface-muted);border-radius:var(--lab-radius-sm);">Item C</div>
+  <div class="layout-story-item">Item A</div>
+  <div class="layout-story-item">Item B</div>
+  <div class="layout-story-item">Item C</div>
 `;
 
 const meta: Meta<LayoutStoryArgs> = {
@@ -28,7 +51,8 @@ const meta: Meta<LayoutStoryArgs> = {
   render: (args) => ({
     props: args,
     template: `
-      <div style="width:560px;max-width:100%;">
+      ${demoStyles}
+      <div class="layout-story-frame">
         <app-spacing-layout-primitives
           [mode]="mode"
           [gap]="gap"
@@ -80,7 +104,8 @@ export const Default: Story = {};
 export const Modes: Story = {
   render: () => ({
     template: `
-      <div style="display:grid;gap:var(--lab-space-6);width:560px;max-width:100%;">
+      ${demoStyles}
+      <div class="layout-story-modes">
         <app-spacing-layout-primitives mode="stack" gap="3">${box}</app-spacing-layout-primitives>
         <app-spacing-layout-primitives mode="inline" gap="3" align="center">${box}</app-spacing-layout-primitives>
         <app-spacing-layout-primitives mode="grid" gap="3" [columns]="3">${box}</app-spacing-layout-primitives>

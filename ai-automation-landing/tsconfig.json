@@ -23,8 +23,7 @@
       "@layout/*": ["app/layout/*"],
       "@assets/*": ["assets/*"],
       "components/*": ["components/*"],
-      "components/ui": ["components/ui/index.ts"],
-      "components/ui/*": ["components/*"]
+      "components/ui": ["components/ui/index.ts"]
     }
   },
   "angularCompilerOptions": {

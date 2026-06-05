@@ -30,7 +30,7 @@ npm run docs:build
 ## Naming Conventions
 
 - Story file: `component-name.stories.ts`
-- Story title: `Components/Component Name`
+- Story title: `UI/Component Name`
 - Primary story name: `Default`
 - Variant/state collections: `Variants`, `States`, or feature-specific names
 

@@ -41,7 +41,7 @@ const meta: Meta<ButtonStoryArgs> = {
     size: 'md',
     type: 'button',
     disabled: false,
-    ariaLabel: 'Save changes',
+    ariaLabel: 'Save',
     label: 'Save',
     pressed: () => undefined,
   },
@@ -72,7 +72,7 @@ export const Default: Story = {
   parameters: {
     docs: {
       source: {
-        code: `<app-ui-button variant="primary" size="md" ariaLabel="Save changes">Save</app-ui-button>`,
+        code: `<app-ui-button variant="primary" size="md" ariaLabel="Save">Save</app-ui-button>`,
       },
     },
   },
