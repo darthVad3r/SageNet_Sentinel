@@ -11,7 +11,7 @@ interface ModalStoryArgs {
 }
 
 const meta: Meta<ModalStoryArgs> = {
-  title: 'Components/Modal Dialog',
+  title: 'UI/Modal Dialog',
   tags: ['autodocs'],
   component: ModalDialogComponent,
   render: (args) => ({

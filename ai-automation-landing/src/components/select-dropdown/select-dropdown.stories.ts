@@ -15,7 +15,7 @@ interface SelectStoryArgs {
 }
 
 const meta: Meta<SelectStoryArgs> = {
-  title: 'Components/Select Dropdown',
+  title: 'UI/Select Dropdown',
   tags: ['autodocs'],
   component: SelectDropdownComponent,
   render: (args) => ({

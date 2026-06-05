@@ -16,7 +16,7 @@ interface InputFieldStoryArgs {
 }
 
 const meta: Meta<InputFieldStoryArgs> = {
-  title: 'Components/Input Field',
+  title: 'UI/Input Field',
   tags: ['autodocs'],
   component: InputFieldComponent,
   render: (args) => ({
@@ -33,7 +33,7 @@ const meta: Meta<InputFieldStoryArgs> = {
           [error]="error"
           [required]="required"
           [disabled]="disabled"
-          (blurred)="onBlurred()"
+          (blurred)="blurred()"
         ></app-input-field>
       </div>
     `,
