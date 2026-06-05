@@ -18,7 +18,7 @@ interface ButtonStoryArgs {
 }
 
 const meta: Meta<ButtonStoryArgs> = {
-  title: 'Components/Button',
+  title: 'UI/Button',
   tags: ['autodocs'],
   component: ButtonComponent,
   render: (args) => ({
@@ -30,7 +30,7 @@ const meta: Meta<ButtonStoryArgs> = {
         [type]="type"
         [disabled]="disabled"
         [ariaLabel]="ariaLabel"
-        (pressed)="onPressed($event)"
+        (pressed)="pressed($event)"
       >
         {{ label }}
       </app-ui-button>

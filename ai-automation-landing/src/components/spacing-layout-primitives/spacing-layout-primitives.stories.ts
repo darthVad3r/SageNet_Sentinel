@@ -22,7 +22,7 @@ const box = `
 `;
 
 const meta: Meta<LayoutStoryArgs> = {
-  title: 'Components/Spacing Layout Primitives',
+  title: 'UI/Spacing Layout Primitives',
   tags: ['autodocs'],
   component: SpacingLayoutPrimitivesComponent,
   render: (args) => ({

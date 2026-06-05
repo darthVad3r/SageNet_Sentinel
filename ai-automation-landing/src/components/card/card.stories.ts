@@ -10,7 +10,7 @@ interface CardStoryArgs {
 }
 
 const meta: Meta<CardStoryArgs> = {
-  title: 'Components/Card',
+  title: 'UI/Card',
   tags: ['autodocs'],
   component: CardComponent,
   render: (args) => ({

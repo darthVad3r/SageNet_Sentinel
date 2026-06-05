@@ -8,7 +8,7 @@ interface TypographyStoryArgs {
 }
 
 const meta: Meta<TypographyStoryArgs> = {
-  title: 'Components/Typography System',
+  title: 'UI/Typography System',
   tags: ['autodocs'],
   component: TypographySystemComponent,
   render: (args) => ({
