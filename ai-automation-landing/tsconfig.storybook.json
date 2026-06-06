@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+    "outDir": "./out-tsc/storybook",
+    "rootDir": ".",
+    "types": ["node"]
+  },
+  "include": [
+    ".storybook/preview.ts",
+    "src/components/**/*.stories.ts",
+    "src/components/**/*.stories.mdx",
+    "src/components/**/*.mdx"
+  ],
+  "exclude": ["src/**/*.spec.ts"]
+}

@@ -1,0 +1,67 @@
+:host {
+  display: block;
+}
+
+.ui-type {
+  color: var(--lab-ink);
+  margin: 0;
+}
+
+.ui-type--display {
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-text-4xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ui-type--h1 {
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-text-3xl);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.ui-type--h2 {
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-text-2xl);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ui-type--h3 {
+  font-family: var(--lab-font-display);
+  font-size: var(--lab-text-xl);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ui-type--body {
+  color: var(--lab-ink-soft);
+  font-family: var(--lab-font-sans);
+  font-size: var(--lab-text-md);
+  line-height: 1.6;
+}
+
+.ui-type--body-sm {
+  color: var(--lab-ink-soft);
+  font-family: var(--lab-font-sans);
+  font-size: var(--lab-text-sm);
+  line-height: 1.5;
+}
+
+.ui-type--label {
+  color: var(--lab-ink);
+  font-family: var(--lab-font-sans);
+  font-size: var(--lab-text-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.ui-type--caption {
+  color: var(--lab-ink-soft);
+  font-family: var(--lab-font-sans);
+  font-size: var(--lab-text-xs);
+  line-height: 1.4;
+}
