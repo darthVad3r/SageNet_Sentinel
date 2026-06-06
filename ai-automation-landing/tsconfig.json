@@ -21,7 +21,9 @@
       "@shared/*": ["app/shared/*"],
       "@features/*": ["app/features/*"],
       "@layout/*": ["app/layout/*"],
-      "@assets/*": ["assets/*"]
+      "@assets/*": ["assets/*"],
+      "components/*": ["components/*"],
+      "components/ui": ["components/ui/index.ts"]
     }
   },
   "angularCompilerOptions": {
