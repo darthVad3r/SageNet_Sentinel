@@ -1,4 +1,5 @@
 @use './variables' as *;
+@use './design-system/index' as ds;
 
 // Flexbox utilities
 @mixin flex-center {
@@ -21,29 +22,31 @@
 // Responsive breakpoints
 @mixin respond-to($breakpoint) {
   @if $breakpoint == 'xs' {
-    @media (max-width: 575px) {
+    @media (max-width: #{(ds.$breakpoint-sm - 1px)}) {
       @content;
     }
   } @else if $breakpoint == 'sm' {
-    @media (min-width: 576px) {
+    @media (min-width: #{ds.$breakpoint-sm}) {
       @content;
     }
   } @else if $breakpoint == 'md' {
-    @media (min-width: 768px) {
+    @media (min-width: #{ds.$breakpoint-md}) {
       @content;
     }
   } @else if $breakpoint == 'lg' {
-    @media (min-width: 992px) {
+    @media (min-width: #{ds.$breakpoint-lg}) {
       @content;
     }
   } @else if $breakpoint == 'xl' {
-    @media (min-width: 1200px) {
+    @media (min-width: #{ds.$breakpoint-xl}) {
       @content;
     }
   } @else if $breakpoint == 'xxl' {
-    @media (min-width: 1400px) {
+    @media (min-width: #{ds.$breakpoint-xxl}) {
       @content;
     }
+  } @else {
+    @error "Unknown breakpoint `#{$breakpoint}`. Supported breakpoints are: 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'.";
   }
 }
 

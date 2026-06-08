@@ -92,19 +92,19 @@
   line-height: 1.45;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1280px) {
   .quick-actions__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .quick-actions__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 768px) {
   .quick-actions__grid {
     grid-template-columns: minmax(0, 1fr);
   }

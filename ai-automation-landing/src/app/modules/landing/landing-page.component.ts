@@ -210,7 +210,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      @media (max-width: 960px) {
+      @media (max-width: 1024px) {
         .hero__inner,
         .feature-grid,
         .pricing-grid,
@@ -223,7 +223,7 @@ import { TestimonialCardComponent } from '../../shared/ui/testimonial-card.compo
         }
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 768px) {
         .hero__inner {
           width: min(1120px, calc(100% - 1.25rem));
         }
