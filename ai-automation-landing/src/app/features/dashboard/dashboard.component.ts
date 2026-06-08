@@ -88,19 +88,19 @@ interface KpiMetric {
         gap: var(--lab-space-3);
       }
 
-      @media (max-width: 1199px) {
+      @media (max-width: 1280px) {
         .kpi-section__grid {
           grid-template-columns: repeat(3, minmax(0, 1fr));
         }
       }
 
-      @media (max-width: 959px) {
+      @media (max-width: 1024px) {
         .kpi-section__grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
 
-      @media (max-width: 560px) {
+      @media (max-width: 768px) {
         .dashboard {
           width: min(1120px, calc(100% - (var(--lab-space-3) * 2)));
           padding-top: var(--lab-space-6);

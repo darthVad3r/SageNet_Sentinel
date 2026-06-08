@@ -1,0 +1,31 @@
+<div class="ui-field">
+  <label class="ui-field__label" [for]="id()">
+    {{ label() }}
+    @if (required()) {
+      <span aria-hidden="true">*</span>
+    }
+  </label>
+
+  <input
+    class="ui-field__control"
+    [id]="id()"
+    [value]="value()"
+    [type]="type()"
+    [placeholder]="placeholder()"
+    [required]="required()"
+    [disabled]="disabled()"
+    [attr.aria-required]="required()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+  />
+
+  @if (hint()) {
+    <p class="ui-field__hint" [id]="id() + '-hint'">{{ hint() }}</p>
+  }
+
+  @if (error()) {
+    <p class="ui-field__error" [id]="id() + '-error'">{{ error() }}</p>
+  }
+</div>

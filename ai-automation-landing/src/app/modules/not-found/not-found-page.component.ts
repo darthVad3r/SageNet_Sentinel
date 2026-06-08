@@ -73,7 +73,7 @@ import { RouterLink } from '@angular/router';
         padding: 0.7rem 1.1rem;
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 768px) {
         .not-found__inner {
           width: min(960px, calc(100% - 1.25rem));
         }

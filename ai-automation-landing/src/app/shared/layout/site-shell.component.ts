@@ -170,7 +170,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
         text-decoration: none;
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 768px) {
         .shell__header-inner,
         .shell__footer-inner {
           width: min(1120px, calc(100% - 1.25rem));

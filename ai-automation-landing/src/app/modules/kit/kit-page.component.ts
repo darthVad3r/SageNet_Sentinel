@@ -99,13 +99,13 @@ import { FeatureCardComponent } from '../../shared/ui/feature-card.component';
         margin-top: 1.5rem;
       }
 
-      @media (max-width: 900px) {
+      @media (max-width: 1024px) {
         .page-shell__inner {
           grid-template-columns: 1fr;
         }
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 768px) {
         .page-shell__inner {
           width: min(1020px, calc(100% - 1.25rem));
         }

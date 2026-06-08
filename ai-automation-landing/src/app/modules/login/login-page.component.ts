@@ -99,7 +99,7 @@ import { AuthService } from '@core/services/auth.service';
         padding: 0.7rem 1.1rem;
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 768px) {
         .login-page__inner {
           width: min(960px, calc(100% - 1.25rem));
         }
