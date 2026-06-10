@@ -158,6 +158,7 @@ export class AppStore {
         id: 'demo-user',
         name: 'Automation Lead',
         email: 'lead@example.com',
+        avatarUrl: null,
         role: 'admin',
       });
     }

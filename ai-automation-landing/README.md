@@ -17,12 +17,63 @@ Single-page Angular landing site for:
 - SEO metadata (title + meta description + OG tags)
 - Fast-load route-level lazy loading
 - No backend required
+- Authentication gate for protected routes (`/dashboard`, `/workflows`, `/settings`)
+- Session-aware header with user identity and logout
+- Auth token injection for same-origin `/api/*` requests
 
 ## Routes
 
 - `/` → Landing page
 - `/book` → Calendar link page
 - `/kit` → Product checkout link page
+- `/login` → Authentication page
+- `/dashboard`, `/workflows`, `/settings` → Protected routes (require sign-in)
+
+## Authentication Gate
+
+The app now enforces authentication on all internal routes.
+
+- Unauthenticated users are redirected to `/login`.
+- The original destination is preserved with `redirectTo` and restored after successful sign-in.
+- Session data is stored in local storage and restored on reload.
+- Logout clears both app state and persisted session token.
+
+### Runtime Auth Provider Config
+
+The app reads runtime configuration from `globalThis.__LAB_AUTH_CONFIG__`.
+
+Add this before Angular bootstraps (for example, in `src/index.html` inside a `<script>` tag):
+
+```html
+<script>
+  globalThis.__LAB_AUTH_CONFIG__ = {
+    enabled: true,
+    users: [
+      {
+        id: 'owner-id',
+        email: 'owner@ai-automation-lab.local',
+        password: 'lab-private-access',
+        name: 'Lab Owner',
+        role: 'admin',
+        avatarUrl: '',
+      },
+    ],
+  };
+</script>
+```
+
+If no runtime config is provided, login is disabled by default.
+
+### API Token Validation Contract
+
+Client behavior:
+
+- For same-origin API requests (`/api/*`), the HTTP interceptor sends `Authorization: Bearer <token>`.
+
+Server expectation:
+
+- API endpoints must reject missing/invalid bearer tokens with `401 Unauthorized`.
+- API endpoints should parse and validate token claims before returning protected data.
 
 ## Architecture Overview
 

@@ -4,32 +4,57 @@ import { vi } from 'vitest';
 import { AppStore } from '../../state/app.store';
 import { AuthService } from './auth.service';
 
-type GlobalWithQaConfig = typeof globalThis & {
-  __LAB_QA_DEMO_AUTH_CONFIG__?: {
+type GlobalWithAuthConfig = typeof globalThis & {
+  __LAB_AUTH_CONFIG__?: {
     enabled?: boolean;
-    allowedHosts?: string[];
+    users?: {
+      id?: string;
+      email: string;
+      password: string;
+      name: string;
+      role?: string;
+      avatarUrl?: string;
+    }[];
   };
 };
 
 describe('AuthService', () => {
   let service: AuthService;
   let appStoreMock: {
-    isAuthenticated: ReturnType<typeof vi.fn>;
-    seedDashboardDemo: ReturnType<typeof vi.fn>;
+    isAuthenticated: () => boolean;
+    setAuthenticated: ReturnType<typeof vi.fn>;
+    logout: ReturnType<typeof vi.fn>;
   };
 
-  const setQaConfig = (enabled: boolean, allowedHosts: string[] = []): void => {
-    (globalThis as GlobalWithQaConfig).__LAB_QA_DEMO_AUTH_CONFIG__ = {
+  const setAuthConfig = (enabled: boolean): void => {
+    (globalThis as GlobalWithAuthConfig).__LAB_AUTH_CONFIG__ = {
       enabled,
-      allowedHosts,
+      users: [
+        {
+          id: 'owner-id',
+          email: 'owner@ai-automation-lab.local',
+          password: 'lab-private-access',
+          name: 'Lab Owner',
+          role: 'admin',
+        },
+      ],
     };
+  };
+
+  const storageKeys = {
+    session: 'lab.auth.session',
+    token: 'lab.auth.token',
   };
 
   beforeEach(() => {
     appStoreMock = {
-      isAuthenticated: vi.fn(() => false),
-      seedDashboardDemo: vi.fn(),
+      isAuthenticated: () => false,
+      setAuthenticated: vi.fn(),
+      logout: vi.fn(),
     };
+
+    localStorage.clear();
+    delete (globalThis as GlobalWithAuthConfig).__LAB_AUTH_CONFIG__;
 
     TestBed.configureTestingModule({
       providers: [
@@ -42,47 +67,95 @@ describe('AuthService', () => {
     });
 
     service = TestBed.inject(AuthService);
-    delete (globalThis as GlobalWithQaConfig).__LAB_QA_DEMO_AUTH_CONFIG__;
   });
 
   afterEach(() => {
-    delete (globalThis as GlobalWithQaConfig).__LAB_QA_DEMO_AUTH_CONFIG__;
+    localStorage.clear();
+    delete (globalThis as GlobalWithAuthConfig).__LAB_AUTH_CONFIG__;
   });
 
-  it('detects the demo bypass query flag only when demo=true', () => {
-    expect(service.isQaDemoBypassRequested('/dashboard?demo=true')).toBe(true);
-    expect(service.isQaDemoBypassRequested('/dashboard?demo=false')).toBe(false);
-    expect(service.isQaDemoBypassRequested('/dashboard')).toBe(false);
+  it('logs in successfully with configured credentials', async () => {
+    setAuthConfig(true);
+
+    const didLogin = await service.login('owner@ai-automation-lab.local', 'lab-private-access');
+
+    expect(didLogin).toBe(true);
+    expect(appStoreMock.setAuthenticated).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(storageKeys.session)).toContain('owner@ai-automation-lab.local');
+    expect(localStorage.getItem(storageKeys.token)).toContain('lab.');
   });
 
-  it('disables QA demo auth when runtime flag is not enabled', () => {
-    setQaConfig(false, ['qa.example.com']);
+  it('rejects login when credentials are invalid', async () => {
+    setAuthConfig(true);
 
-    expect(service.canUseQaDemoAuth('localhost')).toBe(false);
-    expect(service.canUseQaDemoAuth('qa.example.com')).toBe(false);
+    const didLogin = await service.login('owner@ai-automation-lab.local', 'invalid-password');
+
+    expect(didLogin).toBe(false);
+    expect(appStoreMock.setAuthenticated).not.toHaveBeenCalled();
   });
 
-  it('allows QA demo auth only for allowlisted hosts when runtime flag is enabled', () => {
-    setQaConfig(true, ['qa.example.com']);
+  it('rejects login when auth is disabled in runtime config', async () => {
+    setAuthConfig(false);
 
-    expect(service.canUseQaDemoAuth('localhost')).toBe(true);
-    expect(service.canUseQaDemoAuth('qa.example.com')).toBe(true);
-    expect(service.canUseQaDemoAuth('preview.vercel.app')).toBe(false);
+    const didLogin = await service.login('owner@ai-automation-lab.local', 'lab-private-access');
+
+    expect(didLogin).toBe(false);
+    expect(appStoreMock.setAuthenticated).not.toHaveBeenCalled();
   });
 
-  it('seeds demo session only when QA demo auth is allowed', () => {
-    setQaConfig(true, ['qa.example.com']);
-    vi.spyOn(service as any, 'getCurrentHostname').mockReturnValue('qa.example.com');
+  it('restores an existing persisted session on service initialization', () => {
+    localStorage.setItem(
+      storageKeys.session,
+      JSON.stringify({
+        id: 'owner-id',
+        name: 'Lab Owner',
+        email: 'owner@ai-automation-lab.local',
+        avatarUrl: null,
+        role: 'admin',
+      })
+    );
+    localStorage.setItem(storageKeys.token, 'lab.saved-token');
 
-    expect(service.tryEnableQaDemoSession()).toBe(true);
-    expect(appStoreMock.seedDashboardDemo).toHaveBeenCalledTimes(1);
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        {
+          provide: AppStore,
+          useValue: appStoreMock,
+        },
+      ],
+    });
+
+    TestBed.inject(AuthService);
+
+    expect(appStoreMock.setAuthenticated).toHaveBeenCalledWith({
+      id: 'owner-id',
+      name: 'Lab Owner',
+      email: 'owner@ai-automation-lab.local',
+      avatarUrl: null,
+      role: 'admin',
+    });
   });
 
-  it('does not seed demo session when QA demo auth is disallowed', () => {
-    setQaConfig(false, ['qa.example.com']);
-    vi.spyOn(service as any, 'getCurrentHostname').mockReturnValue('qa.example.com');
+  it('clears persisted session and store state on logout', async () => {
+    setAuthConfig(true);
+    await service.login('owner@ai-automation-lab.local', 'lab-private-access');
 
-    expect(service.tryEnableQaDemoSession()).toBe(false);
-    expect(appStoreMock.seedDashboardDemo).not.toHaveBeenCalled();
+    service.logout();
+
+    expect(appStoreMock.logout).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(storageKeys.session)).toBeNull();
+    expect(localStorage.getItem(storageKeys.token)).toBeNull();
+  });
+
+  it('returns null token when no session exists', () => {
+    expect(service.getAccessToken()).toBeNull();
+  });
+
+  it('returns the stored token when available', () => {
+    localStorage.setItem(storageKeys.token, 'lab.persisted-token');
+
+    expect(service.getAccessToken()).toBe('lab.persisted-token');
   });
 });

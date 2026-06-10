@@ -1,27 +1,65 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [FormsModule, RouterLink],
   template: `
     <section class="login-page">
       <div class="login-page__inner">
         <p class="login-page__eyebrow">Authentication required</p>
         <h1>Sign in to continue.</h1>
         <p class="login-page__message">
-          Your session is not authenticated. Use your sign-in flow here before accessing protected
-          routes.
+          Access to internal routes is restricted to approved users. Sign in to continue to your
+          workspace.
         </p>
-        @if (showDemoAction) {
-          <button type="button" class="login-page__demo" (click)="continueWithDemo()">
-            Continue with QA Demo Session
+
+        <form class="login-page__form" (ngSubmit)="submit()">
+          <label class="login-page__field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="email"
+              autocomplete="email"
+              [(ngModel)]="email"
+              placeholder="owner@ai-automation-lab.local"
+              required
+            />
+          </label>
+
+          <label class="login-page__field">
+            <span>Password</span>
+            <input
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              [(ngModel)]="password"
+              placeholder="Enter your password"
+              required
+            />
+          </label>
+
+          @if (errorMessage()) {
+            <p class="login-page__error" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <button type="submit" class="login-page__submit" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
           </button>
-          <p class="login-page__hint">Available in non-production environments only.</p>
+        </form>
+
+        <p class="login-page__hint">Use credentials provisioned in runtime auth configuration.</p>
+
+        @if (redirectTarget()) {
+          <p class="login-page__target">
+            You will be redirected to <strong>{{ redirectTarget() }}</strong> after sign in.
+          </p>
         }
+
         <a class="login-page__cta" routerLink="/">Return home</a>
       </div>
     </section>
@@ -69,7 +107,42 @@ import { AuthService } from '@core/services/auth.service';
         max-width: 56ch;
       }
 
-      .login-page__demo {
+      .login-page__form {
+        margin-top: 1.4rem;
+        display: grid;
+        gap: 0.95rem;
+        max-width: 28rem;
+      }
+
+      .login-page__field {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .login-page__field span {
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--lab-ink-soft);
+        font-weight: 700;
+      }
+
+      .login-page__field input {
+        border-radius: 0.8rem;
+        border: 1px solid var(--lab-line);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        min-height: 2.75rem;
+        padding: 0.65rem 0.9rem;
+        font: inherit;
+      }
+
+      .login-page__field input:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--lab-color-primary) 36%, transparent);
+        outline-offset: 2px;
+      }
+
+      .login-page__submit {
         margin-top: 1.4rem;
         border-radius: 999px;
         border: 1px solid transparent;
@@ -81,10 +154,26 @@ import { AuthService } from '@core/services/auth.service';
         cursor: pointer;
       }
 
+      .login-page__submit:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .login-page__error {
+        margin: 0;
+        color: #a91b1b;
+        font-weight: 600;
+      }
+
       .login-page__hint {
-        margin: 0.7rem 0 0;
+        margin: 0.85rem 0 0;
         color: var(--lab-ink-soft);
         font-size: var(--lab-text-sm);
+      }
+
+      .login-page__target {
+        margin: 0.65rem 0 0;
+        color: var(--lab-ink-soft);
       }
 
       .login-page__cta {
@@ -111,15 +200,47 @@ import { AuthService } from '@core/services/auth.service';
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);
 
+  private readonly activatedRoute = inject(ActivatedRoute);
+
   private readonly router = inject(Router);
 
-  readonly showDemoAction = this.authService.canUseQaDemoAuth();
+  readonly isSubmitting = signal(false);
 
-  continueWithDemo(): void {
-    if (!this.authService.tryEnableQaDemoSession()) {
+  readonly errorMessage = signal<string | null>(null);
+
+  readonly redirectTarget = signal(this.readRedirectTarget());
+
+  email = '';
+
+  password = '';
+
+  async submit(): Promise<void> {
+    if (this.isSubmitting()) {
       return;
     }
 
-    void this.router.navigateByUrl('/dashboard');
+    this.errorMessage.set(null);
+    this.isSubmitting.set(true);
+
+    const didLogin = await this.authService.login(this.email, this.password);
+    this.isSubmitting.set(false);
+
+    if (!didLogin) {
+      this.errorMessage.set('Invalid credentials. Access is limited to approved users.');
+      return;
+    }
+
+    const redirectTarget = this.redirectTarget() || '/dashboard';
+    void this.router.navigateByUrl(redirectTarget);
+  }
+
+  private readRedirectTarget(): string | null {
+    const redirectTo = this.activatedRoute.snapshot.queryParamMap.get('redirectTo');
+
+    if (!redirectTo?.startsWith('/')) {
+      return null;
+    }
+
+    return redirectTo;
   }
 }
