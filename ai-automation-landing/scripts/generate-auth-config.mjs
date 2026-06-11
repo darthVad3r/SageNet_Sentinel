@@ -9,22 +9,43 @@ const projectRoot = resolve(scriptDirectory, '..');
 const envFilePath = resolve(projectRoot, '.env.local');
 const outputFilePath = resolve(projectRoot, 'src/assets/runtime/auth-config.js');
 
-loadDotEnv({ path: envFilePath });
-
-const runtimeAuthConfig = {
-  enabled: process.env['LAB_AUTH_ENABLED'] === 'true',
+export const buildRuntimeAuthConfig = (env = process.env) => ({
+  enabled: env['LAB_AUTH_ENABLED'] === 'true',
   provider: 'supabase',
-  supabaseUrl: process.env['LAB_SUPABASE_URL'] ?? '',
-  supabaseAnonKey: process.env['LAB_SUPABASE_ANON_KEY'] ?? '',
+  supabaseUrl: env['LAB_SUPABASE_URL'] ?? '',
+  supabaseAnonKey: env['LAB_SUPABASE_ANON_KEY'] ?? '',
+});
+
+const toSingleQuotedJsStringLiteral = (value) => {
+  const serialized = JSON.stringify(value ?? '');
+  const body = serialized.slice(1, -1);
+  const escaped = body.replaceAll("'", "\\'");
+  return `'${escaped}'`;
 };
 
-mkdirSync(dirname(outputFilePath), { recursive: true });
+export const renderRuntimeAuthConfig = (runtimeAuthConfig) =>
+  `/* eslint-disable no-undef, no-underscore-dangle */\nwindow.__LAB_AUTH_CONFIG__ = {\n  enabled: ${runtimeAuthConfig.enabled ? 'true' : 'false'},\n  provider: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.provider)},\n  supabaseUrl: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.supabaseUrl)},\n  supabaseAnonKey: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.supabaseAnonKey)},\n};\n`;
 
-writeFileSync(
-  outputFilePath,
-  `/* eslint-disable no-undef, no-underscore-dangle */\nwindow.__LAB_AUTH_CONFIG__ = {\n  enabled: ${runtimeAuthConfig.enabled},\n  provider: 'supabase',\n  supabaseUrl: '${runtimeAuthConfig.supabaseUrl.replaceAll("'", "\\'")}',\n  supabaseAnonKey: '${runtimeAuthConfig.supabaseAnonKey.replaceAll("'", "\\'")}',\n};\n`,
-  'utf8'
-);
+export const generateAuthConfig = ({
+  env = process.env,
+  envPath = envFilePath,
+  outputPath = outputFilePath,
+  loadEnvFile = true,
+} = {}) => {
+  if (loadEnvFile) {
+    loadDotEnv({ path: envPath });
+  }
 
-const status = runtimeAuthConfig.enabled ? 'enabled' : 'disabled';
-console.log(`[auth:config] Generated runtime auth config (${status}).`);
+  const runtimeAuthConfig = buildRuntimeAuthConfig(env);
+  mkdirSync(dirname(outputPath), { recursive: true });
+  writeFileSync(outputPath, renderRuntimeAuthConfig(runtimeAuthConfig), 'utf8');
+  return runtimeAuthConfig;
+};
+
+const isDirectRun = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  const runtimeAuthConfig = generateAuthConfig();
+  const status = runtimeAuthConfig.enabled ? 'enabled' : 'disabled';
+  console.log(`[auth:config] Generated runtime auth config (${status}).`);
+}

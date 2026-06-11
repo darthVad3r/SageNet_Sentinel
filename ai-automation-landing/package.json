@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "auth:config": "node scripts/generate-auth-config.mjs",
+    "auth:config:test": "node --test scripts/generate-auth-config.spec.mjs",
     "prestart": "npm run auth:config",
     "prebuild": "npm run auth:config",
     "prewatch": "npm run auth:config",
