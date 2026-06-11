@@ -17,12 +17,63 @@ Single-page Angular landing site for:
 - SEO metadata (title + meta description + OG tags)
 - Fast-load route-level lazy loading
 - No backend required
+- Authentication gate for protected routes (`/dashboard`, `/workflows`, `/settings`)
+- Session-aware header with user identity and logout
+- Auth token injection for same-origin `/api/*` requests
+- Supabase authentication provider initialized at app startup
 
 ## Routes
 
 - `/` → Landing page
 - `/book` → Calendar link page
 - `/kit` → Product checkout link page
+- `/login` → Authentication page
+- `/auth-test` → Protected provider verification page
+- `/dashboard`, `/workflows`, `/settings` → Protected routes (require sign-in)
+
+## Authentication Gate
+
+The app now enforces authentication on all internal routes.
+
+- Unauthenticated users are redirected to `/login`.
+- The original destination is preserved with `redirectTo` and restored after successful sign-in.
+- Session data is stored in local storage and restored on reload.
+- Logout clears both app state and persisted session token.
+
+### Auth Provider Setup
+
+The app uses `@supabase/supabase-js` as the authentication provider SDK.
+
+1. Copy `.env.local.example` to `.env.local`.
+2. Set these values from your Supabase project:
+   - `LAB_AUTH_ENABLED=true`
+   - `LAB_SUPABASE_URL`
+   - `LAB_SUPABASE_ANON_KEY`
+3. Create at least one email/password user in Supabase Authentication.
+
+Before `start`, `build`, `test`, and `typecheck`, the project runs `npm run auth:config`.
+
+That script reads `.env.local` and generates `src/assets/runtime/auth-config.js`, which is loaded by `src/index.html` before Angular bootstraps. The resulting runtime config is exposed on `window.__LAB_AUTH_CONFIG__`.
+
+If `.env.local` is missing or `LAB_AUTH_ENABLED` is not `true`, login stays disabled for that environment.
+
+### Session Handling
+
+- Supabase persists the browser session automatically.
+- Token refresh is managed by the Supabase client.
+- User metadata (email, display name, avatar, role) is synchronized into the global app store.
+- `/auth-test` confirms the current session is available after sign-in.
+
+### API Token Validation Contract
+
+Client behavior:
+
+- For same-origin API requests (`/api/*`), the HTTP interceptor sends `Authorization: Bearer <token>`.
+
+Server expectation:
+
+- API endpoints must reject missing/invalid bearer tokens with `401 Unauthorized`.
+- API endpoints should parse and validate token claims before returning protected data.
 
 ## Architecture Overview
 

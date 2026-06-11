@@ -1,27 +1,79 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [FormsModule, RouterLink],
   template: `
     <section class="login-page">
       <div class="login-page__inner">
         <p class="login-page__eyebrow">Authentication required</p>
         <h1>Sign in to continue.</h1>
         <p class="login-page__message">
-          Your session is not authenticated. Use your sign-in flow here before accessing protected
-          routes.
+          Access to internal routes is restricted to approved users. Sign in to continue to your
+          workspace.
         </p>
-        @if (showDemoAction) {
-          <button type="button" class="login-page__demo" (click)="continueWithDemo()">
-            Continue with QA Demo Session
-          </button>
-          <p class="login-page__hint">Available in non-production environments only.</p>
+
+        @if (!authService.isConfigured()) {
+          <p class="login-page__warning" role="alert">
+            Authentication is not configured for this environment yet. Add the required Supabase
+            settings before sign-in will work.
+          </p>
         }
+
+        <form class="login-page__form" (ngSubmit)="submit()">
+          <label class="login-page__field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="email"
+              autocomplete="email"
+              [(ngModel)]="email"
+              placeholder="owner@ai-automation-lab.local"
+              required
+            />
+          </label>
+
+          <label class="login-page__field">
+            <span>Password</span>
+            <input
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              [(ngModel)]="password"
+              placeholder="Enter your password"
+              required
+            />
+          </label>
+
+          @if (errorMessage()) {
+            <p class="login-page__error" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <button
+            type="submit"
+            class="login-page__submit"
+            [disabled]="isSubmitting() || !authService.isConfigured()"
+          >
+            {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
+          </button>
+        </form>
+
+        <p class="login-page__hint">
+          Sign in uses the configured Supabase project and respects provider-managed session
+          refresh.
+        </p>
+
+        @if (redirectTarget()) {
+          <p class="login-page__target">
+            You will be redirected to <strong>{{ redirectTarget() }}</strong> after sign in.
+          </p>
+        }
+
         <a class="login-page__cta" routerLink="/">Return home</a>
       </div>
     </section>
@@ -69,7 +121,42 @@ import { AuthService } from '@core/services/auth.service';
         max-width: 56ch;
       }
 
-      .login-page__demo {
+      .login-page__form {
+        margin-top: 1.4rem;
+        display: grid;
+        gap: 0.95rem;
+        max-width: 28rem;
+      }
+
+      .login-page__field {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .login-page__field span {
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--lab-ink-soft);
+        font-weight: 700;
+      }
+
+      .login-page__field input {
+        border-radius: 0.8rem;
+        border: 1px solid var(--lab-line);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        min-height: 2.75rem;
+        padding: 0.65rem 0.9rem;
+        font: inherit;
+      }
+
+      .login-page__field input:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--lab-color-primary) 36%, transparent);
+        outline-offset: 2px;
+      }
+
+      .login-page__submit {
         margin-top: 1.4rem;
         border-radius: 999px;
         border: 1px solid transparent;
@@ -81,10 +168,36 @@ import { AuthService } from '@core/services/auth.service';
         cursor: pointer;
       }
 
+      .login-page__submit:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .login-page__error {
+        margin: 0;
+        color: #a91b1b;
+        font-weight: 600;
+      }
+
+      .login-page__warning {
+        margin: 1rem 0 0;
+        padding: 0.9rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid #d5aa18;
+        background: #fff5ce;
+        color: #6b4e00;
+        max-width: 40rem;
+      }
+
       .login-page__hint {
-        margin: 0.7rem 0 0;
+        margin: 0.85rem 0 0;
         color: var(--lab-ink-soft);
         font-size: var(--lab-text-sm);
+      }
+
+      .login-page__target {
+        margin: 0.65rem 0 0;
+        color: var(--lab-ink-soft);
       }
 
       .login-page__cta {
@@ -109,17 +222,49 @@ import { AuthService } from '@core/services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
+
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   private readonly router = inject(Router);
 
-  readonly showDemoAction = this.authService.canUseQaDemoAuth();
+  readonly isSubmitting = signal(false);
 
-  continueWithDemo(): void {
-    if (!this.authService.tryEnableQaDemoSession()) {
+  readonly errorMessage = signal<string | null>(null);
+
+  readonly redirectTarget = signal(this.readRedirectTarget());
+
+  email = '';
+
+  password = '';
+
+  async submit(): Promise<void> {
+    if (this.isSubmitting()) {
       return;
     }
 
-    void this.router.navigateByUrl('/dashboard');
+    this.errorMessage.set(null);
+    this.isSubmitting.set(true);
+
+    const didLogin = await this.authService.login(this.email, this.password);
+    this.isSubmitting.set(false);
+
+    if (!didLogin) {
+      this.errorMessage.set('Sign-in failed. Verify your Supabase credentials and user account.');
+      return;
+    }
+
+    const redirectTarget = this.redirectTarget() || '/dashboard';
+    void this.router.navigateByUrl(redirectTarget);
+  }
+
+  private readRedirectTarget(): string | null {
+    const redirectTo = this.activatedRoute.snapshot.queryParamMap.get('redirectTo');
+
+    if (!redirectTo?.startsWith('/')) {
+      return null;
+    }
+
+    return redirectTo;
   }
 }

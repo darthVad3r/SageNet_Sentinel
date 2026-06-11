@@ -9,7 +9,9 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
 import { SeoMetadata, SeoService } from '../../core/services/seo.service';
+import { AppStore } from '../../state/app.store';
 
 @Component({
   selector: 'app-site-shell',
@@ -37,10 +39,27 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
             </a>
             <a routerLink="/book" routerLinkActive="is-active">Book</a>
             <a routerLink="/kit" routerLinkActive="is-active">Kit</a>
-            <a routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
-            <a routerLink="/workflows" routerLinkActive="is-active">Workflows</a>
-            <a routerLink="/settings" routerLinkActive="is-active">Settings</a>
+
+            @if (isAuthenticated()) {
+              <a routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
+              <a routerLink="/workflows" routerLinkActive="is-active">Workflows</a>
+              <a routerLink="/settings" routerLinkActive="is-active">Settings</a>
+              <a routerLink="/auth-test" routerLinkActive="is-active">Auth Test</a>
+            }
           </nav>
+
+          @if (isAuthenticated()) {
+            <div class="session" aria-live="polite">
+              <div class="session__avatar" aria-hidden="true">{{ avatarLabel() }}</div>
+              <div class="session__copy">
+                <strong>{{ currentUserName() }}</strong>
+                <span>{{ currentUserEmail() }}</span>
+              </div>
+              <button type="button" class="session__logout" (click)="logout()">Logout</button>
+            </div>
+          } @else {
+            <a class="session__signin" routerLink="/login">Sign in</a>
+          }
         </div>
       </header>
 
@@ -86,7 +105,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
       .shell__header-inner {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
         gap: 1rem;
         min-height: 4.5rem;
       }
@@ -128,6 +147,7 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
         align-items: center;
         gap: 0.45rem;
         flex-wrap: wrap;
+        margin-left: auto;
       }
 
       .nav a {
@@ -149,6 +169,56 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
 
       .shell__footer {
         padding: 1.5rem 0 2rem;
+      }
+
+      .session {
+        margin-left: 0.25rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        border: 1px solid var(--lab-line);
+        border-radius: 999px;
+        padding: 0.35rem 0.45rem 0.35rem 0.35rem;
+      }
+
+      .session__avatar {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        color: var(--lab-on-primary);
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--lab-color-primary), var(--lab-color-accent-cyan));
+      }
+
+      .session__copy {
+        display: grid;
+      }
+
+      .session__copy strong {
+        font-size: 0.82rem;
+      }
+
+      .session__copy span {
+        font-size: 0.72rem;
+        color: var(--lab-ink-soft);
+      }
+
+      .session__logout,
+      .session__signin {
+        border-radius: 999px;
+        border: 1px solid var(--lab-line);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.5rem 0.8rem;
+      }
+
+      .session__signin {
+        margin-left: 0.25rem;
       }
 
       .shell__footer-inner {
@@ -180,6 +250,12 @@ import { SeoMetadata, SeoService } from '../../core/services/seo.service';
 
         .nav {
           justify-content: space-between;
+          margin-left: 0;
+        }
+
+        .session,
+        .session__signin {
+          margin-left: 0;
         }
       }
     `,
@@ -193,7 +269,22 @@ export class SiteShellComponent implements OnInit {
 
   private readonly seoService = inject(SeoService);
 
+  private readonly authService = inject(AuthService);
+
+  private readonly appStore = inject(AppStore);
+
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly isAuthenticated = this.appStore.isAuthenticated;
+
+  readonly currentUserName = () => this.appStore.user().name ?? 'User';
+
+  readonly currentUserEmail = () => this.appStore.user().email ?? 'No email';
+
+  readonly avatarLabel = () => {
+    const name = this.currentUserName().trim();
+    return name ? name.charAt(0).toUpperCase() : 'U';
+  };
 
   ngOnInit(): void {
     this.router.events
@@ -216,5 +307,10 @@ export class SiteShellComponent implements OnInit {
           this.seoService.applyMetadata(metadata);
         }
       });
+  }
+
+  logout(): void {
+    this.authService.logout();
+    void this.router.navigate(['/login']);
   }
 }

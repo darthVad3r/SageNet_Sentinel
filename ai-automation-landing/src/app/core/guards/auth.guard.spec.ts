@@ -9,26 +9,15 @@ describe('AuthGuard', () => {
   let guard: AuthGuard;
   let loginUrlTree: UrlTree;
   let isAuthenticated = false;
-  let isQaDemoBypassRequested = false;
-  let tryEnableQaDemoSession = false;
-  let tryEnableQaDemoSessionCalls = 0;
   let createUrlTreeCalls: unknown[][] = [];
 
   beforeEach(() => {
     isAuthenticated = false;
-    isQaDemoBypassRequested = false;
-    tryEnableQaDemoSession = false;
-    tryEnableQaDemoSessionCalls = 0;
     createUrlTreeCalls = [];
     loginUrlTree = {} as UrlTree;
 
     authService = {
       isAuthenticated: () => isAuthenticated,
-      isQaDemoBypassRequested: () => isQaDemoBypassRequested,
-      tryEnableQaDemoSession: () => {
-        tryEnableQaDemoSessionCalls += 1;
-        return tryEnableQaDemoSession;
-      },
     } as AuthService;
 
     router = {
@@ -48,38 +37,24 @@ describe('AuthGuard', () => {
 
     expect(result).toBe(true);
     expect(createUrlTreeCalls).toEqual([]);
-    expect(tryEnableQaDemoSessionCalls).toBe(0);
   });
 
-  it('should reject demo bypass outside dashboard routes', () => {
-    isQaDemoBypassRequested = true;
-    tryEnableQaDemoSession = true;
-
-    const result = guard.canActivate({} as never, { url: '/settings?demo=true' } as never);
-
-    expect(createUrlTreeCalls).toEqual([[['/login']]]);
-    expect(result).toBe(loginUrlTree);
-    expect(tryEnableQaDemoSessionCalls).toBe(0);
-  });
-
-  it('should allow navigation with demo bypass when requested and enabled', () => {
-    isQaDemoBypassRequested = true;
-    tryEnableQaDemoSession = true;
-
-    const result = guard.canActivate({} as never, { url: '/dashboard?demo=true' } as never);
-
-    expect(result).toBe(true);
-    expect(createUrlTreeCalls).toEqual([]);
-    expect(tryEnableQaDemoSessionCalls).toBe(1);
-  });
-
-  it('should redirect to /login when unauthenticated', () => {
+  it('should redirect to /login with redirectTo when unauthenticated', () => {
     isAuthenticated = false;
-    isQaDemoBypassRequested = false;
 
-    const result = guard.canActivate({} as never, { url: '/dashboard' } as never);
+    const targetUrl = '/dashboard?tab=activity';
+    const result = guard.canActivate({} as never, { url: targetUrl } as never);
 
-    expect(createUrlTreeCalls).toEqual([[['/login']]]);
+    expect(createUrlTreeCalls).toEqual([
+      [
+        ['/login'],
+        {
+          queryParams: {
+            redirectTo: targetUrl,
+          },
+        },
+      ],
+    ]);
     expect(result).toBe(loginUrlTree);
   });
 });

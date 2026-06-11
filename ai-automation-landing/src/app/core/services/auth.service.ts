@@ -1,77 +1,171 @@
-import { Injectable, inject } from '@angular/core';
+import { computed, Injectable, inject, signal } from '@angular/core';
+import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
+import { UserMetadata } from '../../state/app.state';
 import { AppStore } from '../../state/app.store';
 
-interface QaDemoAuthConfig {
+interface AuthProviderConfig {
   readonly enabled?: boolean;
-  readonly allowedHosts?: readonly string[];
+  readonly provider?: 'supabase';
+  readonly supabaseUrl?: string;
+  readonly supabaseAnonKey?: string;
 }
 
-type QaDemoAuthGlobal = typeof globalThis & {
-  __LAB_QA_DEMO_AUTH_CONFIG__?: QaDemoAuthConfig;
+type AuthGlobal = typeof globalThis & {
+  __LAB_AUTH_CONFIG__?: AuthProviderConfig;
 };
-
-const DEFAULT_QA_ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0'] as const;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly appStore = inject(AppStore);
 
+  private readonly sessionState = signal<Session | null>(null);
+
+  private readonly initializedState = signal(false);
+
+  private readonly configuredState = signal(false);
+
+  private client: SupabaseClient | null = null;
+
+  private authStateChangeUnsubscribe: (() => void) | null = null;
+
+  readonly session = this.sessionState.asReadonly();
+
+  readonly isInitialized = this.initializedState.asReadonly();
+
+  readonly isConfigured = this.configuredState.asReadonly();
+
+  readonly user = computed(() => this.sessionState()?.user ?? null);
+
   isAuthenticated(): boolean {
-    return this.appStore.isAuthenticated();
+    return !!this.sessionState();
   }
 
-  isQaDemoBypassRequested(url?: string): boolean {
-    if (!url) {
-      return false;
+  async initialize(): Promise<void> {
+    if (this.initializedState()) {
+      return;
     }
 
-    const queryIndex = url.indexOf('?');
-    if (queryIndex < 0) {
-      return false;
+    const authConfig = this.readAuthConfig();
+    if (authConfig.enabled === false || !authConfig.supabaseUrl || !authConfig.supabaseAnonKey) {
+      this.syncSession(null);
+      this.initializedState.set(true);
+      return;
     }
 
-    const params = new URLSearchParams(url.slice(queryIndex + 1));
-    return params.get('demo') === 'true';
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+
+      this.client = createClient(authConfig.supabaseUrl, authConfig.supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      });
+
+      const {
+        data: { session },
+      } = await this.client.auth.getSession();
+
+      this.syncSession(session);
+
+      const { data } = this.client.auth.onAuthStateChange((_event, nextSession) => {
+        this.syncSession(nextSession);
+      });
+      this.authStateChangeUnsubscribe = data?.subscription?.unsubscribe ?? null;
+
+      this.configuredState.set(true);
+    } catch (error) {
+      console.error('[AuthService] Failed to initialize provider:', error);
+      this.syncSession(null);
+    } finally {
+      this.initializedState.set(true);
+    }
   }
 
-  canUseQaDemoAuth(hostname = this.getCurrentHostname()): boolean {
-    if (!hostname) {
-      return false;
-    }
-
-    const config = this.readQaDemoAuthConfig();
-    if (!config.enabled) {
-      return false;
-    }
-
-    const normalizedHost = hostname.toLowerCase();
-    const allowedHosts = new Set([...DEFAULT_QA_ALLOWED_HOSTS, ...config.allowedHosts]);
-    return allowedHosts.has(normalizedHost);
+  getAccessToken(): string | null {
+    return this.sessionState()?.access_token ?? null;
   }
 
-  tryEnableQaDemoSession(): boolean {
-    if (!this.canUseQaDemoAuth()) {
+  async login(email: string, password: string): Promise<boolean> {
+    if (!this.client) {
       return false;
     }
 
-    this.appStore.seedDashboardDemo();
+    const { data, error } = await this.client.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (error || !data.session) {
+      return false;
+    }
+
+    this.syncSession(data.session);
     return true;
   }
 
-  private getCurrentHostname(): string {
-    if (typeof globalThis === 'undefined' || !('location' in globalThis)) {
-      return '';
+  async logout(): Promise<void> {
+    if (this.client) {
+      await this.client.auth.signOut();
     }
 
-    return globalThis.location?.hostname ?? '';
+    this.authStateChangeUnsubscribe?.();
+    this.authStateChangeUnsubscribe = null;
+    this.syncSession(null);
   }
 
-  private readQaDemoAuthConfig(): { enabled: boolean; allowedHosts: readonly string[] } {
-    const config = (globalThis as QaDemoAuthGlobal).__LAB_QA_DEMO_AUTH_CONFIG__;
+  private readAuthConfig(): AuthProviderConfig {
+    const config = (globalThis as AuthGlobal).__LAB_AUTH_CONFIG__;
     return {
-      enabled: config?.enabled === true,
-      allowedHosts: (config?.allowedHosts ?? []).map((host) => host.toLowerCase()),
+      enabled: config?.enabled !== false,
+      provider: 'supabase',
+      supabaseUrl: config?.supabaseUrl,
+      supabaseAnonKey: config?.supabaseAnonKey,
     };
+  }
+
+  private syncSession(session: Session | null): void {
+    this.sessionState.set(session);
+
+    if (!session?.user) {
+      this.appStore.logout();
+      return;
+    }
+
+    this.appStore.setAuthenticated(this.mapToUserMetadata(session.user));
+  }
+
+  private mapToUserMetadata(user: User): UserMetadata {
+    const authMetadata = user.user_metadata ?? {};
+    const appMetadata = user.app_metadata ?? {};
+    const displayName =
+      this.readStringMetadata(authMetadata, ['full_name', 'name', 'display_name']) ?? user.email;
+
+    return {
+      id: user.id,
+      name: displayName ?? null,
+      email: user.email ?? null,
+      avatarUrl: this.readStringMetadata(authMetadata, ['avatar_url', 'picture', 'avatar']) ?? null,
+      role:
+        this.readStringMetadata(appMetadata, ['role']) ??
+        this.readStringMetadata(authMetadata, ['role']) ??
+        'member',
+    };
+  }
+
+  private readStringMetadata(
+    metadata: Record<string, unknown>,
+    keys: readonly string[]
+  ): string | null {
+    for (const key of keys) {
+      const value = metadata[key];
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+    }
+
+    return null;
   }
 }

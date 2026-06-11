@@ -17,7 +17,11 @@
   justify-content: center;
   line-height: 1.2;
   min-inline-size: max-content;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .ui-button--sm {
