@@ -1,153 +1,171 @@
-import { Injectable, inject } from '@angular/core';
+import { computed, Injectable, inject, signal } from '@angular/core';
+import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 import { UserMetadata } from '../../state/app.state';
 import { AppStore } from '../../state/app.store';
 
-interface AuthProviderUserConfig {
-  readonly id?: string;
-  readonly email: string;
-  readonly password: string;
-  readonly name: string;
-  readonly role?: string;
-  readonly avatarUrl?: string;
-}
-
 interface AuthProviderConfig {
   readonly enabled?: boolean;
-  readonly users?: readonly AuthProviderUserConfig[];
+  readonly provider?: 'supabase';
+  readonly supabaseUrl?: string;
+  readonly supabaseAnonKey?: string;
 }
 
 type AuthGlobal = typeof globalThis & {
   __LAB_AUTH_CONFIG__?: AuthProviderConfig;
 };
 
-const AUTH_STORAGE_KEY = 'lab.auth.session';
-
-const AUTH_TOKEN_STORAGE_KEY = 'lab.auth.token';
-
-const DEFAULT_AUTH_USERS: readonly AuthProviderUserConfig[] = [];
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly appStore = inject(AppStore);
 
-  constructor() {
-    this.restoreSession();
-  }
+  private readonly sessionState = signal<Session | null>(null);
+
+  private readonly initializedState = signal(false);
+
+  private readonly configuredState = signal(false);
+
+  private client: SupabaseClient | null = null;
+
+  private authStateChangeUnsubscribe: (() => void) | null = null;
+
+  readonly session = this.sessionState.asReadonly();
+
+  readonly isInitialized = this.initializedState.asReadonly();
+
+  readonly isConfigured = this.configuredState.asReadonly();
+
+  readonly user = computed(() => this.sessionState()?.user ?? null);
 
   isAuthenticated(): boolean {
-    return this.appStore.isAuthenticated();
+    return !!this.sessionState();
   }
 
-  getAccessToken(): string | null {
-    if (!this.supportsStorage()) {
-      return null;
-    }
-
-    return globalThis.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-  }
-
-  async login(email: string, password: string): Promise<boolean> {
-    const normalizedEmail = email.trim().toLowerCase();
-    const authConfig = this.readAuthConfig();
-    if (!authConfig.enabled || !authConfig.users.length) {
-      return false;
-    }
-
-    const users = authConfig.users;
-
-    const matchedUser = users.find(
-      (user) => user.email.trim().toLowerCase() === normalizedEmail && user.password === password
-    );
-
-    if (!matchedUser) {
-      return false;
-    }
-
-    const user = this.mapToUserMetadata(matchedUser);
-    const token = this.createAccessToken(user);
-    this.persistSession(user, token);
-    this.appStore.setAuthenticated(user);
-    return true;
-  }
-
-  logout(): void {
-    this.appStore.logout();
-    this.clearSession();
-  }
-
-  private restoreSession(): void {
-    if (!this.supportsStorage()) {
+  async initialize(): Promise<void> {
+    if (this.initializedState()) {
       return;
     }
 
-    const serializedSession = globalThis.localStorage.getItem(AUTH_STORAGE_KEY);
-    const token = globalThis.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-    if (!serializedSession || !token) {
+    const authConfig = this.readAuthConfig();
+    if (authConfig.enabled === false || !authConfig.supabaseUrl || !authConfig.supabaseAnonKey) {
+      this.syncSession(null);
+      this.initializedState.set(true);
       return;
     }
 
     try {
-      const parsedSession = JSON.parse(serializedSession) as UserMetadata;
-      if (!parsedSession?.id || !parsedSession.email) {
-        this.clearSession();
-        return;
-      }
+      const { createClient } = await import('@supabase/supabase-js');
 
-      this.appStore.setAuthenticated(parsedSession);
-    } catch {
-      this.clearSession();
+      this.client = createClient(authConfig.supabaseUrl, authConfig.supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      });
+
+      const {
+        data: { session },
+      } = await this.client.auth.getSession();
+
+      this.syncSession(session);
+
+      const { data } = this.client.auth.onAuthStateChange((_event, nextSession) => {
+        this.syncSession(nextSession);
+      });
+      this.authStateChangeUnsubscribe = data?.subscription?.unsubscribe ?? null;
+
+      this.configuredState.set(true);
+    } catch (error) {
+      console.error('[AuthService] Failed to initialize provider:', error);
+      this.syncSession(null);
+    } finally {
+      this.initializedState.set(true);
     }
   }
 
-  private persistSession(user: UserMetadata, token: string): void {
-    if (!this.supportsStorage()) {
-      return;
-    }
-
-    globalThis.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    globalThis.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+  getAccessToken(): string | null {
+    return this.sessionState()?.access_token ?? null;
   }
 
-  private clearSession(): void {
-    if (!this.supportsStorage()) {
-      return;
+  async login(email: string, password: string): Promise<boolean> {
+    if (!this.client) {
+      return false;
     }
 
-    globalThis.localStorage.removeItem(AUTH_STORAGE_KEY);
-    globalThis.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    const { data, error } = await this.client.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (error || !data.session) {
+      return false;
+    }
+
+    this.syncSession(data.session);
+    return true;
   }
 
-  private readAuthConfig(): { enabled: boolean; users: readonly AuthProviderUserConfig[] } {
+  async logout(): Promise<void> {
+    if (this.client) {
+      await this.client.auth.signOut();
+    }
+
+    this.authStateChangeUnsubscribe?.();
+    this.authStateChangeUnsubscribe = null;
+    this.syncSession(null);
+  }
+
+  private readAuthConfig(): AuthProviderConfig {
     const config = (globalThis as AuthGlobal).__LAB_AUTH_CONFIG__;
     return {
       enabled: config?.enabled !== false,
-      users: config?.users?.length ? config.users : DEFAULT_AUTH_USERS,
+      provider: 'supabase',
+      supabaseUrl: config?.supabaseUrl,
+      supabaseAnonKey: config?.supabaseAnonKey,
     };
   }
 
-  private mapToUserMetadata(user: AuthProviderUserConfig): UserMetadata {
+  private syncSession(session: Session | null): void {
+    this.sessionState.set(session);
+
+    if (!session?.user) {
+      this.appStore.logout();
+      return;
+    }
+
+    this.appStore.setAuthenticated(this.mapToUserMetadata(session.user));
+  }
+
+  private mapToUserMetadata(user: User): UserMetadata {
+    const authMetadata = user.user_metadata ?? {};
+    const appMetadata = user.app_metadata ?? {};
+    const displayName =
+      this.readStringMetadata(authMetadata, ['full_name', 'name', 'display_name']) ?? user.email;
+
     return {
-      id: user.id ?? user.email,
-      name: user.name,
-      email: user.email,
-      avatarUrl: user.avatarUrl ?? null,
-      role: user.role ?? 'member',
+      id: user.id,
+      name: displayName ?? null,
+      email: user.email ?? null,
+      avatarUrl: this.readStringMetadata(authMetadata, ['avatar_url', 'picture', 'avatar']) ?? null,
+      role:
+        this.readStringMetadata(appMetadata, ['role']) ??
+        this.readStringMetadata(authMetadata, ['role']) ??
+        'member',
     };
   }
 
-  private createAccessToken(user: UserMetadata): string {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      iat: Date.now(),
-    };
+  private readStringMetadata(
+    metadata: Record<string, unknown>,
+    keys: readonly string[]
+  ): string | null {
+    for (const key of keys) {
+      const value = metadata[key];
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+    }
 
-    return `lab.${btoa(JSON.stringify(payload))}`;
-  }
-
-  private supportsStorage(): boolean {
-    return globalThis.localStorage !== undefined;
+    return null;
   }
 }

@@ -18,6 +18,13 @@ import { AuthService } from '@core/services/auth.service';
           workspace.
         </p>
 
+        @if (!authService.isConfigured()) {
+          <p class="login-page__warning" role="alert">
+            Authentication is not configured for this environment yet. Add the required Supabase
+            settings before sign-in will work.
+          </p>
+        }
+
         <form class="login-page__form" (ngSubmit)="submit()">
           <label class="login-page__field">
             <span>Email</span>
@@ -47,12 +54,19 @@ import { AuthService } from '@core/services/auth.service';
             <p class="login-page__error" role="alert">{{ errorMessage() }}</p>
           }
 
-          <button type="submit" class="login-page__submit" [disabled]="isSubmitting()">
+          <button
+            type="submit"
+            class="login-page__submit"
+            [disabled]="isSubmitting() || !authService.isConfigured()"
+          >
             {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
           </button>
         </form>
 
-        <p class="login-page__hint">Use credentials provisioned in runtime auth configuration.</p>
+        <p class="login-page__hint">
+          Sign in uses the configured Supabase project and respects provider-managed session
+          refresh.
+        </p>
 
         @if (redirectTarget()) {
           <p class="login-page__target">
@@ -165,6 +179,16 @@ import { AuthService } from '@core/services/auth.service';
         font-weight: 600;
       }
 
+      .login-page__warning {
+        margin: 1rem 0 0;
+        padding: 0.9rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid #d5aa18;
+        background: #fff5ce;
+        color: #6b4e00;
+        max-width: 40rem;
+      }
+
       .login-page__hint {
         margin: 0.85rem 0 0;
         color: var(--lab-ink-soft);
@@ -198,7 +222,7 @@ import { AuthService } from '@core/services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPageComponent {
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
 
   private readonly activatedRoute = inject(ActivatedRoute);
 
@@ -226,7 +250,7 @@ export class LoginPageComponent {
     this.isSubmitting.set(false);
 
     if (!didLogin) {
-      this.errorMessage.set('Invalid credentials. Access is limited to approved users.');
+      this.errorMessage.set('Sign-in failed. Verify your Supabase credentials and user account.');
       return;
     }
 

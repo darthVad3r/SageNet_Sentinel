@@ -44,6 +44,7 @@ import { AppStore } from '../../state/app.store';
               <a routerLink="/dashboard" routerLinkActive="is-active">Dashboard</a>
               <a routerLink="/workflows" routerLinkActive="is-active">Workflows</a>
               <a routerLink="/settings" routerLinkActive="is-active">Settings</a>
+              <a routerLink="/auth-test" routerLinkActive="is-active">Auth Test</a>
             }
           </nav>
 

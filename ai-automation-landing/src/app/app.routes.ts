@@ -112,6 +112,13 @@ const settingsSeo: SeoMetadata = {
   canonicalUrl: 'https://example.com/settings',
 };
 
+const authTestSeo: SeoMetadata = {
+  title: 'Auth Test | AI Automation Lab',
+  description:
+    'Verify authenticated session metadata and provider initialization for AI Automation Lab.',
+  canonicalUrl: 'https://example.com/auth-test',
+};
+
 const notFoundSeo: SeoMetadata = {
   title: '404 | AI Automation Lab',
   description:
@@ -175,6 +182,16 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         loadComponent: () =>
           import('@features/settings/settings.component').then((m) => m.SettingsComponent),
+      },
+      {
+        path: 'auth-test',
+        title: authTestSeo.title,
+        data: { seo: authTestSeo },
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./modules/auth-test/auth-test-page.component').then(
+            (m) => m.AuthTestPageComponent
+          ),
       },
       {
         path: '**',

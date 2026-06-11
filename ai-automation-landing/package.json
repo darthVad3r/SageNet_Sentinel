@@ -2,6 +2,12 @@
   "name": "ai-automation-landing",
   "version": "0.0.0",
   "scripts": {
+    "auth:config": "node scripts/generate-auth-config.mjs",
+    "prestart": "npm run auth:config",
+    "prebuild": "npm run auth:config",
+    "prewatch": "npm run auth:config",
+    "pretest": "npm run auth:config",
+    "pretypecheck": "npm run auth:config",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -24,6 +30,7 @@
     "@angular/forms": "^21.2.12",
     "@angular/platform-browser": "^21.2.12",
     "@angular/router": "^21.2.12",
+    "@supabase/supabase-js": "^2.53.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -40,6 +47,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitest/coverage-v8": "^4.0.8",
+    "dotenv": "^17.2.1",
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^18.0.0",
