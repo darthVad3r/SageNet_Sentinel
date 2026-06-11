@@ -22,7 +22,7 @@ mkdirSync(dirname(outputFilePath), { recursive: true });
 
 writeFileSync(
   outputFilePath,
-  `window.__LAB_AUTH_CONFIG__ = ${JSON.stringify(runtimeAuthConfig, null, 2)};\n`,
+  `/* eslint-disable no-undef, no-underscore-dangle */\nwindow.__LAB_AUTH_CONFIG__ = {\n  enabled: ${runtimeAuthConfig.enabled},\n  provider: 'supabase',\n  supabaseUrl: '${runtimeAuthConfig.supabaseUrl.replaceAll("'", "\\'")}',\n  supabaseAnonKey: '${runtimeAuthConfig.supabaseAnonKey.replaceAll("'", "\\'")}',\n};\n`,
   'utf8'
 );
 
