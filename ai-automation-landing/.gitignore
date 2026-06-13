@@ -43,3 +43,10 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment secrets — never commit real credentials
+.env.local
+.env.*.local
+
+# Generated runtime config — produced by auth:config script from .env.local
+src/assets/runtime/auth-config.js
