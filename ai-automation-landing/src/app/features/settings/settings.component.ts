@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+
+import { type LeadSubmission } from '@core/services/lead-contract';
+import { LeadIntakeService } from '@core/services/lead-intake.service';
 
 /**
  * Settings Component
@@ -55,6 +58,59 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
               <span class="settings-label">Two-Factor Authentication</span>
               <button id="settings-enable-2fa" class="btn btn-secondary">Enable 2FA</button>
             </div>
+          </section>
+
+          <section class="settings-section">
+            <h2>Lead Intake Export</h2>
+            <p class="settings-section-copy">
+              Recent booking submissions are loaded from the /api/leads contract so source and UTM
+              metadata can be reviewed from the same backend path used in production.
+            </p>
+
+            @if (isLoading()) {
+              <p class="settings-empty-state">Loading recent lead submissions...</p>
+            } @else if (loadError(); as errorMessage) {
+              <p class="settings-empty-state">{{ errorMessage }}</p>
+              <button type="button" class="btn btn-secondary" (click)="refreshLeadSubmissions()">
+                Retry
+              </button>
+            } @else if (recentLeadSubmissions().length) {
+              <div class="lead-export-actions">
+                <button type="button" class="btn btn-secondary" (click)="downloadLeadExport()">
+                  Download JSON export
+                </button>
+              </div>
+
+              <div class="lead-export-table-wrap">
+                <table class="lead-export-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Submitted</th>
+                      <th scope="col">Lead</th>
+                      <th scope="col">Company</th>
+                      <th scope="col">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (submission of recentLeadSubmissions(); track submission.id) {
+                      <tr>
+                        <td>{{ formatSubmittedAt(submission) }}</td>
+                        <td>
+                          {{ submission.name }}<br /><span>{{ submission.email }}</span>
+                        </td>
+                        <td>{{ submission.company }}</td>
+                        <td>{{ formatSource(submission) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <p class="settings-empty-state">
+                No lead submissions have been captured yet. New intake entries from the booking page
+                will appear here with route and UTM source metadata.
+              </p>
+            }
           </section>
         </main>
       </div>
@@ -139,6 +195,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         margin-bottom: 0;
       }
 
+      .settings-section-copy,
+      .settings-empty-state {
+        color: var(--lab-ink-soft);
+      }
+
       .settings-group {
         margin-bottom: 1.5rem;
       }
@@ -156,6 +217,31 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         border: 1px solid var(--lab-line);
         border-radius: 4px;
         font-size: 1rem;
+      }
+
+      .lead-export-actions {
+        margin-bottom: 1rem;
+      }
+
+      .lead-export-table-wrap {
+        overflow-x: auto;
+      }
+
+      .lead-export-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .lead-export-table th,
+      .lead-export-table td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid var(--lab-line);
+        vertical-align: top;
+      }
+
+      .lead-export-table td span {
+        color: var(--lab-ink-soft);
       }
 
       @media (max-width: 768px) {
@@ -180,4 +266,68 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     `,
   ],
 })
-export class SettingsComponent {}
+export class SettingsComponent {
+  private readonly leadIntakeService = inject(LeadIntakeService);
+
+  private readonly loadErrorState = signal<string | null>(null);
+
+  readonly recentLeadSubmissions = computed(() => this.leadIntakeService.submissions().slice(0, 5));
+
+  readonly isLoading = this.leadIntakeService.isLoading;
+
+  readonly loadError = this.loadErrorState.asReadonly();
+
+  constructor() {
+    queueMicrotask(() => {
+      void this.refreshLeadSubmissions();
+    });
+  }
+
+  downloadLeadExport(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const blob = new Blob(
+      [this.leadIntakeService.exportSubmissions(this.recentLeadSubmissions())],
+      {
+        type: 'application/json;charset=utf-8',
+      }
+    );
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'lead-intake-export.json';
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  formatSubmittedAt(submission: LeadSubmission): string {
+    return new Date(submission.submittedAt).toLocaleString();
+  }
+
+  formatSource(submission: LeadSubmission): string {
+    const source = submission.source.utm.source;
+    const campaign = submission.source.utm.campaign;
+
+    if (source && campaign) {
+      return `${submission.source.route} · ${source} / ${campaign}`;
+    }
+
+    if (source) {
+      return `${submission.source.route} · ${source}`;
+    }
+
+    return submission.source.route;
+  }
+
+  async refreshLeadSubmissions(): Promise<void> {
+    this.loadErrorState.set(null);
+
+    try {
+      await this.leadIntakeService.loadSubmissions(5);
+    } catch {
+      this.loadErrorState.set('We could not load lead submissions from /api/leads.');
+    }
+  }
+}
