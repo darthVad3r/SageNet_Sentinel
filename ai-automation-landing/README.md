@@ -16,7 +16,7 @@ Single-page Angular landing site for:
 - Reusable UI components
 - SEO metadata (title + meta description + OG tags)
 - Fast-load route-level lazy loading
-- No backend required
+- Serverless `/api/leads` intake endpoint for persisted lead capture
 - Authentication gate for protected routes (`/dashboard`, `/workflows`, `/settings`)
 - Session-aware header with user identity and logout
 - Auth token injection for same-origin `/api/*` requests
@@ -74,6 +74,21 @@ Server expectation:
 
 - API endpoints must reject missing/invalid bearer tokens with `401 Unauthorized`.
 - API endpoints should parse and validate token claims before returning protected data.
+
+### Lead Intake API Contract
+
+The booking flow now submits to same-origin `POST /api/leads` and the settings export view reads from `GET /api/leads`.
+
+Required backend environment variables:
+
+- `LAB_SUPABASE_URL`
+- `LAB_SUPABASE_SERVICE_ROLE_KEY`
+
+Optional notification variable:
+
+- `LAB_LEAD_NOTIFICATION_WEBHOOK_URL`
+
+The `/api/leads` function expects a Supabase table named `lead_submissions` with columns matching the server mapping in `api/leads.ts`.
 
 ## Architecture Overview
 
@@ -379,6 +394,17 @@ npm run build
 ```
 
 Production artifacts are generated in `dist/ai-automation-landing`.
+
+## Bundle profiling
+
+```bash
+npm run build:stats
+npm run analyze:stats
+```
+
+1. Run `npm run build:stats` to generate `dist/ai-automation-landing/stats.json`.
+2. Run `npm run analyze:stats` to print top contributors in initial chunks.
+3. Optimize the largest contributors first, then rerun both commands to compare impact.
 
 ## Test
 
