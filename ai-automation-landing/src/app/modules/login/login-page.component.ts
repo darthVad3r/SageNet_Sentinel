@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
@@ -18,7 +18,7 @@ import { AuthService } from '@core/services/auth.service';
           workspace.
         </p>
 
-        @if (!authService.isConfigured()) {
+        @if (authService.isInitialized() && !authService.isConfigured()) {
           <p class="login-page__warning" role="alert">
             Authentication is not configured for this environment yet. Add the required Supabase
             settings before sign-in will work.
@@ -57,7 +57,9 @@ import { AuthService } from '@core/services/auth.service';
           <button
             type="submit"
             class="login-page__submit"
-            [disabled]="isSubmitting() || !authService.isConfigured()"
+            [disabled]="
+              isSubmitting() || !authService.isInitialized() || !authService.isConfigured()
+            "
           >
             {{ isSubmitting() ? 'Signing in...' : 'Sign in' }}
           </button>
@@ -221,7 +223,7 @@ import { AuthService } from '@core/services/auth.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   readonly authService = inject(AuthService);
 
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -237,6 +239,12 @@ export class LoginPageComponent {
   email = '';
 
   password = '';
+
+  ngOnInit(): void {
+    if (!this.authService.isInitialized()) {
+      void this.authService.initialize();
+    }
+  }
 
   async submit(): Promise<void> {
     if (this.isSubmitting()) {

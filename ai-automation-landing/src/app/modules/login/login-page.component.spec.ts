@@ -9,6 +9,8 @@ import { LoginPageComponent } from './login-page.component';
 describe('LoginPageComponent', () => {
   const login = vi.fn();
   const isConfigured = vi.fn();
+  const isInitialized = vi.fn();
+  const initialize = vi.fn();
   const navigateByUrl = vi.fn();
 
   const createComponent = (redirectTo: string | null): LoginPageComponent => {
@@ -20,6 +22,8 @@ describe('LoginPageComponent', () => {
           useValue: {
             login,
             isConfigured,
+            isInitialized,
+            initialize,
           },
         },
         {
@@ -45,7 +49,10 @@ describe('LoginPageComponent', () => {
   beforeEach(() => {
     login.mockReset();
     isConfigured.mockReset();
+    isInitialized.mockReset();
+    initialize.mockReset();
     navigateByUrl.mockReset();
+    isInitialized.mockReturnValue(true);
     isConfigured.mockReturnValue(true);
   });
 
@@ -108,6 +115,8 @@ describe('LoginPageComponent', () => {
           useValue: {
             login,
             isConfigured,
+            isInitialized,
+            initialize,
           },
         },
         {
