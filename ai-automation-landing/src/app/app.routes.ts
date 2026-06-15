@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { SeoMetadata } from '@core/services/seo.service';
+import { canActivateAuthGuard } from './core/guards/auth.guard';
 
 const homeSeo: SeoMetadata = {
   title: 'AI Automation Lab | Agent Workflow Architecture',
@@ -162,10 +163,7 @@ export const routes: Routes = [
         path: 'dashboard',
         title: dashboardSeo.title,
         data: { seo: dashboardSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadChildren: () =>
           import('@features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
@@ -173,10 +171,7 @@ export const routes: Routes = [
         path: 'workflows',
         title: workflowsSeo.title,
         data: { seo: workflowsSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('@features/workflows/workflows.component').then((m) => m.WorkflowsComponent),
       },
@@ -184,10 +179,7 @@ export const routes: Routes = [
         path: 'settings',
         title: settingsSeo.title,
         data: { seo: settingsSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('@features/settings/settings.component').then((m) => m.SettingsComponent),
       },
@@ -195,10 +187,7 @@ export const routes: Routes = [
         path: 'auth-test',
         title: authTestSeo.title,
         data: { seo: authTestSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('./modules/auth-test/auth-test-page.component').then(
             (m) => m.AuthTestPageComponent
