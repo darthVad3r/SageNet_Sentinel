@@ -258,7 +258,10 @@ export class LoginPageComponent implements OnInit {
     this.isSubmitting.set(false);
 
     if (!didLogin) {
-      this.errorMessage.set('Sign-in failed. Verify your Supabase credentials and user account.');
+      this.errorMessage.set(
+        this.authService.loginError() ??
+          'Sign-in failed. Verify your Supabase credentials and user account.'
+      );
       return;
     }
 

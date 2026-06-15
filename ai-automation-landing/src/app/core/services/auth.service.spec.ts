@@ -167,6 +167,7 @@ describe('AuthService', () => {
     const didLogin = await service.login('owner@example.com', 'secret-password');
 
     expect(didLogin).toBe(true);
+    expect(service.loginError()).toBeNull();
     expect(signInWithPasswordMock).toHaveBeenCalledWith({
       email: 'owner@example.com',
       password: 'secret-password',
@@ -199,6 +200,9 @@ describe('AuthService', () => {
     const didLogin = await service.login('owner@example.com', 'wrong-password');
 
     expect(didLogin).toBe(false);
+    expect(service.loginError()).toBe(
+      'Invalid login credentials. Verify email/password for this Supabase project.'
+    );
   });
 
   it('signs out and clears the synchronized session state', async () => {
