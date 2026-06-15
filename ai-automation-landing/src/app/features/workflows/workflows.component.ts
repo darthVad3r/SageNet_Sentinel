@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   OnInit,
   computed,
   inject,
@@ -188,6 +189,9 @@ import { WorkflowService } from '@core/services/workflow.service';
       @if (selectedRuns().length > 0) {
         <section class="run-history">
           <h2>Run History</h2>
+          @if (isPollingRuns()) {
+            <p class="status">Live run updates enabled while runs are queued/running.</p>
+          }
           <table>
             <thead>
               <tr>
@@ -201,7 +205,11 @@ import { WorkflowService } from '@core/services/workflow.service';
             <tbody>
               @for (run of selectedRuns(); track run.id) {
                 <tr>
-                  <td>{{ run.status }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="runStatusClass(run.status)">
+                      {{ run.status }}
+                    </span>
+                  </td>
                   <td>{{ formatDateTime(run.triggeredAt) }}</td>
                   <td>{{ formatDateTime(run.startedAt) }}</td>
                   <td>{{ formatDateTime(run.completedAt) }}</td>
@@ -301,6 +309,26 @@ import { WorkflowService } from '@core/services/workflow.service';
         color: var(--lab-ink);
       }
 
+      .badge-queued {
+        background: color-mix(in srgb, #f59e0b 18%, var(--lab-surface));
+        color: #b45309;
+      }
+
+      .badge-running {
+        background: color-mix(in srgb, #0891b2 18%, var(--lab-surface));
+        color: #0e7490;
+      }
+
+      .badge-succeeded {
+        background: color-mix(in srgb, #22c55e 18%, var(--lab-surface));
+        color: #15803d;
+      }
+
+      .badge-failed {
+        background: color-mix(in srgb, #ef4444 18%, var(--lab-surface));
+        color: #b91c1c;
+      }
+
       .actions-cell {
         display: flex;
         gap: 0.5rem;
@@ -361,8 +389,10 @@ import { WorkflowService } from '@core/services/workflow.service';
     `,
   ],
 })
-export class WorkflowsComponent implements OnInit {
+export class WorkflowsComponent implements OnInit, OnDestroy {
   private readonly workflowService = inject(WorkflowService);
+
+  private runPollTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly workflows = signal<readonly Workflow[]>([]);
 
@@ -385,6 +415,10 @@ export class WorkflowsComponent implements OnInit {
   ];
 
   readonly searchTerm = signal('');
+
+  readonly runHistoryWorkflowId = signal<string | null>(null);
+
+  readonly isPollingRuns = signal(false);
 
   editor: {
     id: string | null;
@@ -410,6 +444,10 @@ export class WorkflowsComponent implements OnInit {
 
   ngOnInit(): void {
     void this.loadWorkflows();
+  }
+
+  ngOnDestroy(): void {
+    this.stopRunPolling();
   }
 
   async loadWorkflows(): Promise<void> {
@@ -459,6 +497,7 @@ export class WorkflowsComponent implements OnInit {
       })),
     };
 
+    this.runHistoryWorkflowId.set(workflow.id);
     void this.loadRuns(workflow.id);
   }
 
@@ -532,9 +571,11 @@ export class WorkflowsComponent implements OnInit {
 
   async triggerRun(workflow: Workflow): Promise<void> {
     try {
+      this.errorMessage.set(null);
       await this.workflowService.triggerRun(workflow.id);
       await this.loadRuns(workflow.id);
       await this.loadWorkflows();
+      this.startRunPolling(workflow.id);
     } catch {
       this.errorMessage.set('Unable to trigger workflow run.');
     }
@@ -544,8 +585,26 @@ export class WorkflowsComponent implements OnInit {
     try {
       const result = await this.workflowService.listRuns(workflowId, 1, 10);
       this.selectedRuns.set(result.data);
+      this.runHistoryWorkflowId.set(workflowId);
+      this.syncRunPolling(workflowId, result.data);
     } catch {
       this.selectedRuns.set([]);
+      this.stopRunPolling();
+    }
+  }
+
+  runStatusClass(status: string): string {
+    switch (status) {
+      case 'queued':
+        return 'badge-queued';
+      case 'running':
+        return 'badge-running';
+      case 'succeeded':
+        return 'badge-succeeded';
+      case 'failed':
+        return 'badge-failed';
+      default:
+        return 'badge-inactive';
     }
   }
 
@@ -575,5 +634,54 @@ export class WorkflowsComponent implements OnInit {
       status: 'active',
       steps: [],
     };
+  }
+
+  private syncRunPolling(workflowId: string, runs: readonly WorkflowRun[]): void {
+    const hasActiveRun = runs.some((run) => run.status === 'queued' || run.status === 'running');
+    if (hasActiveRun) {
+      this.startRunPolling(workflowId);
+      return;
+    }
+
+    this.stopRunPolling();
+  }
+
+  private startRunPolling(workflowId: string): void {
+    this.runHistoryWorkflowId.set(workflowId);
+    this.isPollingRuns.set(true);
+
+    if (this.runPollTimer !== null) {
+      return;
+    }
+
+    this.runPollTimer = setTimeout(() => {
+      this.runPollTimer = null;
+      void this.pollRuns();
+    }, 2000);
+  }
+
+  private stopRunPolling(): void {
+    if (this.runPollTimer !== null) {
+      clearTimeout(this.runPollTimer);
+      this.runPollTimer = null;
+    }
+
+    this.isPollingRuns.set(false);
+  }
+
+  private async pollRuns(): Promise<void> {
+    const workflowId = this.runHistoryWorkflowId();
+    if (!workflowId) {
+      this.stopRunPolling();
+      return;
+    }
+
+    try {
+      const result = await this.workflowService.listRuns(workflowId, 1, 10);
+      this.selectedRuns.set(result.data);
+      this.syncRunPolling(workflowId, result.data);
+    } catch {
+      this.stopRunPolling();
+    }
   }
 }

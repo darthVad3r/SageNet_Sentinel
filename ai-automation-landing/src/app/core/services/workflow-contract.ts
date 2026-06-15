@@ -46,10 +46,12 @@ export interface WorkflowInput {
   readonly steps: readonly WorkflowStepInput[];
 }
 
+export type WorkflowRunStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+
 export interface WorkflowRun {
   readonly id: string;
   readonly workflowId: string;
-  readonly status: string;
+  readonly status: WorkflowRunStatus;
   readonly triggeredAt: string;
   readonly startedAt: string | null;
   readonly completedAt: string | null;

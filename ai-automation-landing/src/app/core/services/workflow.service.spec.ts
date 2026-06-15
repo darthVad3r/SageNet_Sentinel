@@ -134,4 +134,62 @@ describe('WorkflowService', () => {
     expect(result.total).toBe(1);
     expect(result.data[0]?.status).toBe('succeeded');
   });
+
+  it('parses queued trigger-run responses', async () => {
+    const service = TestBed.inject(WorkflowService);
+    const resultPromise = service.triggerRun('workflow-1');
+
+    const request = httpTestingController.expectOne('/api/workflows/workflow-1/runs');
+    expect(request.request.method).toBe('POST');
+
+    request.flush({
+      schemaVersion: WORKFLOW_API_SCHEMA_VERSION,
+      data: {
+        id: 'run-queued-1',
+        workflowId: 'workflow-1',
+        status: 'queued',
+        triggeredAt: '2026-06-14T04:00:00.000Z',
+        startedAt: null,
+        completedAt: null,
+        summary: 'Run queued',
+      },
+    });
+
+    const result = await resultPromise;
+    expect(result.status).toBe('queued');
+    expect(result.startedAt).toBeNull();
+    expect(result.completedAt).toBeNull();
+  });
+
+  it('rejects unknown run status values', async () => {
+    const service = TestBed.inject(WorkflowService);
+    const resultPromise = service.listRuns('workflow-1', 1, 10);
+
+    const request = httpTestingController.expectOne(
+      (candidate) =>
+        candidate.url === '/api/workflows/workflow-1/runs' &&
+        candidate.params.get('page') === '1' &&
+        candidate.params.get('pageSize') === '10'
+    );
+
+    request.flush({
+      schemaVersion: WORKFLOW_API_SCHEMA_VERSION,
+      page: 1,
+      pageSize: 10,
+      total: 1,
+      data: [
+        {
+          id: 'run-unknown-1',
+          workflowId: 'workflow-1',
+          status: 'waiting',
+          triggeredAt: '2026-06-14T03:00:00.000Z',
+          startedAt: null,
+          completedAt: null,
+          summary: 'Waiting',
+        },
+      ],
+    });
+
+    await expect(resultPromise).rejects.toThrow(/run.status must be one of/);
+  });
 });

@@ -172,12 +172,28 @@ export class WorkflowService {
     return {
       id: this.readString(value['id'], 'run.id'),
       workflowId: this.readString(value['workflowId'], 'run.workflowId'),
-      status: this.readString(value['status'], 'run.status'),
+      status: this.readRunStatus(value['status']),
       triggeredAt: this.readString(value['triggeredAt'], 'run.triggeredAt'),
       startedAt: this.readNullableString(value['startedAt'], 'run.startedAt'),
       completedAt: this.readNullableString(value['completedAt'], 'run.completedAt'),
       summary: this.readString(value['summary'], 'run.summary'),
     };
+  }
+
+  private readRunStatus(value: unknown): WorkflowRun['status'] {
+    const status = this.readString(value, 'run.status').toLowerCase();
+    if (
+      status === 'queued' ||
+      status === 'running' ||
+      status === 'succeeded' ||
+      status === 'failed'
+    ) {
+      return status;
+    }
+
+    throw new Error(
+      `run.status must be one of queued, running, succeeded, failed (received ${status}).`
+    );
   }
 
   private readString(value: unknown, label: string): string {
