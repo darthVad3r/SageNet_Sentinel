@@ -87,7 +87,7 @@ describe('QuickActionShortcutsComponent', () => {
 
     expect(shortcutButtons.length).toBeGreaterThan(0);
 
-    shortcutButtons[0]!.click();
+    shortcutButtons[0].click();
 
     expect(lastNavigatedUrl).toBe(QUICK_ACTION_SHORTCUTS_MOCK[0].route ?? '/dashboard');
   });

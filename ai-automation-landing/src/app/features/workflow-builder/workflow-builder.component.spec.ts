@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
 import { WorkflowService } from '../../core/services/workflow.service';
@@ -8,8 +8,9 @@ import { WorkflowBuilderComponent } from './workflow-builder.component';
 describe('WorkflowBuilderComponent', () => {
   it('renders the workflow builder workspace', () => {
     const fixture = TestBed.configureTestingModule({
-      imports: [WorkflowBuilderComponent, RouterTestingModule],
+      imports: [WorkflowBuilderComponent],
       providers: [
+        provideRouter([]),
         {
           provide: WorkflowService,
           useValue: {
@@ -52,8 +53,9 @@ describe('WorkflowBuilderComponent', () => {
     };
 
     const fixture = TestBed.configureTestingModule({
-      imports: [WorkflowBuilderComponent, RouterTestingModule],
+      imports: [WorkflowBuilderComponent],
       providers: [
+        provideRouter([]),
         {
           provide: WorkflowService,
           useValue: mockWorkflowService,

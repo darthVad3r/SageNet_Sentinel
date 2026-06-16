@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { WorkflowService } from '../../core/services/workflow.service';
 import type { WorkflowStepInput } from '../../core/services/workflow-contract';
+import { WorkflowService } from '../../core/services/workflow.service';
 
 type BuilderStepType = 'manual' | 'automated' | 'integration';
 
@@ -397,7 +397,7 @@ export class WorkflowBuilderComponent {
     }
 
     const steps = [...this.draft.steps];
-    [steps[index - 1], steps[index]] = [steps[index]!, steps[index - 1]!];
+    [steps[index - 1], steps[index]] = [steps[index], steps[index - 1]];
     this.draft.steps = steps;
   }
 
@@ -407,7 +407,7 @@ export class WorkflowBuilderComponent {
     }
 
     const steps = [...this.draft.steps];
-    [steps[index], steps[index + 1]] = [steps[index + 1]!, steps[index]!];
+    [steps[index], steps[index + 1]] = [steps[index + 1], steps[index]];
     this.draft.steps = steps;
   }
 
