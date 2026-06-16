@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -12,6 +13,7 @@ import {
 } from './dashboard-contract';
 import { resolveRuntimeApiUrl } from './runtime-config';
 
+import { AuthService } from './auth.service';
 const DASHBOARD_SUMMARY_PATH = '/api/dashboard/summary';
 const DASHBOARD_RECENT_RUNS_PATH = '/api/dashboard/recent-runs';
 
@@ -19,9 +21,26 @@ const DASHBOARD_RECENT_RUNS_PATH = '/api/dashboard/recent-runs';
 export class DashboardService {
   private readonly http = inject(HttpClient);
 
+  private readonly authService = inject(AuthService);
+
+  private getHttpHeaders(): HttpHeaders {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    const token = this.authService.getAccessToken();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return headers;
+  }
+
   async loadSummary(): Promise<DashboardSummary> {
     const response = await firstValueFrom(
-      this.http.get<DashboardSummaryEnvelope>(resolveRuntimeApiUrl(DASHBOARD_SUMMARY_PATH))
+      this.http.get<DashboardSummaryEnvelope>(resolveRuntimeApiUrl(DASHBOARD_SUMMARY_PATH), {
+        headers: this.getHttpHeaders(),
+      })
     );
 
     if (response.schemaVersion !== DASHBOARD_API_SCHEMA_VERSION) {
@@ -34,7 +53,8 @@ export class DashboardService {
   async loadRecentRuns(limit = 10): Promise<readonly DashboardRecentRun[]> {
     const response = await firstValueFrom(
       this.http.get<DashboardRecentRunsEnvelope>(
-        resolveRuntimeApiUrl(`${DASHBOARD_RECENT_RUNS_PATH}?limit=${limit}`)
+        resolveRuntimeApiUrl(`${DASHBOARD_RECENT_RUNS_PATH}?limit=${limit}`),
+        { headers: this.getHttpHeaders() }
       )
     );
 

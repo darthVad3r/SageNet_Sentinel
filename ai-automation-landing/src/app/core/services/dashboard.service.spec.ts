@@ -6,12 +6,23 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DASHBOARD_API_SCHEMA_VERSION } from './dashboard-contract';
 import { DashboardService } from './dashboard.service';
 
+import { AuthService } from './auth.service';
 describe('DashboardService', () => {
   let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DashboardService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        DashboardService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthService,
+          useValue: {
+            getAccessToken: () => 'test-token',
+          },
+        },
+      ],
     });
 
     httpTestingController = TestBed.inject(HttpTestingController);

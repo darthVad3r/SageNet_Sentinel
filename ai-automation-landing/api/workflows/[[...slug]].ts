@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 import type { WorkflowInput } from '../../src/app/core/services/workflow-contract';
+
+import { ApiLogger, AuthLogger } from '../_shared/logger';
 import {
   WORKFLOW_SCHEMA_VERSION,
   createWorkflow,
@@ -14,7 +16,6 @@ import {
   extractBearerToken,
   verifyBearerToken,
 } from '../_shared/supabase-clients';
-
 function parseSlug(req: VercelRequest): string[] {
   const raw = req.query['slug'];
   if (Array.isArray(raw)) {
@@ -97,12 +98,14 @@ async function authorizeRequest(req: VercelRequest, res: VercelResponse): Promis
   const isValid = await verifyBearerToken(token);
   if (!isValid) {
     res.status(401).json({ error: 'Unauthorized.' });
+
+    AuthLogger.logTokenValidation(false);
     return false;
   }
 
+  AuthLogger.logTokenValidation(true);
   return true;
 }
-
 async function handleRootWorkflows(req: VercelRequest, res: VercelResponse): Promise<boolean> {
   const supabase = createSupabaseAdminClient();
 
@@ -231,6 +234,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     await dispatchByRoute(req, res);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected /api/workflows error.';
+    ApiLogger.logError('workflows', message, error instanceof Error ? error : undefined);
     res.status(500).json({ error: message });
   }
 }
