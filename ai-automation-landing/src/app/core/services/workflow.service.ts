@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { AuthService } from './auth.service';
 import { resolveRuntimeApiUrl } from './runtime-config';
 import {
   WORKFLOW_API_SCHEMA_VERSION,
@@ -36,16 +37,35 @@ interface WorkflowRunPage {
 export class WorkflowService {
   private readonly http = inject(HttpClient);
 
+  private readonly authService = inject(AuthService);
+
+  private getHttpHeaders(): HttpHeaders {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    const token = this.authService.getAccessToken();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return headers;
+  }
+
   async listWorkflows(): Promise<readonly Workflow[]> {
     const response = await firstValueFrom(
-      this.http.get<WorkflowEnvelope>(resolveRuntimeApiUrl(WORKFLOWS_API_PATH))
+      this.http.get<WorkflowEnvelope>(resolveRuntimeApiUrl(WORKFLOWS_API_PATH), {
+        headers: this.getHttpHeaders(),
+      })
     );
     return this.readWorkflowArrayEnvelope(response);
   }
 
   async createWorkflow(input: WorkflowInput): Promise<Workflow> {
     const response = await firstValueFrom(
-      this.http.post<WorkflowEnvelope>(resolveRuntimeApiUrl(WORKFLOWS_API_PATH), input)
+      this.http.post<WorkflowEnvelope>(resolveRuntimeApiUrl(WORKFLOWS_API_PATH), input, {
+        headers: this.getHttpHeaders(),
+      })
     );
     return this.readWorkflowEnvelope(response);
   }
@@ -54,7 +74,8 @@ export class WorkflowService {
     const response = await firstValueFrom(
       this.http.put<WorkflowEnvelope>(
         resolveRuntimeApiUrl(`${WORKFLOWS_API_PATH}/${encodeURIComponent(workflowId)}`),
-        input
+        input,
+        { headers: this.getHttpHeaders() }
       )
     );
     return this.readWorkflowEnvelope(response);
@@ -64,7 +85,8 @@ export class WorkflowService {
     const response = await firstValueFrom(
       this.http.post<WorkflowEnvelope>(
         resolveRuntimeApiUrl(`${WORKFLOWS_API_PATH}/${encodeURIComponent(workflowId)}/runs`),
-        {}
+        {},
+        { headers: this.getHttpHeaders() }
       )
     );
 
@@ -83,7 +105,7 @@ export class WorkflowService {
     const response = await firstValueFrom(
       this.http.get<WorkflowRunListEnvelope>(
         resolveRuntimeApiUrl(`${WORKFLOWS_API_PATH}/${encodeURIComponent(workflowId)}/runs`),
-        { params }
+        { headers: this.getHttpHeaders(), params }
       )
     );
 

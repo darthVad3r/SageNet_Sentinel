@@ -1,8 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { AuthService } from './auth.service';
 import { WORKFLOW_API_SCHEMA_VERSION } from './workflow-contract';
 import { WorkflowService } from './workflow.service';
 
@@ -11,7 +12,17 @@ describe('WorkflowService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [WorkflowService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        WorkflowService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: AuthService,
+          useValue: {
+            getAccessToken: vi.fn().mockReturnValue('mock-token'),
+          },
+        },
+      ],
     });
 
     httpTestingController = TestBed.inject(HttpTestingController);

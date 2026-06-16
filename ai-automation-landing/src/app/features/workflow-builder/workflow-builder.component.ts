@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+
+import { WorkflowService } from '../../core/services/workflow.service';
+import type { WorkflowStepInput } from '../../core/services/workflow-contract';
 
 type BuilderStepType = 'manual' | 'automated' | 'integration';
 
@@ -143,13 +146,20 @@ interface BuilderStep {
           type="button"
           class="workflow-builder__button workflow-builder__button--primary"
           (click)="saveDraft()"
+          [disabled]="isLoading()"
         >
-          Save Draft
+          {{ isLoading() ? 'Saving...' : 'Save Draft' }}
         </button>
         <a routerLink="/workflows" class="workflow-builder__button workflow-builder__button--ghost">
           Back to Workflows
         </a>
       </div>
+
+      @if (errorMessage()) {
+        <p class="workflow-builder__message workflow-builder__message--error" role="alert">
+          ✗ {{ errorMessage() }}
+        </p>
+      }
 
       @if (saveMessage()) {
         <p class="workflow-builder__message" role="status">{{ saveMessage() }}</p>
@@ -248,6 +258,11 @@ interface BuilderStep {
         cursor: pointer;
       }
 
+      .workflow-builder__button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
       .workflow-builder__button--primary {
         border-color: transparent;
         background: linear-gradient(135deg, var(--lab-color-primary), var(--lab-color-accent-cyan));
@@ -293,6 +308,10 @@ interface BuilderStep {
         font-weight: 600;
       }
 
+      .workflow-builder__message--error {
+        color: var(--lab-danger);
+      }
+
       @media (max-width: 1280px) {
         .workflow-builder__layout {
           grid-template-columns: 1fr;
@@ -322,19 +341,25 @@ interface BuilderStep {
   ],
 })
 export class WorkflowBuilderComponent {
+  private readonly workflowService = inject(WorkflowService);
+
+  readonly isLoading = signal(false);
+
+  readonly errorMessage = signal<string | null>(null);
+
   readonly draft = {
     name: 'New Workflow',
     client: '',
-    stage: 'discovery',
+    stage: 'discovery' as const,
     description: '',
     steps: [
       {
-        type: 'manual' as BuilderStepType,
+        type: 'manual' as const,
         owner: 'Operations',
         description: 'Capture the incoming request and route it to the intake queue.',
       },
       {
-        type: 'automated' as BuilderStepType,
+        type: 'automated' as const,
         owner: 'Automation',
         description: 'Validate the payload and fan out the first action set.',
       },
@@ -386,8 +411,35 @@ export class WorkflowBuilderComponent {
     this.draft.steps = steps;
   }
 
-  saveDraft(): void {
-    const stepCount = this.draft.steps.length;
-    this.saveMessageValue = `${this.draft.name || 'Workflow'} draft saved with ${stepCount} step${stepCount === 1 ? '' : 's'}.`;
+  async saveDraft(): Promise<void> {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.saveMessageValue = '';
+
+    try {
+      const workflowInput = {
+        name: this.draft.name,
+        description: this.draft.description,
+        client: this.draft.client,
+        stage: this.draft.stage,
+        status: 'draft',
+        steps: this.draft.steps.map((step) => ({
+          type: step.type,
+          description: step.description,
+          owner: step.owner,
+        })) satisfies WorkflowStepInput[],
+      };
+
+      const workflow = await this.workflowService.createWorkflow(workflowInput);
+      const stepCount = workflow.steps.length;
+      this.saveMessageValue = `✓ ${workflow.name} saved with ${stepCount} step${stepCount === 1 ? '' : 's'}. ID: ${workflow.id.substring(0, 8)}`;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to save workflow';
+      this.errorMessage.set(errorMsg);
+      this.saveMessageValue = '';
+      console.error('Workflow save failed:', error);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 }
