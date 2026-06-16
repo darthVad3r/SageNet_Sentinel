@@ -104,6 +104,20 @@ const workflowsSeo: SeoMetadata = {
   canonicalUrl: 'https://example.com/workflows',
 };
 
+const workflowBuilderSeo: SeoMetadata = {
+  title: 'Workflow Builder | AI Automation Lab',
+  description:
+    'Draft workflow steps, review lifecycle checkpoints, and prepare automation flows for delivery.',
+  canonicalUrl: 'https://example.com/workflow-builder',
+};
+
+const automationEditorSeo: SeoMetadata = {
+  title: 'Automation Editor | AI Automation Lab',
+  description:
+    'Shape workflow steps, trigger logic, and release checks in the AI Automation Lab automation editor.',
+  canonicalUrl: 'https://example.com/automation-editor',
+};
+
 const settingsSeo: SeoMetadata = {
   title: 'Settings | AI Automation Lab',
   description:
@@ -174,6 +188,26 @@ export const routes: Routes = [
         canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('@features/workflows/workflows.component').then((m) => m.WorkflowsComponent),
+      },
+      {
+        path: 'workflow-builder',
+        title: workflowBuilderSeo.title,
+        data: { seo: workflowBuilderSeo },
+        canActivate: [canActivateAuthGuard],
+        loadComponent: () =>
+          import('./features/workflow-builder/workflow-builder.component').then(
+            (m) => m.WorkflowBuilderComponent
+          ),
+      },
+      {
+        path: 'automation-editor',
+        title: automationEditorSeo.title,
+        data: { seo: automationEditorSeo },
+        canActivate: [canActivateAuthGuard],
+        loadComponent: () =>
+          import('./features/automation-editor/automation-editor.component').then(
+            (m) => m.AutomationEditorComponent
+          ),
       },
       {
         path: 'settings',

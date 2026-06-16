@@ -91,4 +91,32 @@ describe('QuickActionShortcutsComponent', () => {
 
     expect(lastNavigatedUrl).toBe(QUICK_ACTION_SHORTCUTS_MOCK[0].route ?? '/dashboard');
   });
+
+  it('routes create workflow to the workflow builder page', () => {
+    const fixture = TestBed.createComponent(QuickActionShortcutsComponent);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const createWorkflowButton = Array.from(
+      host.querySelectorAll<HTMLButtonElement>('button.quick-actions__shortcut')
+    ).find((button) => button.textContent?.includes('Create Workflow'));
+
+    createWorkflowButton?.click();
+
+    expect(lastNavigatedUrl).toBe('/workflow-builder');
+  });
+
+  it('routes the automation editor shortcut to the dedicated editor page', () => {
+    const fixture = TestBed.createComponent(QuickActionShortcutsComponent);
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const automationEditorButton = Array.from(
+      host.querySelectorAll<HTMLButtonElement>('button.quick-actions__shortcut')
+    ).find((button) => button.textContent?.includes('Open Automation Editor'));
+
+    automationEditorButton?.click();
+
+    expect(lastNavigatedUrl).toBe('/automation-editor');
+  });
 });
