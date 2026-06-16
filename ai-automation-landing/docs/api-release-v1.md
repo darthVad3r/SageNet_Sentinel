@@ -116,22 +116,29 @@ Get recent workflow runs with workflow names.
 
 - **Authentication:** Required (Bearer token)
 - **Query Parameters:**
-  - `limit` (default: 10, max: 50)
+  - `page` (default: 1)
+  - `pageSize` (default: 10, max: 50)
+  - `limit` (legacy alias for `pageSize`)
 - **Response:**
 
 ```json
 {
   "schemaVersion": "2026-06-14",
-  "data": [
-    {
-      "runId": "uuid",
-      "workflowId": "uuid",
-      "workflowName": "Lead Qualification",
-      "status": "succeeded|queued|running|failed",
-      "triggeredAt": "2026-06-15T12:30:00.000Z",
-      "completedAt": "2026-06-15T12:30:45.000Z"
-    }
-  ]
+  "data": {
+    "total": 128,
+    "page": 1,
+    "pageSize": 10,
+    "data": [
+      {
+        "runId": "uuid",
+        "workflowId": "uuid",
+        "workflowName": "Lead Qualification",
+        "status": "succeeded|queued|running|failed",
+        "triggeredAt": "2026-06-15T12:30:00.000Z",
+        "completedAt": "2026-06-15T12:30:45.000Z"
+      }
+    ]
+  }
 }
 ```
 

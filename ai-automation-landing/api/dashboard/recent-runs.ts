@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+import { ApiLogger, AuthLogger } from '../_shared/logger';
 import {
   createSupabaseAdminClient,
   extractBearerToken,
@@ -33,6 +34,14 @@ function parsePageSize(req: VercelRequest): number {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  const requestId = ApiLogger.getRequestId(req);
+  const startTime = Date.now();
+  const method = req.method ?? 'UNKNOWN';
+  const path = req.url ?? '/api/dashboard/recent-runs';
+
+  res.setHeader('X-Request-ID', requestId);
+  ApiLogger.logInfo('dashboard:recent-runs', `Incoming ${method} ${path}`, {}, requestId);
+
   try {
     if (req.method !== 'GET') {
       res.setHeader('Allow', 'GET');
@@ -42,23 +51,51 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     const token = extractBearerToken(req);
     if (!token) {
+      AuthLogger.logTokenValidation(false, requestId);
       res.status(401).json({ error: 'Unauthorized.' });
       return;
     }
 
     const isValid = await verifyBearerToken(token);
     if (!isValid) {
+      AuthLogger.logTokenValidation(false, requestId);
       res.status(401).json({ error: 'Unauthorized.' });
       return;
     }
+    AuthLogger.logTokenValidation(true, requestId);
 
     const page = parsePage(req.query['page']);
     const pageSize = parsePageSize(req);
+    ApiLogger.logInfo(
+      'dashboard:recent-runs',
+      'Resolved pagination options',
+      { page, pageSize },
+      requestId
+    );
+
     const supabase = createSupabaseAdminClient();
     res.status(200).json(await dashboardRecentRunsEnvelope(supabase, page, pageSize));
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unexpected /api/dashboard/recent-runs error.';
+
+    ApiLogger.logError(
+      'dashboard:recent-runs',
+      message,
+      error instanceof Error ? error : undefined,
+      undefined,
+      requestId
+    );
     res.status(500).json({ error: message });
+  } finally {
+    ApiLogger.logRequestMetrics(
+      {
+        method,
+        path,
+        statusCode: res.statusCode,
+        duration: Date.now() - startTime,
+      },
+      requestId
+    );
   }
 }

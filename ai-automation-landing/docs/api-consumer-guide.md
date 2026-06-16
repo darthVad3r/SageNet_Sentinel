@@ -95,6 +95,25 @@ console.log('Queued runs:', dashboard.data.queuedRunCount);
 console.log('By stage:', dashboard.data.workflowsByStage);
 ```
 
+### 5. Read Recent Run Activity (Paginated)
+
+```typescript
+const recentRunsResponse = await fetch(
+  'https://your-app.vercel.app/api/dashboard/recent-runs?page=1&pageSize=10',
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
+const recentRunsEnvelope = await recentRunsResponse.json();
+console.log('Total runs:', recentRunsEnvelope.data.total);
+console.log('Current page:', recentRunsEnvelope.data.page);
+console.log('Page size:', recentRunsEnvelope.data.pageSize);
+console.log('Rows on page:', recentRunsEnvelope.data.data.length);
+```
+
 ## Using the Angular Service
 
 If you're using the provided Angular service:
@@ -275,6 +294,29 @@ try {
       { "stage": "testing", "count": 1 },
       { "stage": "live", "count": 0 },
       { "stage": "paused", "count": 0 }
+    ]
+  }
+}
+```
+
+### Dashboard Recent Runs Response
+
+```json
+{
+  "schemaVersion": "2026-06-14",
+  "data": {
+    "total": 128,
+    "page": 2,
+    "pageSize": 10,
+    "data": [
+      {
+        "runId": "run-123",
+        "workflowId": "wf-123",
+        "workflowName": "Lead Qualification",
+        "status": "succeeded",
+        "triggeredAt": "2026-06-15T12:30:00.000Z",
+        "completedAt": "2026-06-15T12:30:45.000Z"
+      }
     ]
   }
 }
