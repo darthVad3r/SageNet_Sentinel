@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DashboardService } from '@core/services/dashboard.service';
 import { DashboardComponent } from './dashboard.component';
@@ -10,45 +10,50 @@ const flushAsync = (): Promise<void> => new Promise<void>((resolve) => setTimeou
 
 describe('DashboardComponent', () => {
   let navigateByUrlCalls: string[];
+  let mockDashboardService: {
+    loadSummary: ReturnType<typeof vi.fn>;
+    loadRecentRuns: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     navigateByUrlCalls = [];
+    mockDashboardService = {
+      loadSummary: vi.fn(async () => ({
+        leadCount: 12,
+        workflowCount: 4,
+        activeWorkflowCount: 3,
+        queuedRunCount: 1,
+        runningRunCount: 0,
+        succeededRunCount: 8,
+        failedRunCount: 1,
+        workflowsByStage: [
+          { stage: 'discovery', count: 2 },
+          { stage: 'live', count: 1 },
+        ],
+      })),
+      loadRecentRuns: vi.fn(async (_page = 1, pageSize = 10) => ({
+        total: 1,
+        page: 1,
+        pageSize,
+        data: [
+          {
+            runId: 'run-1',
+            workflowId: 'wf-1',
+            workflowName: 'Lead Qualification',
+            status: 'succeeded',
+            triggeredAt: '2026-06-15T10:00:00.000Z',
+            completedAt: '2026-06-15T10:00:05.000Z',
+          },
+        ],
+      })),
+    };
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
         {
           provide: DashboardService,
-          useValue: {
-            loadSummary: async () => ({
-              leadCount: 12,
-              workflowCount: 4,
-              activeWorkflowCount: 3,
-              queuedRunCount: 1,
-              runningRunCount: 0,
-              succeededRunCount: 8,
-              failedRunCount: 1,
-              workflowsByStage: [
-                { stage: 'discovery', count: 2 },
-                { stage: 'live', count: 1 },
-              ],
-            }),
-            loadRecentRuns: async () => ({
-              total: 1,
-              page: 1,
-              pageSize: 10,
-              data: [
-                {
-                  runId: 'run-1',
-                  workflowId: 'wf-1',
-                  workflowName: 'Lead Qualification',
-                  status: 'succeeded',
-                  triggeredAt: '2026-06-15T10:00:00.000Z',
-                  completedAt: '2026-06-15T10:00:05.000Z',
-                },
-              ],
-            }),
-          },
+          useValue: mockDashboardService,
         },
         {
           provide: Router,
@@ -144,5 +149,65 @@ describe('DashboardComponent', () => {
     await fixture.whenStable();
 
     expect(navigateByUrlCalls.length).toBeGreaterThan(0);
+  });
+
+  it('should render empty recent activity message when no runs exist', async () => {
+    mockDashboardService.loadRecentRuns.mockResolvedValue({
+      total: 0,
+      page: 1,
+      pageSize: 10,
+      data: [],
+    });
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    fixture.detectChanges();
+    await flushAsync();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.activity-section__empty')?.textContent).toContain(
+      'No workflow runs yet'
+    );
+  });
+
+  it('should request updated runs when page size changes', async () => {
+    mockDashboardService.loadRecentRuns.mockImplementation(async (page = 1, pageSize = 10) => ({
+      total: 120,
+      page,
+      pageSize,
+      data: [
+        {
+          runId: `run-${page}-${pageSize}`,
+          workflowId: 'wf-1',
+          workflowName: 'Lead Qualification',
+          status: 'queued',
+          triggeredAt: '2026-06-15T10:00:00.000Z',
+          completedAt: null,
+        },
+      ],
+    }));
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    fixture.detectChanges();
+    await flushAsync();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const pageSizeSelect = host.querySelector<HTMLSelectElement>('#activity-page-size');
+    expect(pageSizeSelect).not.toBeNull();
+    if (!pageSizeSelect) {
+      throw new Error('Expected page size selector to be rendered.');
+    }
+
+    pageSizeSelect.value = '25';
+    pageSizeSelect.dispatchEvent(new Event('change'));
+
+    await flushAsync();
+    fixture.detectChanges();
+
+    expect(mockDashboardService.loadRecentRuns).toHaveBeenLastCalledWith(1, 25);
+    expect(host.querySelector('.activity-section__page-label')?.textContent).toContain(
+      'Page 1 of 5'
+    );
   });
 });

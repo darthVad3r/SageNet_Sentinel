@@ -56,70 +56,107 @@ interface KpiMetric {
       <app-quick-action-shortcuts />
 
       @if (workflowsByStage().length > 0) {
-        <section class="stages-section surface-card" aria-label="Workflow stage breakdown">
+        <section class="stages-section surface-card" aria-label="Workflow stages">
           <header class="stages-section__header">
             <h2>Workflows by Stage</h2>
-            <p>Current distribution of active workflows across delivery stages.</p>
+            <p>Distribution of current automations by delivery stage.</p>
           </header>
 
-          <ul class="stages-section__grid" aria-label="Stage counts">
-            @for (item of workflowsByStage(); track item.stage) {
-              <li class="stages-section__item">
-                <span class="stages-section__stage">{{ item.stage }}</span>
-                <span class="stages-section__count">{{ item.count }}</span>
-              </li>
+          <div class="stages-section__grid" role="list" aria-label="Workflow stage counts">
+            @for (stage of workflowsByStage(); track stage.stage) {
+              <article class="stages-section__item" role="listitem">
+                <h3 class="stages-section__stage">{{ stage.stage }}</h3>
+                <p class="stages-section__count">{{ stage.count }}</p>
+              </article>
             }
-          </ul>
+          </div>
         </section>
       }
 
-      @if (recentRuns().length > 0) {
-        <section class="activity-section surface-card" aria-label="Recent run activity">
-          <header class="activity-section__header">
-            <h2>Recent Activity</h2>
-            <p>
-              Showing {{ recentRuns().length }} of {{ recentRunsTotal() }} workflow runs across all
-              automations.
-            </p>
-          </header>
+      <section class="activity-section surface-card" aria-label="Recent run activity">
+        <header class="activity-section__header">
+          <h2>Recent Activity</h2>
+          <p>
+            Showing {{ recentRuns().length }} of {{ recentRunsTotal() }} workflow runs across all
+            automations.
+          </p>
+        </header>
 
+        @if (isRunsLoading()) {
+          <div class="activity-section__skeleton" aria-hidden="true">
+            @for (placeholder of [1, 2, 3]; track placeholder) {
+              <div class="activity-section__skeleton-row"></div>
+            }
+          </div>
+        } @else if (recentRuns().length > 0) {
           <ul class="activity-section__list" aria-label="Recent workflow runs">
             @for (run of recentRuns(); track run.runId) {
               <li class="activity-item">
                 <span class="activity-item__name">{{ run.workflowName }}</span>
-                <span class="activity-item__status" [class]="runStatusClass(run.status)">{{
-                  run.status
-                }}</span>
+                <span class="activity-item__status" [class]="runStatusClass(run.status)">
+                  {{ run.status }}
+                </span>
                 <time class="activity-item__time" [attr.datetime]="run.triggeredAt">
                   {{ formatDate(run.triggeredAt) }}
                 </time>
               </li>
             }
           </ul>
+        } @else {
+          <p class="activity-section__empty">
+            No workflow runs yet. Trigger a run to populate activity.
+          </p>
+        }
 
-          @if (recentRunsTotal() > runsPageSize || runsPage() > 1) {
-            <footer class="activity-section__pagination">
-              <button
-                type="button"
-                class="activity-section__page-button"
-                [disabled]="!canGoToPreviousRunsPage()"
-                (click)="goToPreviousRunsPage()"
-              >
-                Previous
-              </button>
-              <span class="activity-section__page-label">{{ runsPaginationLabel() }}</span>
-              <button
-                type="button"
-                class="activity-section__page-button"
-                [disabled]="!canGoToNextRunsPage()"
-                (click)="goToNextRunsPage()"
-              >
-                Next
-              </button>
-            </footer>
-          }
-        </section>
-      }
+        <footer class="activity-section__pagination">
+          <label class="activity-section__page-size-label" for="activity-page-size">Rows</label>
+          <select
+            id="activity-page-size"
+            class="activity-section__page-size"
+            [value]="runsPageSize()"
+            [disabled]="isRunsLoading() || isLoading()"
+            (change)="onRunsPageSizeChange($any($event.target).value)"
+          >
+            @for (size of runsPageSizeOptions; track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+
+          <button
+            type="button"
+            class="activity-section__page-button"
+            [disabled]="!canGoToFirstRunsPage()"
+            (click)="goToFirstRunsPage()"
+          >
+            First
+          </button>
+          <button
+            type="button"
+            class="activity-section__page-button"
+            [disabled]="!canGoToPreviousRunsPage()"
+            (click)="goToPreviousRunsPage()"
+          >
+            Previous
+          </button>
+          <span class="activity-section__page-label">{{ runsPaginationLabel() }}</span>
+          <button
+            type="button"
+            class="activity-section__page-button"
+            [disabled]="!canGoToNextRunsPage()"
+            (click)="goToNextRunsPage()"
+          >
+            Next
+          </button>
+          <button
+            type="button"
+            class="activity-section__page-button"
+            [disabled]="!canGoToLastRunsPage()"
+            (click)="goToLastRunsPage()"
+          >
+            Last
+          </button>
+        </footer>
+      </section>
 
       <app-progress-section />
     </div>
@@ -338,6 +375,21 @@ interface KpiMetric {
         align-items: center;
         justify-content: flex-end;
         gap: var(--lab-space-2);
+        flex-wrap: wrap;
+      }
+
+      .activity-section__page-size-label,
+      .activity-section__page-size {
+        font-size: var(--lab-text-sm);
+      }
+
+      .activity-section__page-size {
+        border: 1px solid var(--lab-line);
+        border-radius: var(--lab-radius-md);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        padding: 0 var(--lab-space-2);
+        height: 2rem;
       }
 
       .activity-section__page-button {
@@ -359,6 +411,39 @@ interface KpiMetric {
       .activity-section__page-label {
         font-size: var(--lab-text-sm);
         color: var(--lab-ink-soft);
+      }
+
+      .activity-section__empty {
+        margin: 0;
+        color: var(--lab-ink-soft);
+        font-size: var(--lab-text-sm);
+      }
+
+      .activity-section__skeleton {
+        display: grid;
+        gap: var(--lab-space-2);
+      }
+
+      .activity-section__skeleton-row {
+        height: 2.75rem;
+        border-radius: var(--lab-radius-md);
+        background: linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--lab-line) 60%, var(--lab-surface)) 0%,
+          color-mix(in srgb, var(--lab-line) 20%, var(--lab-surface)) 50%,
+          color-mix(in srgb, var(--lab-line) 60%, var(--lab-surface)) 100%
+        );
+        background-size: 240px 100%;
+        animation: activity-skeleton-shimmer 1.2s ease-in-out infinite;
+      }
+
+      @keyframes activity-skeleton-shimmer {
+        from {
+          background-position: -120px 0;
+        }
+        to {
+          background-position: 120px 0;
+        }
       }
 
       @media (max-width: 768px) {
@@ -385,7 +470,7 @@ interface KpiMetric {
 export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
 
-  readonly runsPageSize = 10;
+  readonly runsPageSizeOptions = [10, 25, 50] as const;
 
   readonly summary = signal<DashboardSummary | null>(null);
 
@@ -395,7 +480,11 @@ export class DashboardComponent implements OnInit {
 
   readonly runsPage = signal(1);
 
+  readonly runsPageSize = signal<number>(10);
+
   readonly isLoading = signal(true);
+
+  readonly isRunsLoading = signal(false);
 
   readonly loadError = signal<string | null>(null);
 
@@ -408,7 +497,7 @@ export class DashboardComponent implements OnInit {
     }
 
     const currentPage = this.runsPage();
-    const pageCount = Math.max(1, Math.ceil(total / this.runsPageSize));
+    const pageCount = Math.max(1, Math.ceil(total / this.runsPageSize()));
     return `Page ${currentPage} of ${pageCount}`;
   });
 
@@ -474,11 +563,23 @@ export class DashboardComponent implements OnInit {
   }
 
   canGoToPreviousRunsPage(): boolean {
-    return this.runsPage() > 1 && !this.isLoading();
+    return this.runsPage() > 1 && !this.isRunsLoading() && !this.isLoading();
   }
 
   canGoToNextRunsPage(): boolean {
-    return this.runsPage() * this.runsPageSize < this.recentRunsTotal() && !this.isLoading();
+    return (
+      this.runsPage() * this.runsPageSize() < this.recentRunsTotal() &&
+      !this.isRunsLoading() &&
+      !this.isLoading()
+    );
+  }
+
+  canGoToFirstRunsPage(): boolean {
+    return this.canGoToPreviousRunsPage();
+  }
+
+  canGoToLastRunsPage(): boolean {
+    return this.canGoToNextRunsPage();
   }
 
   async goToPreviousRunsPage(): Promise<void> {
@@ -489,6 +590,14 @@ export class DashboardComponent implements OnInit {
     await this.loadRunsPage(this.runsPage() - 1);
   }
 
+  async goToFirstRunsPage(): Promise<void> {
+    if (!this.canGoToFirstRunsPage()) {
+      return;
+    }
+
+    await this.loadRunsPage(1);
+  }
+
   async goToNextRunsPage(): Promise<void> {
     if (!this.canGoToNextRunsPage()) {
       return;
@@ -497,14 +606,39 @@ export class DashboardComponent implements OnInit {
     await this.loadRunsPage(this.runsPage() + 1);
   }
 
+  async goToLastRunsPage(): Promise<void> {
+    if (!this.canGoToLastRunsPage()) {
+      return;
+    }
+
+    const lastPage = Math.max(1, Math.ceil(this.recentRunsTotal() / this.runsPageSize()));
+    await this.loadRunsPage(lastPage);
+  }
+
+  async onRunsPageSizeChange(rawValue: string): Promise<void> {
+    const nextPageSize = Number.parseInt(rawValue, 10);
+    if (
+      !Number.isFinite(nextPageSize) ||
+      nextPageSize <= 0 ||
+      nextPageSize === this.runsPageSize()
+    ) {
+      return;
+    }
+
+    this.runsPageSize.set(nextPageSize);
+    this.runsPage.set(1);
+    await this.loadRunsPage(1);
+  }
+
   private async loadAll(): Promise<void> {
     this.isLoading.set(true);
+    this.isRunsLoading.set(true);
     this.loadError.set(null);
 
     try {
       const [summary, recentRunsPage] = await Promise.all([
         this.dashboardService.loadSummary(),
-        this.dashboardService.loadRecentRuns(this.runsPage(), this.runsPageSize),
+        this.dashboardService.loadRecentRuns(this.runsPage(), this.runsPageSize()),
       ]);
       this.summary.set(summary);
       this.runsPage.set(recentRunsPage.page);
@@ -512,24 +646,27 @@ export class DashboardComponent implements OnInit {
       this.recentRunsTotal.set(recentRunsPage.total);
     } catch {
       this.loadError.set('Unable to load live dashboard summary right now.');
+      this.recentRuns.set([]);
+      this.recentRunsTotal.set(0);
     } finally {
+      this.isRunsLoading.set(false);
       this.isLoading.set(false);
     }
   }
 
   private async loadRunsPage(page: number): Promise<void> {
-    this.isLoading.set(true);
+    this.isRunsLoading.set(true);
     this.loadError.set(null);
 
     try {
-      const runsPage = await this.dashboardService.loadRecentRuns(page, this.runsPageSize);
+      const runsPage = await this.dashboardService.loadRecentRuns(page, this.runsPageSize());
       this.runsPage.set(runsPage.page);
       this.recentRuns.set(runsPage.data);
       this.recentRunsTotal.set(runsPage.total);
     } catch {
       this.loadError.set('Unable to load recent run activity right now.');
     } finally {
-      this.isLoading.set(false);
+      this.isRunsLoading.set(false);
     }
   }
 }
