@@ -43,6 +43,22 @@ function jsonResponse(payload: unknown, status = 200, headers: HeadersInit = {})
   });
 }
 
+function requestUrl(input: string | URL | Request): string {
+  if (typeof input === 'string') {
+    return input;
+  }
+
+  if (input instanceof URL) {
+    return input.toString();
+  }
+
+  return input.url;
+}
+
+function sortedKeys(value: Record<string, unknown>): string[] {
+  return Object.keys(value).sort((left, right) => left.localeCompare(right));
+}
+
 describe('dashboard summary API handler', () => {
   beforeEach(() => {
     process.env['LAB_SUPABASE_URL'] = 'https://example.supabase.co';
@@ -121,8 +137,7 @@ describe('dashboard summary API handler', () => {
 
   it('returns summary envelope for authorized requests', async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-      const url =
-        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url = requestUrl(input);
       const method = init?.method ?? 'GET';
 
       if (url.includes('/auth/v1/user')) {
@@ -176,11 +191,11 @@ describe('dashboard summary API handler', () => {
     expect(response.statusCode).toBe(200);
 
     const payload = response.body as Record<string, unknown>;
-    expect(Object.keys(payload).sort()).toEqual(['data', 'schemaVersion']);
+    expect(sortedKeys(payload)).toEqual(['data', 'schemaVersion']);
     expect(payload['schemaVersion']).toBe('2026-06-14');
 
     const data = payload['data'] as Record<string, unknown>;
-    expect(Object.keys(data).sort()).toEqual([
+    expect(sortedKeys(data)).toEqual([
       'activeWorkflowCount',
       'failedRunCount',
       'leadCount',
@@ -203,7 +218,7 @@ describe('dashboard summary API handler', () => {
     const workflowsByStage = data['workflowsByStage'] as Array<Record<string, unknown>>;
     expect(workflowsByStage.length).toBe(2);
     for (const stage of workflowsByStage) {
-      expect(Object.keys(stage).sort()).toEqual(['count', 'stage']);
+      expect(sortedKeys(stage)).toEqual(['count', 'stage']);
       expect(typeof stage['stage']).toBe('string');
       expect(typeof stage['count']).toBe('number');
     }

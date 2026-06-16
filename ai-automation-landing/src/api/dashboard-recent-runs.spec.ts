@@ -43,6 +43,22 @@ function jsonResponse(payload: unknown, status = 200, headers: HeadersInit = {})
   });
 }
 
+function requestUrl(input: string | URL | Request): string {
+  if (typeof input === 'string') {
+    return input;
+  }
+
+  if (input instanceof URL) {
+    return input.toString();
+  }
+
+  return input.url;
+}
+
+function sortedKeys(value: Record<string, unknown>): string[] {
+  return Object.keys(value).sort((left, right) => left.localeCompare(right));
+}
+
 describe('dashboard recent-runs API handler', () => {
   beforeEach(() => {
     process.env['LAB_SUPABASE_URL'] = 'https://example.supabase.co';
@@ -120,8 +136,7 @@ describe('dashboard recent-runs API handler', () => {
 
   it('uses page and pageSize query values when provided', async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-      const url =
-        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url = requestUrl(input);
       const method = init?.method ?? 'GET';
 
       if (url.includes('/auth/v1/user')) {
@@ -175,11 +190,11 @@ describe('dashboard recent-runs API handler', () => {
 
     expect(response.statusCode).toBe(200);
     const payload = response.body as Record<string, unknown>;
-    expect(Object.keys(payload).sort()).toEqual(['data', 'schemaVersion']);
+    expect(sortedKeys(payload)).toEqual(['data', 'schemaVersion']);
     expect(payload['schemaVersion']).toBe('2026-06-14');
 
     const data = payload['data'] as Record<string, unknown>;
-    expect(Object.keys(data).sort()).toEqual(['data', 'page', 'pageSize', 'total']);
+    expect(sortedKeys(data)).toEqual(['data', 'page', 'pageSize', 'total']);
     expect(data).toMatchObject({
       page: 2,
       pageSize: 25,
@@ -188,7 +203,7 @@ describe('dashboard recent-runs API handler', () => {
 
     const runs = data['data'] as Array<Record<string, unknown>>;
     expect(runs.length).toBe(1);
-    expect(Object.keys(runs[0] ?? {}).sort()).toEqual([
+    expect(sortedKeys(runs[0] ?? {})).toEqual([
       'completedAt',
       'runId',
       'status',
@@ -204,8 +219,7 @@ describe('dashboard recent-runs API handler', () => {
 
   it('falls back to defaults and supports legacy limit alias', async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
-      const url =
-        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url = requestUrl(input);
 
       if (url.includes('/auth/v1/user')) {
         return jsonResponse({ id: 'user-1' }, 200);
@@ -244,10 +258,10 @@ describe('dashboard recent-runs API handler', () => {
 
     expect(response.statusCode).toBe(200);
     const payload = response.body as Record<string, unknown>;
-    expect(Object.keys(payload).sort()).toEqual(['data', 'schemaVersion']);
+    expect(sortedKeys(payload)).toEqual(['data', 'schemaVersion']);
 
     const data = payload['data'] as Record<string, unknown>;
-    expect(Object.keys(data).sort()).toEqual(['data', 'page', 'pageSize', 'total']);
+    expect(sortedKeys(data)).toEqual(['data', 'page', 'pageSize', 'total']);
     expect(data).toMatchObject({
       page: 1,
       pageSize: 50,
