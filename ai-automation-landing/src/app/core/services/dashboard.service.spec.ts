@@ -38,6 +38,7 @@ describe('DashboardService', () => {
 
     const request = httpTestingController.expectOne('/api/dashboard/summary');
     expect(request.request.method).toBe('GET');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
 
     request.flush({
       schemaVersion: DASHBOARD_API_SCHEMA_VERSION,
@@ -66,7 +67,10 @@ describe('DashboardService', () => {
     const service = TestBed.inject(DashboardService);
     const resultPromise = service.loadSummary();
 
-    httpTestingController.expectOne('/api/dashboard/summary').flush({
+    const request = httpTestingController.expectOne('/api/dashboard/summary');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
+
+    request.flush({
       schemaVersion: DASHBOARD_API_SCHEMA_VERSION,
       data: {
         leadCount: 0,
@@ -86,38 +90,47 @@ describe('DashboardService', () => {
 
   it('loads and parses recent runs', async () => {
     const service = TestBed.inject(DashboardService);
-    const resultPromise = service.loadRecentRuns(5);
+    const resultPromise = service.loadRecentRuns(2, 5);
 
-    const request = httpTestingController.expectOne('/api/dashboard/recent-runs?limit=5');
+    const request = httpTestingController.expectOne('/api/dashboard/recent-runs?page=2&pageSize=5');
     expect(request.request.method).toBe('GET');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
 
     request.flush({
       schemaVersion: DASHBOARD_API_SCHEMA_VERSION,
-      data: [
-        {
-          runId: 'run-1',
-          workflowId: 'wf-1',
-          workflowName: 'Lead Qualification',
-          status: 'succeeded',
-          triggeredAt: '2026-06-15T10:00:00.000Z',
-          completedAt: '2026-06-15T10:00:05.000Z',
-        },
-        {
-          runId: 'run-2',
-          workflowId: 'wf-1',
-          workflowName: 'Lead Qualification',
-          status: 'queued',
-          triggeredAt: '2026-06-15T10:05:00.000Z',
-          completedAt: null,
-        },
-      ],
+      data: {
+        total: 12,
+        page: 2,
+        pageSize: 5,
+        data: [
+          {
+            runId: 'run-1',
+            workflowId: 'wf-1',
+            workflowName: 'Lead Qualification',
+            status: 'succeeded',
+            triggeredAt: '2026-06-15T10:00:00.000Z',
+            completedAt: '2026-06-15T10:00:05.000Z',
+          },
+          {
+            runId: 'run-2',
+            workflowId: 'wf-1',
+            workflowName: 'Lead Qualification',
+            status: 'queued',
+            triggeredAt: '2026-06-15T10:05:00.000Z',
+            completedAt: null,
+          },
+        ],
+      },
     });
 
     const result = await resultPromise;
-    expect(result).toHaveLength(2);
-    expect(result[0]?.status).toBe('succeeded');
-    expect(result[0]?.completedAt).toBe('2026-06-15T10:00:05.000Z');
-    expect(result[1]?.status).toBe('queued');
-    expect(result[1]?.completedAt).toBeNull();
+    expect(result.total).toBe(12);
+    expect(result.page).toBe(2);
+    expect(result.pageSize).toBe(5);
+    expect(result.data).toHaveLength(2);
+    expect(result.data[0]?.status).toBe('succeeded');
+    expect(result.data[0]?.completedAt).toBe('2026-06-15T10:00:05.000Z');
+    expect(result.data[1]?.status).toBe('queued');
+    expect(result.data[1]?.completedAt).toBeNull();
   });
 });

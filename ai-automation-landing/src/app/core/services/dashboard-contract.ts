@@ -32,7 +32,14 @@ export interface DashboardRecentRun {
   readonly completedAt: string | null;
 }
 
+export interface DashboardRecentRunsPage {
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly data: readonly DashboardRecentRun[];
+}
+
 export interface DashboardRecentRunsEnvelope {
   readonly schemaVersion: string;
-  readonly data: readonly DashboardRecentRun[];
+  readonly data: DashboardRecentRunsPage;
 }

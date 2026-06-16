@@ -33,16 +33,21 @@ describe('DashboardComponent', () => {
                 { stage: 'live', count: 1 },
               ],
             }),
-            loadRecentRuns: async () => [
-              {
-                runId: 'run-1',
-                workflowId: 'wf-1',
-                workflowName: 'Lead Qualification',
-                status: 'succeeded',
-                triggeredAt: '2026-06-15T10:00:00.000Z',
-                completedAt: '2026-06-15T10:00:05.000Z',
-              },
-            ],
+            loadRecentRuns: async () => ({
+              total: 1,
+              page: 1,
+              pageSize: 10,
+              data: [
+                {
+                  runId: 'run-1',
+                  workflowId: 'wf-1',
+                  workflowName: 'Lead Qualification',
+                  status: 'succeeded',
+                  triggeredAt: '2026-06-15T10:00:00.000Z',
+                  completedAt: '2026-06-15T10:00:05.000Z',
+                },
+              ],
+            }),
           },
         },
         {

@@ -1,12 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import {
   DASHBOARD_API_SCHEMA_VERSION,
   type DashboardRecentRun,
   type DashboardRecentRunsEnvelope,
+  type DashboardRecentRunsPage,
   type DashboardSummary,
   type DashboardSummaryEnvelope,
   type DashboardWorkflowStageBreakdown,
@@ -50,10 +50,10 @@ export class DashboardService {
     return this.readSummary(response.data);
   }
 
-  async loadRecentRuns(limit = 10): Promise<readonly DashboardRecentRun[]> {
+  async loadRecentRuns(page = 1, pageSize = 10): Promise<DashboardRecentRunsPage> {
     const response = await firstValueFrom(
       this.http.get<DashboardRecentRunsEnvelope>(
-        resolveRuntimeApiUrl(`${DASHBOARD_RECENT_RUNS_PATH}?limit=${limit}`),
+        resolveRuntimeApiUrl(`${DASHBOARD_RECENT_RUNS_PATH}?page=${page}&pageSize=${pageSize}`),
         { headers: this.getHttpHeaders() }
       )
     );
@@ -62,11 +62,22 @@ export class DashboardService {
       throw new Error('Invalid dashboard recent runs response envelope.');
     }
 
-    if (!Array.isArray(response.data)) {
+    if (!this.isRecord(response.data)) {
       throw new TypeError('Invalid dashboard recent runs payload.');
     }
 
-    return response.data.map((entry) => this.readRecentRun(entry));
+    const payload = response.data;
+    const runsRaw = payload.data;
+    if (!Array.isArray(runsRaw)) {
+      throw new TypeError('Invalid dashboard recent runs list payload.');
+    }
+
+    return {
+      total: this.readNumber(payload.total, 'total'),
+      page: this.readNumber(payload.page, 'page'),
+      pageSize: this.readNumber(payload.pageSize, 'pageSize'),
+      data: runsRaw.map((entry) => this.readRecentRun(entry)),
+    };
   }
 
   private readSummary(value: unknown): DashboardSummary {

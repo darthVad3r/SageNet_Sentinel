@@ -1,24 +1,35 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-import { dashboardRecentRunsEnvelope } from '../_shared/workflow-data';
 import {
   createSupabaseAdminClient,
   extractBearerToken,
   verifyBearerToken,
 } from '../_shared/supabase-clients';
+import { dashboardRecentRunsEnvelope } from '../_shared/workflow-data';
 
-const DEFAULT_LIMIT = 10;
-const MAX_LIMIT = 50;
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
 
-function parseLimit(input: string | string[] | undefined): number {
+function parsePositiveInteger(input: string | string[] | undefined, fallback: number): number {
   const rawValue = Array.isArray(input) ? input[0] : input;
   const parsedValue = Number.parseInt(rawValue ?? '', 10);
 
   if (Number.isNaN(parsedValue) || parsedValue <= 0) {
-    return DEFAULT_LIMIT;
+    return fallback;
   }
 
-  return Math.min(parsedValue, MAX_LIMIT);
+  return parsedValue;
+}
+
+function parsePage(input: string | string[] | undefined): number {
+  return parsePositiveInteger(input, DEFAULT_PAGE);
+}
+
+function parsePageSize(req: VercelRequest): number {
+  // Support legacy ?limit= for backward compatibility while preferring pageSize.
+  const pageSizeInput = req.query['pageSize'] ?? req.query['limit'];
+  return Math.min(parsePositiveInteger(pageSizeInput, DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
@@ -41,9 +52,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    const limit = parseLimit(req.query['limit']);
+    const page = parsePage(req.query['page']);
+    const pageSize = parsePageSize(req);
     const supabase = createSupabaseAdminClient();
-    res.status(200).json(await dashboardRecentRunsEnvelope(supabase, limit));
+    res.status(200).json(await dashboardRecentRunsEnvelope(supabase, page, pageSize));
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unexpected /api/dashboard/recent-runs error.';

@@ -410,16 +410,29 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
 
 export async function dashboardRecentRunsEnvelope(
   supabase: SupabaseClient,
-  limit: number
+  page: number,
+  pageSize: number
 ): Promise<{
   schemaVersion: string;
-  data: readonly DashboardRecentRun[];
+  data: {
+    total: number;
+    page: number;
+    pageSize: number;
+    data: readonly DashboardRecentRun[];
+  };
 }> {
-  const { data: runs, error: runsError } = await supabase
+  const from = Math.max(0, (page - 1) * pageSize);
+  const to = from + pageSize - 1;
+
+  const {
+    data: runs,
+    count,
+    error: runsError,
+  } = await supabase
     .from(WORKFLOW_RUNS_TABLE)
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('triggered_at', { ascending: false })
-    .limit(limit);
+    .range(from, to);
 
   if (runsError) {
     throwSupabaseError(runsError, 'Failed to load recent workflow runs');
@@ -457,17 +470,22 @@ export async function dashboardRecentRunsEnvelope(
 
   return {
     schemaVersion: DASHBOARD_API_SCHEMA_VERSION,
-    data: (runs ?? []).map((row) => {
-      const mappedRun = mapWorkflowRunRow(row as WorkflowRunRow);
-      return {
-        runId: mappedRun.id,
-        workflowId: mappedRun.workflowId,
-        workflowName: workflowNameById.get(mappedRun.workflowId) ?? 'Unknown workflow',
-        status: mappedRun.status,
-        triggeredAt: mappedRun.triggeredAt,
-        completedAt: mappedRun.completedAt,
-      };
-    }),
+    data: {
+      total: count ?? 0,
+      page,
+      pageSize,
+      data: (runs ?? []).map((row) => {
+        const mappedRun = mapWorkflowRunRow(row as WorkflowRunRow);
+        return {
+          runId: mappedRun.id,
+          workflowId: mappedRun.workflowId,
+          workflowName: workflowNameById.get(mappedRun.workflowId) ?? 'Unknown workflow',
+          status: mappedRun.status,
+          triggeredAt: mappedRun.triggeredAt,
+          completedAt: mappedRun.completedAt,
+        };
+      }),
+    },
   };
 }
 

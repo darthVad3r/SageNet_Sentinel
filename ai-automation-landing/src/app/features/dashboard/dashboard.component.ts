@@ -77,7 +77,10 @@ interface KpiMetric {
         <section class="activity-section surface-card" aria-label="Recent run activity">
           <header class="activity-section__header">
             <h2>Recent Activity</h2>
-            <p>Last {{ recentRuns().length }} workflow runs across all automations.</p>
+            <p>
+              Showing {{ recentRuns().length }} of {{ recentRunsTotal() }} workflow runs across all
+              automations.
+            </p>
           </header>
 
           <ul class="activity-section__list" aria-label="Recent workflow runs">
@@ -93,6 +96,28 @@ interface KpiMetric {
               </li>
             }
           </ul>
+
+          @if (recentRunsTotal() > runsPageSize || runsPage() > 1) {
+            <footer class="activity-section__pagination">
+              <button
+                type="button"
+                class="activity-section__page-button"
+                [disabled]="!canGoToPreviousRunsPage()"
+                (click)="goToPreviousRunsPage()"
+              >
+                Previous
+              </button>
+              <span class="activity-section__page-label">{{ runsPaginationLabel() }}</span>
+              <button
+                type="button"
+                class="activity-section__page-button"
+                [disabled]="!canGoToNextRunsPage()"
+                (click)="goToNextRunsPage()"
+              >
+                Next
+              </button>
+            </footer>
+          }
         </section>
       }
 
@@ -308,6 +333,34 @@ interface KpiMetric {
         white-space: nowrap;
       }
 
+      .activity-section__pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--lab-space-2);
+      }
+
+      .activity-section__page-button {
+        border: 1px solid var(--lab-line);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        border-radius: var(--lab-radius-md);
+        padding: var(--lab-space-1) var(--lab-space-3);
+        font-size: var(--lab-text-sm);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .activity-section__page-button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .activity-section__page-label {
+        font-size: var(--lab-text-sm);
+        color: var(--lab-ink-soft);
+      }
+
       @media (max-width: 768px) {
         .dashboard {
           width: min(1120px, calc(100% - (var(--lab-space-3) * 2)));
@@ -332,15 +385,32 @@ interface KpiMetric {
 export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
 
+  readonly runsPageSize = 10;
+
   readonly summary = signal<DashboardSummary | null>(null);
 
   readonly recentRuns = signal<readonly DashboardRecentRun[]>([]);
+
+  readonly recentRunsTotal = signal(0);
+
+  readonly runsPage = signal(1);
 
   readonly isLoading = signal(true);
 
   readonly loadError = signal<string | null>(null);
 
   readonly workflowsByStage = computed(() => this.summary()?.workflowsByStage ?? []);
+
+  readonly runsPaginationLabel = computed(() => {
+    const total = this.recentRunsTotal();
+    if (total <= 0) {
+      return 'Page 1 of 1';
+    }
+
+    const currentPage = this.runsPage();
+    const pageCount = Math.max(1, Math.ceil(total / this.runsPageSize));
+    return `Page ${currentPage} of ${pageCount}`;
+  });
 
   readonly kpiMetrics = computed<readonly KpiMetric[]>(() => {
     const summary = this.summary();
@@ -403,19 +473,61 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  canGoToPreviousRunsPage(): boolean {
+    return this.runsPage() > 1 && !this.isLoading();
+  }
+
+  canGoToNextRunsPage(): boolean {
+    return this.runsPage() * this.runsPageSize < this.recentRunsTotal() && !this.isLoading();
+  }
+
+  async goToPreviousRunsPage(): Promise<void> {
+    if (!this.canGoToPreviousRunsPage()) {
+      return;
+    }
+
+    await this.loadRunsPage(this.runsPage() - 1);
+  }
+
+  async goToNextRunsPage(): Promise<void> {
+    if (!this.canGoToNextRunsPage()) {
+      return;
+    }
+
+    await this.loadRunsPage(this.runsPage() + 1);
+  }
+
   private async loadAll(): Promise<void> {
     this.isLoading.set(true);
     this.loadError.set(null);
 
     try {
-      const [summary, runs] = await Promise.all([
+      const [summary, recentRunsPage] = await Promise.all([
         this.dashboardService.loadSummary(),
-        this.dashboardService.loadRecentRuns(10),
+        this.dashboardService.loadRecentRuns(this.runsPage(), this.runsPageSize),
       ]);
       this.summary.set(summary);
-      this.recentRuns.set(runs);
+      this.runsPage.set(recentRunsPage.page);
+      this.recentRuns.set(recentRunsPage.data);
+      this.recentRunsTotal.set(recentRunsPage.total);
     } catch {
       this.loadError.set('Unable to load live dashboard summary right now.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  private async loadRunsPage(page: number): Promise<void> {
+    this.isLoading.set(true);
+    this.loadError.set(null);
+
+    try {
+      const runsPage = await this.dashboardService.loadRecentRuns(page, this.runsPageSize);
+      this.runsPage.set(runsPage.page);
+      this.recentRuns.set(runsPage.data);
+      this.recentRunsTotal.set(runsPage.total);
+    } catch {
+      this.loadError.set('Unable to load recent run activity right now.');
     } finally {
       this.isLoading.set(false);
     }
