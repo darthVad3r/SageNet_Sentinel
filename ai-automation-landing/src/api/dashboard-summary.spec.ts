@@ -174,18 +174,39 @@ describe('dashboard summary API handler', () => {
     );
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toMatchObject({
-      schemaVersion: '2026-06-14',
-      data: {
-        leadCount: 7,
-        workflowCount: 3,
-        activeWorkflowCount: 2,
-        queuedRunCount: 1,
-        runningRunCount: 0,
-        succeededRunCount: 1,
-        failedRunCount: 0,
-      },
+
+    const payload = response.body as Record<string, unknown>;
+    expect(Object.keys(payload).sort()).toEqual(['data', 'schemaVersion']);
+    expect(payload['schemaVersion']).toBe('2026-06-14');
+
+    const data = payload['data'] as Record<string, unknown>;
+    expect(Object.keys(data).sort()).toEqual([
+      'activeWorkflowCount',
+      'failedRunCount',
+      'leadCount',
+      'queuedRunCount',
+      'runningRunCount',
+      'succeededRunCount',
+      'workflowCount',
+      'workflowsByStage',
+    ]);
+    expect(data).toMatchObject({
+      leadCount: 7,
+      workflowCount: 3,
+      activeWorkflowCount: 2,
+      queuedRunCount: 1,
+      runningRunCount: 0,
+      succeededRunCount: 1,
+      failedRunCount: 0,
     });
+
+    const workflowsByStage = data['workflowsByStage'] as Array<Record<string, unknown>>;
+    expect(workflowsByStage.length).toBe(2);
+    for (const stage of workflowsByStage) {
+      expect(Object.keys(stage).sort()).toEqual(['count', 'stage']);
+      expect(typeof stage['stage']).toBe('string');
+      expect(typeof stage['count']).toBe('number');
+    }
   });
 
   it('returns 500 when admin client cannot be created', async () => {
