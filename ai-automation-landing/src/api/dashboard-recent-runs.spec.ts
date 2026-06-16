@@ -174,19 +174,31 @@ describe('dashboard recent-runs API handler', () => {
     );
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toMatchObject({
-      schemaVersion: '2026-06-14',
-      data: {
-        page: 2,
-        pageSize: 25,
-        total: 1,
-        data: [
-          {
-            runId: 'run-1',
-            workflowId: 'wf-1',
-          },
-        ],
-      },
+    const payload = response.body as Record<string, unknown>;
+    expect(Object.keys(payload).sort()).toEqual(['data', 'schemaVersion']);
+    expect(payload['schemaVersion']).toBe('2026-06-14');
+
+    const data = payload['data'] as Record<string, unknown>;
+    expect(Object.keys(data).sort()).toEqual(['data', 'page', 'pageSize', 'total']);
+    expect(data).toMatchObject({
+      page: 2,
+      pageSize: 25,
+      total: 1,
+    });
+
+    const runs = data['data'] as Array<Record<string, unknown>>;
+    expect(runs.length).toBe(1);
+    expect(Object.keys(runs[0] ?? {}).sort()).toEqual([
+      'completedAt',
+      'runId',
+      'status',
+      'triggeredAt',
+      'workflowId',
+      'workflowName',
+    ]);
+    expect(runs[0]).toMatchObject({
+      runId: 'run-1',
+      workflowId: 'wf-1',
     });
   });
 
@@ -231,11 +243,14 @@ describe('dashboard recent-runs API handler', () => {
     );
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toMatchObject({
-      data: {
-        page: 1,
-        pageSize: 50,
-      },
+    const payload = response.body as Record<string, unknown>;
+    expect(Object.keys(payload).sort()).toEqual(['data', 'schemaVersion']);
+
+    const data = payload['data'] as Record<string, unknown>;
+    expect(Object.keys(data).sort()).toEqual(['data', 'page', 'pageSize', 'total']);
+    expect(data).toMatchObject({
+      page: 1,
+      pageSize: 50,
     });
   });
 
