@@ -9,6 +9,12 @@ import {
   LeadIntakeService,
 } from './lead-intake.service';
 
+type GlobalWithRuntimeConfig = typeof globalThis & {
+  __LAB_RUNTIME_CONFIG__?: {
+    backendApiBaseUrl?: string;
+  };
+};
+
 describe('LeadIntakeService', () => {
   let httpTestingController: HttpTestingController;
 
@@ -21,6 +27,7 @@ describe('LeadIntakeService', () => {
   });
 
   afterEach(() => {
+    delete (globalThis as GlobalWithRuntimeConfig).__LAB_RUNTIME_CONFIG__;
     httpTestingController.verify();
   });
 
@@ -163,5 +170,27 @@ describe('LeadIntakeService', () => {
     });
 
     await expect(loadPromise).rejects.toBeInstanceOf(LeadContractError);
+  });
+
+  it('targets configured backend base URL when runtime config is provided', async () => {
+    (globalThis as GlobalWithRuntimeConfig).__LAB_RUNTIME_CONFIG__ = {
+      backendApiBaseUrl: 'https://api.example.com',
+    };
+
+    const service = TestBed.inject(LeadIntakeService);
+    const loadPromise = service.loadSubmissions(2);
+
+    const request = httpTestingController.expectOne(
+      (candidate) => candidate.url === 'https://api.example.com/api/leads'
+    );
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('limit')).toBe('2');
+
+    request.flush({
+      schemaVersion: LEAD_API_SCHEMA_VERSION,
+      data: [],
+    });
+
+    await expect(loadPromise).resolves.toEqual([]);
   });
 });

@@ -74,7 +74,7 @@ Configured policy for `main`:
 
 - Pull request required (direct pushes blocked)
 - Minimum 1 approving review
-- Required status checks: `Lint`, `Build`
+- Required status checks: `Lint`, `Type Check`, `Unit Tests`, `Build`
 - Required conversation resolution
 - Required linear history
 - Force pushes and branch deletion disabled

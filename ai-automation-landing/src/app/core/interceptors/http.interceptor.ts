@@ -1,7 +1,9 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
 import { AuthService } from '../services/auth.service';
+import { readBackendApiBaseUrl } from '../services/runtime-config';
 
 /**
  * HTTP Interceptor placeholder
@@ -28,6 +30,11 @@ export class HttpInterceptorService implements HttpInterceptor {
 
   private isApiRequest(url: string): boolean {
     if (url.startsWith('/api')) {
+      return true;
+    }
+
+    const backendApiBaseUrl = readBackendApiBaseUrl();
+    if (backendApiBaseUrl && url.startsWith(`${backendApiBaseUrl}/api`)) {
       return true;
     }
 

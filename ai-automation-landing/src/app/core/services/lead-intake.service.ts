@@ -9,6 +9,7 @@ import {
   type LeadSubmissionInput,
   type PreferredContactMethod,
 } from './lead-contract';
+import { resolveRuntimeApiUrl } from './runtime-config';
 
 export {
   LEAD_API_SCHEMA_VERSION,
@@ -101,7 +102,7 @@ export class LeadIntakeService {
       }
 
       const response = await firstValueFrom(
-        this.http.get<LeadSubmissionEnvelope>(LEADS_API_PATH, { params })
+        this.http.get<LeadSubmissionEnvelope>(resolveRuntimeApiUrl(LEADS_API_PATH), { params })
       );
       const submissions = this.parseSubmissionListResponse(response);
       this.submissionsState.set(submissions);
@@ -116,7 +117,7 @@ export class LeadIntakeService {
 
     try {
       const response = await firstValueFrom(
-        this.http.post<LeadSubmissionEnvelope>(LEADS_API_PATH, {
+        this.http.post<LeadSubmissionEnvelope>(resolveRuntimeApiUrl(LEADS_API_PATH), {
           schemaVersion: LEAD_API_SCHEMA_VERSION,
           data: {
             name: input.name.trim(),

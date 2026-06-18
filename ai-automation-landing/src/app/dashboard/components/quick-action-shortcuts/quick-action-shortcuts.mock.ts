@@ -5,14 +5,14 @@ export const QUICK_ACTION_SHORTCUTS_MOCK: readonly QuickAction[] = [
     id: 'create-workflow',
     title: 'Create Workflow',
     icon: 'add_task',
-    route: '/workflows',
+    route: '/workflow-builder',
     description: 'Start a new workflow template and assign automation steps.',
   },
   {
     id: 'open-automation-editor',
     title: 'Open Automation Editor',
     icon: 'edit_note',
-    route: '/workflows',
+    route: '/automation-editor',
     description: 'Jump into the automation editor to refine active scenarios.',
   },
   {

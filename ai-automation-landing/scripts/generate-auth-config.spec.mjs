@@ -16,6 +16,7 @@ test('buildRuntimeAuthConfig reads env keys with stable defaults', () => {
     provider: 'supabase',
     supabaseUrl: 'https://example.supabase.co',
     supabaseAnonKey: 'anon-key',
+    backendApiBaseUrl: '',
   });
 });
 
@@ -24,13 +25,22 @@ test('renderRuntimeAuthConfig produces valid JavaScript for special characters',
     enabled: true,
     provider: 'supabase',
     supabaseUrl: "https://example.supabase.co/path?q=a'b\\c\nnext",
-    supabaseAnonKey: 'key-with-\"quote\"-and-\\-slash',
+    supabaseAnonKey: String.raw`key-with-"quote"-and-\-slash`,
+    backendApiBaseUrl: 'https://api.example.com/base-path',
   };
 
   const script = renderRuntimeAuthConfig(expectedConfig);
 
-  const context = { window: {} };
+  const context = { globalThis: {} };
   vm.runInNewContext(script, context);
 
-  assert.deepEqual(context.window.__LAB_AUTH_CONFIG__, expectedConfig);
+  assert.deepEqual(context.globalThis.__LAB_AUTH_CONFIG__, {
+    enabled: expectedConfig.enabled,
+    provider: expectedConfig.provider,
+    supabaseUrl: expectedConfig.supabaseUrl,
+    supabaseAnonKey: expectedConfig.supabaseAnonKey,
+  });
+  assert.deepEqual(context.globalThis.__LAB_RUNTIME_CONFIG__, {
+    backendApiBaseUrl: expectedConfig.backendApiBaseUrl,
+  });
 });
