@@ -42,6 +42,12 @@ interface WorkflowRunRow {
   summary: string;
 }
 
+interface WorkflowImpactRow {
+  id: string;
+  name: string;
+  estimated_minutes_saved_per_run: number;
+}
+
 function nowIso(): string {
   return new Date().toISOString();
 }
@@ -337,6 +343,7 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
     activeWorkflowCountResult,
     workflowStageResult,
     runStatusResult,
+    workflowImpactResult,
     leadCountResult,
   ] = await Promise.all([
     supabase.from(WORKFLOWS_TABLE).select('id', { count: 'exact', head: true }),
@@ -345,7 +352,8 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
       .select('id', { count: 'exact', head: true })
       .eq('status', 'active'),
     supabase.from(WORKFLOWS_TABLE).select('stage'),
-    supabase.from(WORKFLOW_RUNS_TABLE).select('status'),
+    supabase.from(WORKFLOW_RUNS_TABLE).select('status,workflow_id'),
+    supabase.from(WORKFLOWS_TABLE).select('id,name,estimated_minutes_saved_per_run'),
     supabase.from(LEADS_TABLE).select('id', { count: 'exact', head: true }),
   ]);
 
@@ -361,6 +369,9 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
   if (runStatusResult.error) {
     throwSupabaseError(runStatusResult.error, 'Failed to load run statuses');
   }
+  if (workflowImpactResult.error) {
+    throwSupabaseError(workflowImpactResult.error, 'Failed to load workflow impact settings');
+  }
   if (leadCountResult.error) {
     throwSupabaseError(leadCountResult.error, 'Failed to count leads');
   }
@@ -371,9 +382,12 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
     succeeded: 0,
     failed: 0,
   };
+  const runCountByWorkflowId = new Map<string, number>();
 
   for (const row of runStatusResult.data ?? []) {
-    const status = readString((row as Record<string, unknown>)['status'], 'workflow_runs.status');
+    const record = row as Record<string, unknown>;
+    const status = readString(record['status'], 'workflow_runs.status');
+    const workflowId = readString(record['workflow_id'], 'workflow_runs.workflow_id');
     if (
       status === 'queued' ||
       status === 'running' ||
@@ -381,14 +395,35 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
       status === 'failed'
     ) {
       statusCounts[status] += 1;
+      runCountByWorkflowId.set(workflowId, (runCountByWorkflowId.get(workflowId) ?? 0) + 1);
     }
   }
+
+  const totalRunCount =
+    statusCounts.queued + statusCounts.running + statusCounts.succeeded + statusCounts.failed;
 
   const stageCounts = new Map<string, number>();
   for (const row of workflowStageResult.data ?? []) {
     const stage = readString((row as Record<string, unknown>)['stage'], 'workflows.stage');
     stageCounts.set(stage, (stageCounts.get(stage) ?? 0) + 1);
   }
+
+  const automationImpact = (workflowImpactResult.data ?? []).map((row) => {
+    const workflow = row as WorkflowImpactRow;
+    const runCount = runCountByWorkflowId.get(workflow.id) ?? 0;
+    const estimatedMinutesSavedPerRun = Math.max(0, workflow.estimated_minutes_saved_per_run ?? 0);
+    const estimatedHoursSaved = Number(((runCount * estimatedMinutesSavedPerRun) / 60).toFixed(2));
+    return {
+      workflowId: workflow.id,
+      workflowName: workflow.name,
+      runCount,
+      estimatedMinutesSavedPerRun,
+      estimatedHoursSaved,
+    };
+  });
+  const totalEstimatedHoursSaved = Number(
+    automationImpact.reduce((total, item) => total + item.estimatedHoursSaved, 0).toFixed(2)
+  );
 
   return {
     schemaVersion: DASHBOARD_API_SCHEMA_VERSION,
@@ -400,6 +435,10 @@ export async function dashboardSummaryEnvelope(supabase: SupabaseClient): Promis
       runningRunCount: statusCounts.running,
       succeededRunCount: statusCounts.succeeded,
       failedRunCount: statusCounts.failed,
+      totalRunCount,
+      totalEstimatedHoursSaved,
+      hasImpactData: totalRunCount > 0 && totalEstimatedHoursSaved > 0,
+      automationImpact,
       workflowsByStage: Array.from(stageCounts.entries()).map(([stage, count]) => ({
         stage,
         count,

@@ -7,6 +7,7 @@ import {
   type DashboardRecentRun,
   type DashboardRecentRunsEnvelope,
   type DashboardRecentRunsPage,
+  type DashboardAutomationImpact,
   type DashboardSummary,
   type DashboardSummaryEnvelope,
   type DashboardWorkflowStageBreakdown,
@@ -89,6 +90,10 @@ export class DashboardService {
     const workflowsByStage: DashboardWorkflowStageBreakdown[] = Array.isArray(stagesRaw)
       ? stagesRaw.map((s) => this.readStageBreakdown(s))
       : [];
+    const impactRaw = value['automationImpact'];
+    const automationImpact: DashboardAutomationImpact[] = Array.isArray(impactRaw)
+      ? impactRaw.map((entry) => this.readAutomationImpact(entry))
+      : [];
 
     return {
       leadCount: this.readNumber(value['leadCount'], 'leadCount'),
@@ -98,6 +103,13 @@ export class DashboardService {
       runningRunCount: this.readNumber(value['runningRunCount'], 'runningRunCount'),
       succeededRunCount: this.readNumber(value['succeededRunCount'], 'succeededRunCount'),
       failedRunCount: this.readNumber(value['failedRunCount'], 'failedRunCount'),
+      totalRunCount: this.readNumber(value['totalRunCount'], 'totalRunCount'),
+      totalEstimatedHoursSaved: this.readNumber(
+        value['totalEstimatedHoursSaved'],
+        'totalEstimatedHoursSaved'
+      ),
+      hasImpactData: this.readBoolean(value['hasImpactData'], 'hasImpactData'),
+      automationImpact,
       workflowsByStage,
     };
   }
@@ -142,6 +154,23 @@ export class DashboardService {
     };
   }
 
+  private readAutomationImpact(value: unknown): DashboardAutomationImpact {
+    if (!this.isRecord(value)) {
+      throw new Error('Invalid automation impact entry.');
+    }
+
+    return {
+      workflowId: this.readString(value['workflowId'], 'workflowId'),
+      workflowName: this.readString(value['workflowName'], 'workflowName'),
+      runCount: this.readNumber(value['runCount'], 'runCount'),
+      estimatedMinutesSavedPerRun: this.readNumber(
+        value['estimatedMinutesSavedPerRun'],
+        'estimatedMinutesSavedPerRun'
+      ),
+      estimatedHoursSaved: this.readNumber(value['estimatedHoursSaved'], 'estimatedHoursSaved'),
+    };
+  }
+
   private readString(value: unknown, label: string): string {
     if (typeof value !== 'string' || !value.trim()) {
       throw new Error(`${label} must be a non-empty string.`);
@@ -153,6 +182,14 @@ export class DashboardService {
   private readNumber(value: unknown, label: string): number {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
       throw new TypeError(`${label} must be a number.`);
+    }
+
+    return value;
+  }
+
+  private readBoolean(value: unknown, label: string): boolean {
+    if (typeof value !== 'boolean') {
+      throw new TypeError(`${label} must be a boolean.`);
     }
 
     return value;

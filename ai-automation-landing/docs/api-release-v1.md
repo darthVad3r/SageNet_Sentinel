@@ -99,6 +99,18 @@ Get aggregated workflow and run statistics.
     "runningRunCount": 1,
     "succeededRunCount": 128,
     "failedRunCount": 5,
+    "totalRunCount": 137,
+    "totalEstimatedHoursSaved": 68.5,
+    "hasImpactData": true,
+    "automationImpact": [
+      {
+        "workflowId": "wf-123",
+        "workflowName": "Lead Qualification",
+        "runCount": 84,
+        "estimatedMinutesSavedPerRun": 30,
+        "estimatedHoursSaved": 42
+      }
+    ],
     "workflowsByStage": [
       { "stage": "discovery", "count": 5 },
       { "stage": "implementation", "count": 8 },
