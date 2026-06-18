@@ -160,8 +160,27 @@ describe('dashboard summary API handler', () => {
         return jsonResponse([{ stage: 'live' }, { stage: 'discovery' }], 200);
       }
 
+      if (
+        url.includes('/rest/v1/workflows') &&
+        url.includes('select=id%2Cname%2Cestimated_minutes_saved_per_run')
+      ) {
+        return jsonResponse(
+          [
+            { id: 'wf-1', name: 'Lead Qualification', estimated_minutes_saved_per_run: 30 },
+            { id: 'wf-2', name: 'Renewal Follow-up', estimated_minutes_saved_per_run: 15 },
+          ],
+          200
+        );
+      }
+
       if (url.includes('/rest/v1/workflow_runs') && url.includes('select=status')) {
-        return jsonResponse([{ status: 'queued' }, { status: 'succeeded' }], 200);
+        return jsonResponse(
+          [
+            { status: 'queued', workflow_id: 'wf-1' },
+            { status: 'succeeded', workflow_id: 'wf-1' },
+          ],
+          200
+        );
       }
 
       if (url.includes('/rest/v1/lead_submissions') && method === 'HEAD') {
@@ -197,11 +216,15 @@ describe('dashboard summary API handler', () => {
     const data = payload['data'] as Record<string, unknown>;
     expect(sortedKeys(data)).toEqual([
       'activeWorkflowCount',
+      'automationImpact',
       'failedRunCount',
+      'hasImpactData',
       'leadCount',
       'queuedRunCount',
       'runningRunCount',
       'succeededRunCount',
+      'totalEstimatedHoursSaved',
+      'totalRunCount',
       'workflowCount',
       'workflowsByStage',
     ]);
@@ -213,6 +236,9 @@ describe('dashboard summary API handler', () => {
       runningRunCount: 0,
       succeededRunCount: 1,
       failedRunCount: 0,
+      totalRunCount: 2,
+      totalEstimatedHoursSaved: 1,
+      hasImpactData: true,
     });
 
     const workflowsByStage = data['workflowsByStage'] as Array<Record<string, unknown>>;
@@ -222,6 +248,16 @@ describe('dashboard summary API handler', () => {
       expect(typeof stage['stage']).toBe('string');
       expect(typeof stage['count']).toBe('number');
     }
+
+    const automationImpact = data['automationImpact'] as Array<Record<string, unknown>>;
+    expect(automationImpact).toHaveLength(2);
+    expect(automationImpact[0]).toMatchObject({
+      workflowId: 'wf-1',
+      workflowName: 'Lead Qualification',
+      runCount: 2,
+      estimatedMinutesSavedPerRun: 30,
+      estimatedHoursSaved: 1,
+    });
   });
 
   it('returns 500 when admin client cannot be created', async () => {

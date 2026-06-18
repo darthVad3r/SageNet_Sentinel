@@ -26,6 +26,18 @@ describe('DashboardComponent', () => {
         runningRunCount: 0,
         succeededRunCount: 8,
         failedRunCount: 1,
+        totalRunCount: 10,
+        totalEstimatedHoursSaved: 4,
+        hasImpactData: true,
+        automationImpact: [
+          {
+            workflowId: 'wf-1',
+            workflowName: 'Lead Qualification',
+            runCount: 10,
+            estimatedMinutesSavedPerRun: 24,
+            estimatedHoursSaved: 4,
+          },
+        ],
         workflowsByStage: [
           { stage: 'discovery', count: 2 },
           { stage: 'live', count: 1 },
@@ -100,7 +112,7 @@ describe('DashboardComponent', () => {
       element.textContent?.trim()
     );
 
-    expect(kpiValues).toEqual(['12', '3', '10', '80%']);
+    expect(kpiValues).toEqual(['12', '3', '10', '4.0h']);
   });
 
   it('should render workflow stage breakdown when stages are available', async () => {
@@ -209,5 +221,34 @@ describe('DashboardComponent', () => {
     expect(host.querySelector('.activity-section__page-label')?.textContent).toContain(
       'Page 1 of 5'
     );
+  });
+
+  it('should show impact placeholders when no run data exists', async () => {
+    mockDashboardService.loadSummary.mockResolvedValue({
+      leadCount: 0,
+      workflowCount: 1,
+      activeWorkflowCount: 1,
+      queuedRunCount: 0,
+      runningRunCount: 0,
+      succeededRunCount: 0,
+      failedRunCount: 0,
+      totalRunCount: 0,
+      totalEstimatedHoursSaved: 0,
+      hasImpactData: false,
+      automationImpact: [],
+      workflowsByStage: [],
+    });
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    fixture.detectChanges();
+    await flushAsync();
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const kpiValues = Array.from(host.querySelectorAll('.kpi__value')).map((element) =>
+      element.textContent?.trim()
+    );
+
+    expect(kpiValues).toEqual(['0', '1', 'No activity yet', 'No impact data yet']);
   });
 });

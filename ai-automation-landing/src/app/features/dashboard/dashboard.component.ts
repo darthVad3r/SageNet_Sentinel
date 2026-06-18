@@ -507,18 +507,17 @@ export class DashboardComponent implements OnInit {
       return [
         { title: 'Leads Captured', value: '—', icon: 'LD' },
         { title: 'Active Automations', value: '—', icon: 'AU' },
-        { title: 'Workflow Runs', value: '—', icon: 'WF' },
-        { title: 'Success Rate', value: '—', icon: 'OK' },
+        { title: 'Tasks Automated', value: '—', icon: 'WF' },
+        { title: 'Hours Saved', value: '—', icon: 'OK' },
       ];
     }
 
-    const totalRuns =
-      summary.queuedRunCount +
-      summary.runningRunCount +
-      summary.succeededRunCount +
-      summary.failedRunCount;
-    const successRate =
-      totalRuns > 0 ? Math.round((summary.succeededRunCount / totalRuns) * 100) : 0;
+    const totalRuns = summary.totalRunCount;
+    const tasksAutomatedDisplay =
+      totalRuns > 0 ? totalRuns.toLocaleString('en-US') : 'No activity yet';
+    const hoursSavedDisplay = summary.hasImpactData
+      ? `${this.formatHours(summary.totalEstimatedHoursSaved)}h`
+      : 'No impact data yet';
 
     return [
       {
@@ -532,13 +531,13 @@ export class DashboardComponent implements OnInit {
         icon: 'AU',
       },
       {
-        title: 'Workflow Runs',
-        value: totalRuns.toLocaleString('en-US'),
+        title: 'Tasks Automated',
+        value: tasksAutomatedDisplay,
         icon: 'WF',
       },
       {
-        title: 'Success Rate',
-        value: `${successRate}%`,
+        title: 'Hours Saved',
+        value: hoursSavedDisplay,
         icon: 'OK',
       },
     ];
@@ -559,6 +558,13 @@ export class DashboardComponent implements OnInit {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+    });
+  }
+
+  private formatHours(value: number): string {
+    return value.toLocaleString('en-US', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
     });
   }
 

@@ -91,7 +91,8 @@ const dashResponse = await fetch('https://your-app.vercel.app/api/dashboard/summ
 
 const dashboard = await dashResponse.json();
 console.log('Active workflows:', dashboard.data.activeWorkflowCount);
-console.log('Queued runs:', dashboard.data.queuedRunCount);
+console.log('Tasks automated:', dashboard.data.totalRunCount);
+console.log('Estimated hours saved:', dashboard.data.totalEstimatedHoursSaved);
 console.log('By stage:', dashboard.data.workflowsByStage);
 ```
 
@@ -288,6 +289,18 @@ try {
     "runningRunCount": 1,
     "succeededRunCount": 89,
     "failedRunCount": 3,
+    "totalRunCount": 95,
+    "totalEstimatedHoursSaved": 47.5,
+    "hasImpactData": true,
+    "automationImpact": [
+      {
+        "workflowId": "wf-123",
+        "workflowName": "Lead Qualification",
+        "runCount": 95,
+        "estimatedMinutesSavedPerRun": 30,
+        "estimatedHoursSaved": 47.5
+      }
+    ],
     "workflowsByStage": [
       { "stage": "discovery", "count": 2 },
       { "stage": "implementation", "count": 2 },
