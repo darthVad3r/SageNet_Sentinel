@@ -14,17 +14,18 @@ export const buildRuntimeAuthConfig = (env = process.env) => ({
   provider: 'supabase',
   supabaseUrl: env['LAB_SUPABASE_URL'] ?? '',
   supabaseAnonKey: env['LAB_SUPABASE_ANON_KEY'] ?? '',
+  backendApiBaseUrl: env['LAB_BACKEND_API_BASE_URL'] ?? '',
 });
 
 const toSingleQuotedJsStringLiteral = (value) => {
   const serialized = JSON.stringify(value ?? '');
   const body = serialized.slice(1, -1);
-  const escaped = body.replaceAll("'", "\\'");
+  const escaped = body.replaceAll("'", String.raw`\'`);
   return `'${escaped}'`;
 };
 
 export const renderRuntimeAuthConfig = (runtimeAuthConfig) =>
-  `/* eslint-disable no-undef, no-underscore-dangle */\nwindow.__LAB_AUTH_CONFIG__ = {\n  enabled: ${runtimeAuthConfig.enabled ? 'true' : 'false'},\n  provider: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.provider)},\n  supabaseUrl: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.supabaseUrl)},\n  supabaseAnonKey: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.supabaseAnonKey)},\n};\n`;
+  `/* eslint-disable no-undef, no-underscore-dangle */\nglobalThis.__LAB_AUTH_CONFIG__ = {\n  enabled: ${runtimeAuthConfig.enabled ? 'true' : 'false'},\n  provider: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.provider)},\n  supabaseUrl: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.supabaseUrl)},\n  supabaseAnonKey: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.supabaseAnonKey)},\n};\n\nglobalThis.__LAB_RUNTIME_CONFIG__ = {\n  backendApiBaseUrl: ${toSingleQuotedJsStringLiteral(runtimeAuthConfig.backendApiBaseUrl)},\n};\n`;
 
 export const generateAuthConfig = ({
   env = process.env,

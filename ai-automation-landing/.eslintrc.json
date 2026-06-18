@@ -16,7 +16,7 @@
     "import/resolver": {
       "typescript": {
         "alwaysTryTypes": true,
-        "project": ["./tsconfig.app.json", "./tsconfig.spec.json"]
+        "project": ["./tsconfig.app.json", "./tsconfig.spec.json", "./tsconfig.api.json"]
       }
     }
   },
@@ -25,7 +25,7 @@
       "files": ["**/*.{ts,tsx}"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-        "project": ["./tsconfig.app.json", "./tsconfig.spec.json"]
+        "project": ["./tsconfig.app.json", "./tsconfig.spec.json", "./tsconfig.api.json"]
       },
       "extends": ["airbnb-typescript", "airbnb/hooks", "prettier"],
       "plugins": ["@typescript-eslint", "import", "jsx-a11y", "react", "react-hooks", "prettier"],

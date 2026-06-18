@@ -1,0 +1,24 @@
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'ai-automation-landing/**'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '*.md'
+
+workflows:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+
+automation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/commands/**'
+          - '.github/agents/**'
+          - '.github/skills/**'
+          - '.github/hooks/**'
+          - '.github/integrations/**'
