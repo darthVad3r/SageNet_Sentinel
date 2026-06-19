@@ -7,6 +7,14 @@ export interface DashboardWorkflowStageBreakdown {
   readonly count: number;
 }
 
+export interface DashboardAutomationImpact {
+  readonly workflowId: string;
+  readonly workflowName: string;
+  readonly runCount: number;
+  readonly estimatedMinutesSavedPerRun: number;
+  readonly estimatedHoursSaved: number;
+}
+
 export interface DashboardSummary {
   readonly leadCount: number;
   readonly workflowCount: number;
@@ -15,6 +23,10 @@ export interface DashboardSummary {
   readonly runningRunCount: number;
   readonly succeededRunCount: number;
   readonly failedRunCount: number;
+  readonly totalRunCount: number;
+  readonly totalEstimatedHoursSaved: number;
+  readonly hasImpactData: boolean;
+  readonly automationImpact: readonly DashboardAutomationImpact[];
   readonly workflowsByStage: readonly DashboardWorkflowStageBreakdown[];
 }
 

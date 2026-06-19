@@ -50,6 +50,18 @@ describe('DashboardService', () => {
         runningRunCount: 2,
         succeededRunCount: 8,
         failedRunCount: 1,
+        totalRunCount: 12,
+        totalEstimatedHoursSaved: 4.5,
+        hasImpactData: true,
+        automationImpact: [
+          {
+            workflowId: 'wf-1',
+            workflowName: 'Lead Qualification',
+            runCount: 9,
+            estimatedMinutesSavedPerRun: 30,
+            estimatedHoursSaved: 4.5,
+          },
+        ],
         workflowsByStage: [
           { stage: 'discovery', count: 2 },
           { stage: 'live', count: 1 },
@@ -59,6 +71,9 @@ describe('DashboardService', () => {
 
     const result = await resultPromise;
     expect(result.leadCount).toBe(12);
+    expect(result.totalEstimatedHoursSaved).toBe(4.5);
+    expect(result.hasImpactData).toBe(true);
+    expect(result.automationImpact[0]?.workflowName).toBe('Lead Qualification');
     expect(result.workflowsByStage).toHaveLength(2);
     expect(result.workflowsByStage[0]).toEqual({ stage: 'discovery', count: 2 });
   });
@@ -80,12 +95,18 @@ describe('DashboardService', () => {
         runningRunCount: 0,
         succeededRunCount: 0,
         failedRunCount: 0,
+        totalRunCount: 0,
+        totalEstimatedHoursSaved: 0,
+        hasImpactData: false,
+        automationImpact: [],
         workflowsByStage: [],
       },
     });
 
     const result = await resultPromise;
     expect(result.workflowsByStage).toEqual([]);
+    expect(result.automationImpact).toEqual([]);
+    expect(result.hasImpactData).toBe(false);
   });
 
   it('loads and parses recent runs', async () => {
