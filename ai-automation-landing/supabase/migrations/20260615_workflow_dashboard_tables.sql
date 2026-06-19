@@ -10,11 +10,15 @@ create table if not exists public.workflows (
   client text not null,
   stage text not null check (stage in ('discovery', 'implementation', 'testing', 'live', 'paused')),
   status text not null check (status in ('active', 'paused', 'archived')),
+  estimated_minutes_saved_per_run integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   steps_json jsonb not null default '[]'::jsonb,
   stage_history_json jsonb not null default '[]'::jsonb
 );
+
+alter table if exists public.workflows
+  add column if not exists estimated_minutes_saved_per_run integer not null default 0;
 
 create table if not exists public.workflow_runs (
   id uuid primary key default gen_random_uuid(),
