@@ -23,7 +23,7 @@ import {
                 <input
                   type="checkbox"
                   [checked]="item.completed"
-                  (change)="setStepCompleted(item.id, $any($event.target).checked)"
+                  (change)="setStepCompleted(item.id, ($event.target as HTMLInputElement).checked)"
                 />
                 <span>{{ item.label }}</span>
               </label>
