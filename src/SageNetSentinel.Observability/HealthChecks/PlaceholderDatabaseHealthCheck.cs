@@ -7,6 +7,6 @@ public class PlaceholderDatabaseHealthCheck : IHealthCheck
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
         // TODO(platform-team): Replace with real database connectivity checks.
-        return Task.FromResult(HealthCheckResult.Healthy("Database check placeholder configured"));
+        return Task.FromResult(HealthCheckResult.Degraded("Database check not yet implemented"));
     }
 }

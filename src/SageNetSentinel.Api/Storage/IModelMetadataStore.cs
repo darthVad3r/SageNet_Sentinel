@@ -1,6 +1,8 @@
+using SageNetSentinel.Api.Models;
+
 namespace SageNetSentinel.Api.Storage;
 
 public interface IModelMetadataStore
 {
-    IReadOnlyCollection<object> GetModels();
+    IReadOnlyCollection<ModelMetadata> GetModels();
 }
