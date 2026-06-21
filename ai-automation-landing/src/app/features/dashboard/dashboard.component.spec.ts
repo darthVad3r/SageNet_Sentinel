@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DashboardService } from '@core/services/dashboard.service';
+import { AppStore } from '../../state/app.store';
 import { DashboardComponent } from './dashboard.component';
 
 // Flush all pending microtasks/Promises before checking rendered output.
@@ -63,6 +64,7 @@ describe('DashboardComponent', () => {
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
+        AppStore,
         {
           provide: DashboardService,
           useValue: mockDashboardService,
