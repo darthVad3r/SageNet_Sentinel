@@ -23,7 +23,7 @@ import {
                 <input
                   type="checkbox"
                   [checked]="item.completed"
-                  (change)="setStepCompleted(item.id, ($event.target as HTMLInputElement).checked)"
+                  (change)="setStepCompletedFromEvent(item.id, $event)"
                 />
                 <span>{{ item.label }}</span>
               </label>
@@ -102,5 +102,10 @@ export class OnboardingGuideComponent {
 
   setStepCompleted(stepId: OnboardingChecklistStepId, completed: boolean): void {
     this.onboardingGuide.setStepCompleted(stepId, completed);
+  }
+
+  setStepCompletedFromEvent(stepId: OnboardingChecklistStepId, event: Event): void {
+    const completed = (event.target as HTMLInputElement | null)?.checked ?? false;
+    this.setStepCompleted(stepId, completed);
   }
 }
