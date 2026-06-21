@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { SeoMetadata } from '@core/services/seo.service';
+import { canActivateAuthGuard } from './core/guards/auth.guard';
 
 const homeSeo: SeoMetadata = {
   title: 'AI Automation Lab | Agent Workflow Architecture',
@@ -103,6 +104,20 @@ const workflowsSeo: SeoMetadata = {
   canonicalUrl: 'https://example.com/workflows',
 };
 
+const workflowBuilderSeo: SeoMetadata = {
+  title: 'Workflow Builder | AI Automation Lab',
+  description:
+    'Draft workflow steps, review lifecycle checkpoints, and prepare automation flows for delivery.',
+  canonicalUrl: 'https://example.com/workflow-builder',
+};
+
+const automationEditorSeo: SeoMetadata = {
+  title: 'Automation Editor | AI Automation Lab',
+  description:
+    'Shape workflow steps, trigger logic, and release checks in the AI Automation Lab automation editor.',
+  canonicalUrl: 'https://example.com/automation-editor',
+};
+
 const settingsSeo: SeoMetadata = {
   title: 'Settings | AI Automation Lab',
   description:
@@ -162,10 +177,7 @@ export const routes: Routes = [
         path: 'dashboard',
         title: dashboardSeo.title,
         data: { seo: dashboardSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadChildren: () =>
           import('@features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
@@ -173,21 +185,35 @@ export const routes: Routes = [
         path: 'workflows',
         title: workflowsSeo.title,
         data: { seo: workflowsSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('@features/workflows/workflows.component').then((m) => m.WorkflowsComponent),
+      },
+      {
+        path: 'workflow-builder',
+        title: workflowBuilderSeo.title,
+        data: { seo: workflowBuilderSeo },
+        canActivate: [canActivateAuthGuard],
+        loadComponent: () =>
+          import('./features/workflow-builder/workflow-builder.component').then(
+            (m) => m.WorkflowBuilderComponent
+          ),
+      },
+      {
+        path: 'automation-editor',
+        title: automationEditorSeo.title,
+        data: { seo: automationEditorSeo },
+        canActivate: [canActivateAuthGuard],
+        loadComponent: () =>
+          import('./features/automation-editor/automation-editor.component').then(
+            (m) => m.AutomationEditorComponent
+          ),
       },
       {
         path: 'settings',
         title: settingsSeo.title,
         data: { seo: settingsSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('@features/settings/settings.component').then((m) => m.SettingsComponent),
       },
@@ -195,10 +221,7 @@ export const routes: Routes = [
         path: 'auth-test',
         title: authTestSeo.title,
         data: { seo: authTestSeo },
-        canActivate: [
-          (route, state) =>
-            import('@core/guards/auth.guard').then((m) => m.canActivateAuthGuard(route, state)),
-        ],
+        canActivate: [canActivateAuthGuard],
         loadComponent: () =>
           import('./modules/auth-test/auth-test-page.component').then(
             (m) => m.AuthTestPageComponent

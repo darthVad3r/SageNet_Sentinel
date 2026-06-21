@@ -23,13 +23,13 @@ export const projectProgressMock: readonly ProgressRecord[] = [
     id: 'workflow-builder',
     title: 'Workflow Builder',
     status: 'in-progress',
-    percent: 35,
+    percent: 45,
   },
   {
     id: 'automation-editor',
     title: 'Automation Editor',
-    status: 'not-started',
-    percent: 0,
+    status: 'in-progress',
+    percent: 15,
   },
   {
     id: 'analytics-pipeline',

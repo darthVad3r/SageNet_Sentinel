@@ -9,6 +9,9 @@ import { LoginPageComponent } from './login-page.component';
 describe('LoginPageComponent', () => {
   const login = vi.fn();
   const isConfigured = vi.fn();
+  const isInitialized = vi.fn();
+  const initialize = vi.fn();
+  const loginError = vi.fn();
   const navigateByUrl = vi.fn();
 
   const createComponent = (redirectTo: string | null): LoginPageComponent => {
@@ -20,6 +23,9 @@ describe('LoginPageComponent', () => {
           useValue: {
             login,
             isConfigured,
+            isInitialized,
+            initialize,
+            loginError,
           },
         },
         {
@@ -45,8 +51,13 @@ describe('LoginPageComponent', () => {
   beforeEach(() => {
     login.mockReset();
     isConfigured.mockReset();
+    isInitialized.mockReset();
+    initialize.mockReset();
+    loginError.mockReset();
     navigateByUrl.mockReset();
+    isInitialized.mockReturnValue(true);
     isConfigured.mockReturnValue(true);
+    loginError.mockReturnValue(null);
   });
 
   it('navigates to redirectTo after successful login', async () => {
@@ -86,6 +97,9 @@ describe('LoginPageComponent', () => {
 
   it('shows an error and stays on page when login fails', async () => {
     login.mockResolvedValue(false);
+    loginError.mockReturnValue(
+      'Invalid login credentials. Verify email/password for this Supabase project.'
+    );
     const component = createComponent('/dashboard');
     component.email = 'owner@example.com';
     component.password = 'bad-password';
@@ -94,7 +108,7 @@ describe('LoginPageComponent', () => {
 
     expect(navigateByUrl).not.toHaveBeenCalled();
     expect(component.errorMessage()).toBe(
-      'Sign-in failed. Verify your Supabase credentials and user account.'
+      'Invalid login credentials. Verify email/password for this Supabase project.'
     );
   });
 
@@ -108,6 +122,9 @@ describe('LoginPageComponent', () => {
           useValue: {
             login,
             isConfigured,
+            isInitialized,
+            initialize,
+            loginError,
           },
         },
         {

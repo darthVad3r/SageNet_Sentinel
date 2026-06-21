@@ -1,4 +1,4 @@
-import { computed, Injectable, inject, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 import { UserMetadata } from '../../state/app.state';
@@ -25,6 +25,8 @@ export class AuthService {
 
   private readonly configuredState = signal(false);
 
+  private readonly loginErrorState = signal<string | null>(null);
+
   private client: SupabaseClient | null = null;
 
   private authStateChangeUnsubscribe: (() => void) | null = null;
@@ -34,6 +36,8 @@ export class AuthService {
   readonly isInitialized = this.initializedState.asReadonly();
 
   readonly isConfigured = this.configuredState.asReadonly();
+
+  readonly loginError = this.loginErrorState.asReadonly();
 
   readonly user = computed(() => this.sessionState()?.user ?? null);
 
@@ -89,21 +93,38 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<boolean> {
+    this.loginErrorState.set(null);
+
     if (!this.client) {
+      this.loginErrorState.set(
+        'Authentication provider is not initialized yet. Refresh and retry.'
+      );
       return false;
     }
 
-    const { data, error } = await this.client.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    try {
+      const { data, error } = await this.client.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (error || !data.session) {
+      if (error) {
+        this.loginErrorState.set(this.toUserFacingAuthError(error.message));
+        return false;
+      }
+
+      if (!data.session) {
+        this.loginErrorState.set('Sign-in did not return a session. Please try again.');
+        return false;
+      }
+
+      this.syncSession(data.session);
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : null;
+      this.loginErrorState.set(this.toUserFacingAuthError(message));
       return false;
     }
-
-    this.syncSession(data.session);
-    return true;
   }
 
   async logout(): Promise<void> {
@@ -167,5 +188,27 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  private toUserFacingAuthError(message: string | null | undefined): string {
+    if (!message) {
+      return 'Unable to sign in right now. Please try again.';
+    }
+
+    const normalized = message.toLowerCase();
+
+    if (normalized.includes('email not confirmed')) {
+      return 'Email is not confirmed in Supabase. Confirm the account and retry.';
+    }
+
+    if (normalized.includes('invalid login credentials')) {
+      return 'Invalid login credentials. Verify email/password for this Supabase project.';
+    }
+
+    if (normalized.includes('network') || normalized.includes('fetch')) {
+      return 'Network error contacting Supabase. Check connectivity and project URL.';
+    }
+
+    return message;
   }
 }

@@ -15,7 +15,7 @@ class HostComponent {
 }
 
 describe('TypographySystemComponent', () => {
-  beforeEach(async () => {
+  beforeAll(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
     }).compileComponents();

@@ -53,7 +53,10 @@ The app uses `@supabase/supabase-js` as the authentication provider SDK.
 
 Before `start`, `build`, `test`, and `typecheck`, the project runs `npm run auth:config`.
 
-That script reads `.env.local` and generates `src/assets/runtime/auth-config.js`, which is loaded by `src/index.html` before Angular bootstraps. The resulting runtime config is exposed on `window.__LAB_AUTH_CONFIG__`.
+That script reads `.env.local` and generates `src/assets/runtime/auth-config.js`, which is loaded by `src/index.html` before Angular bootstraps. The runtime configuration is exposed on:
+
+- `window.__LAB_AUTH_CONFIG__` (auth provider settings)
+- `window.__LAB_RUNTIME_CONFIG__` (backend API settings)
 
 If `.env.local` is missing or `LAB_AUTH_ENABLED` is not `true`, login stays disabled for that environment.
 
@@ -69,6 +72,7 @@ If `.env.local` is missing or `LAB_AUTH_ENABLED` is not `true`, login stays disa
 Client behavior:
 
 - For same-origin API requests (`/api/*`), the HTTP interceptor sends `Authorization: Bearer <token>`.
+- If `LAB_BACKEND_API_BASE_URL` is set, the interceptor also sends bearer tokens to `${LAB_BACKEND_API_BASE_URL}/api/*`.
 
 Server expectation:
 
@@ -77,7 +81,26 @@ Server expectation:
 
 ### Lead Intake API Contract
 
-The booking flow now submits to same-origin `POST /api/leads` and the settings export view reads from `GET /api/leads`.
+The booking flow submits to `POST /api/leads` and the settings export view reads from `GET /api/leads`.
+
+- Default behavior targets same-origin routes.
+- If `LAB_BACKEND_API_BASE_URL` is set, client requests are sent to `${LAB_BACKEND_API_BASE_URL}/api/leads`.
+
+### Workflow Management API Contract
+
+The `/workflows` route now uses backend workflow APIs for CRUD, lifecycle updates, run triggering, and run history.
+
+- `GET /api/workflows`
+- `POST /api/workflows`
+- `PUT /api/workflows/{workflowId}`
+- `DELETE /api/workflows/{workflowId}`
+- `POST /api/workflows/{workflowId}/runs`
+- `GET /api/workflows/{workflowId}/runs?page=&pageSize=`
+
+All workflow requests use the same runtime API base URL logic as lead intake:
+
+- default same-origin (`/api/*`)
+- optional `${LAB_BACKEND_API_BASE_URL}` override for split frontend/backend local development
 
 Required backend environment variables:
 
@@ -87,6 +110,10 @@ Required backend environment variables:
 Optional notification variable:
 
 - `LAB_LEAD_NOTIFICATION_WEBHOOK_URL`
+
+Optional frontend runtime variable:
+
+- `LAB_BACKEND_API_BASE_URL`
 
 The `/api/leads` function expects a Supabase table named `lead_submissions` with columns matching the server mapping in `api/leads.ts`.
 
