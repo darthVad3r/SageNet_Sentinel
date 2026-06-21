@@ -8,6 +8,9 @@ namespace SageNetSentinel.Api.Controllers;
 [Route("api/[controller]")]
 public class ModelManagementController : ControllerBase
 {
+    private const string ModelVersion = "1.0.0";
+    private const string Framework = "ML.NET 5.0";
+    private const string Algorithm = "LightGBM";
     private readonly IModelTrainer _modelTrainer;
     private readonly ILogger<ModelManagementController> _logger;
 
@@ -41,9 +44,9 @@ public class ModelManagementController : ControllerBase
         return Ok(new
         {
             mlNetModelLoaded = _modelTrainer.IsModelLoaded,
-            modelVersion = "1.0.0",
-            framework = "ML.NET 5.0",
-            algorithm = "LightGBM"
+            modelVersion = ModelVersion,
+            framework = Framework,
+            algorithm = Algorithm
         });
     }
 }

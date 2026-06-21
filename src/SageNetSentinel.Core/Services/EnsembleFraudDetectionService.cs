@@ -40,7 +40,7 @@ public class EnsembleFraudDetectionService : IFraudDetectionService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Prediction from {ServiceName} failed for transaction {TransactionId}", service.ServiceName, transaction.TransactionId);
+                _logger.LogError(ex, "Prediction from {ServiceName} failed", service.ServiceName);
             }
         }
 

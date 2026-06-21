@@ -21,6 +21,11 @@ public class FraudScoringGrpcService : Protos.FraudScoringService.FraudScoringSe
         // TODO(platform-team): Integrate gRPC service with service registry/discovery.
 
         var transaction = request.Transaction;
+        if (!DateTime.TryParse(transaction.TimestampUtc, out var parsedTimestamp))
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid transaction timestamp_utc."));
+        }
+
         var prediction = await _fraudDetectionService.PredictAsync(new TransactionContract
         {
             TenantId = transaction.TenantId,
@@ -30,7 +35,7 @@ public class FraudScoringGrpcService : Protos.FraudScoringService.FraudScoringSe
             MerchantCategory = transaction.MerchantCategory,
             Location = transaction.Location,
             Country = transaction.Country,
-            Timestamp = DateTime.TryParse(transaction.TimestampUtc, out var parsed) ? parsed : DateTime.UtcNow,
+            Timestamp = parsedTimestamp,
             UserId = transaction.UserId,
             CardLastFour = transaction.CardLastFour,
             TransactionType = transaction.TransactionType,

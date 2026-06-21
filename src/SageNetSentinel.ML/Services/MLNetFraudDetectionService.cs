@@ -164,7 +164,7 @@ public class MLNetFraudDetectionService : IFraudDetectionService, IModelTrainer
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error making prediction for transaction {TransactionId}", transaction.TransactionId);
+            _logger.LogError(ex, "Error making prediction");
             throw;
         }
     }

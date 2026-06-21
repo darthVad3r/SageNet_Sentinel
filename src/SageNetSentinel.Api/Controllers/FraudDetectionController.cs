@@ -25,9 +25,21 @@ public class FraudDetectionController : ControllerBase
     {
         try
         {
+            if (!string.IsNullOrWhiteSpace(request.TenantId)
+                && !string.IsNullOrWhiteSpace(request.Transaction.TenantId)
+                && !string.Equals(request.TenantId, request.Transaction.TenantId, StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { error = "TenantId mismatch between request and transaction." });
+            }
+
             request.Transaction.TenantId = string.IsNullOrWhiteSpace(request.Transaction.TenantId)
                 ? request.TenantId
                 : request.Transaction.TenantId;
+
+            if (string.IsNullOrWhiteSpace(request.Transaction.TenantId))
+            {
+                return BadRequest(new { error = "TenantId is required." });
+            }
 
             using var _ = _logger.BeginTenantScope(request.Transaction);
             var prediction = await _fraudDetectionService.PredictAsync(request.Transaction);
@@ -35,7 +47,7 @@ public class FraudDetectionController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error analyzing transaction {TransactionId}", request.Transaction.TransactionId);
+            _logger.LogError(ex, "Error analyzing transaction request");
             return BadRequest(new { error = ex.Message });
         }
     }
