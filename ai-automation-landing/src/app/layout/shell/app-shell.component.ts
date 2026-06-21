@@ -134,6 +134,10 @@ type NavigationItem = {
         cursor: pointer;
       }
 
+      .app-shell__help-menu summary::marker {
+        content: '';
+      }
+
       .app-shell__help-menu summary::-webkit-details-marker {
         display: none;
       }
