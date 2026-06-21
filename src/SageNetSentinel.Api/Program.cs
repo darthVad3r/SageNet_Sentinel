@@ -8,6 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
+// Register HTTP context accessor and TenantContext factory
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped(sp =>
+{
+    var accessor = sp.GetRequiredService<IHttpContextAccessor>();
+    var tenantId = accessor.HttpContext?.Request.Headers[SageNetSentinel.Contracts.TenantContext.HeaderName].FirstOrDefault() ?? "default";
+    return new SageNetSentinel.Contracts.TenantContext { TenantId = tenantId };
+});
+
+// Observability scaffolding (placeholder)
+builder.Services.AddObservability(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
