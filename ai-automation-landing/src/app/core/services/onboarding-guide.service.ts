@@ -191,6 +191,10 @@ export class OnboardingGuideService {
       return null;
     }
 
-    return localStorage;
+    try {
+      return localStorage;
+    } catch {
+      return null;
+    }
   }
 }
