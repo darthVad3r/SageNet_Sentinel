@@ -9,6 +9,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
+import { OnboardingGuideService } from '../../core/services/onboarding-guide.service';
 import { SeoMetadata, SeoService } from '../../core/services/seo.service';
 import { AppStore } from '../../state/app.store';
 
@@ -41,6 +42,19 @@ type NavigationItem = {
             <span>Core application shell</span>
           </span>
         </a>
+
+        <details class="app-shell__help-menu">
+          <summary>Help</summary>
+          <div class="app-shell__help-panel">
+            <button
+              type="button"
+              [disabled]="!store.hasActiveSession()"
+              (click)="reopenOnboardingGuide($event)"
+            >
+              Re-open onboarding guide
+            </button>
+          </div>
+        </details>
       </header>
 
       <div class="app-shell__layout">
@@ -99,6 +113,58 @@ type NavigationItem = {
         gap: var(--lab-space-3);
         border-bottom: 1px solid var(--lab-line);
         background: var(--lab-surface);
+      }
+
+      .app-shell__help-menu {
+        margin-left: auto;
+        position: relative;
+      }
+
+      .app-shell__help-menu summary {
+        list-style: none;
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.25rem;
+        padding: 0 var(--lab-space-3);
+        border: 1px solid var(--lab-line);
+        border-radius: var(--lab-radius-md);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .app-shell__help-menu summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .app-shell__help-panel {
+        position: absolute;
+        top: calc(100% + var(--lab-space-2));
+        right: 0;
+        min-width: 220px;
+        padding: var(--lab-space-2);
+        border: 1px solid var(--lab-line);
+        border-radius: var(--lab-radius-md);
+        background: var(--lab-surface);
+        box-shadow: var(--lab-shadow-2);
+        z-index: 40;
+      }
+
+      .app-shell__help-panel button {
+        width: 100%;
+        border: 1px solid var(--lab-line);
+        border-radius: var(--lab-radius-md);
+        background: var(--lab-surface);
+        color: var(--lab-ink);
+        padding: var(--lab-space-2) var(--lab-space-3);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .app-shell__help-panel button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .app-shell__menu-toggle {
@@ -247,6 +313,8 @@ export class AppShellComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
+  private readonly onboardingGuide = inject(OnboardingGuideService);
+
   readonly store = inject(AppStore);
 
   readonly navigationItems: NavigationItem[] = [
@@ -286,5 +354,13 @@ export class AppShellComponent implements OnInit {
 
   closeSidebar(): void {
     this.store.setSidebarOpen(false);
+  }
+
+  reopenOnboardingGuide(event: Event): void {
+    this.onboardingGuide.reopenGuide();
+
+    const trigger = event.currentTarget as HTMLElement | null;
+    const detailsElement = trigger?.closest('details');
+    detailsElement?.removeAttribute('open');
   }
 }

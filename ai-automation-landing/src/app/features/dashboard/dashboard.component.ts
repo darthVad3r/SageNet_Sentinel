@@ -11,6 +11,7 @@ import { DashboardService } from '@core/services/dashboard.service';
 import { QuickActionShortcutsComponent } from '../../dashboard/components/quick-action-shortcuts/quick-action-shortcuts.component';
 
 import { KpiCardComponent } from './kpi-card.component';
+import { OnboardingGuideComponent } from './onboarding-guide.component';
 import { ProgressSectionComponent } from './progress-section.component';
 
 interface KpiMetric {
@@ -22,7 +23,12 @@ interface KpiMetric {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [KpiCardComponent, ProgressSectionComponent, QuickActionShortcutsComponent],
+  imports: [
+    KpiCardComponent,
+    ProgressSectionComponent,
+    QuickActionShortcutsComponent,
+    OnboardingGuideComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard">
@@ -38,6 +44,8 @@ interface KpiMetric {
           <p class="dashboard__error" role="alert">{{ errorMessage }}</p>
         }
       </header>
+
+      <app-onboarding-guide />
 
       <section class="kpi-section" aria-label="Key performance indicators">
         <h2>KPIs</h2>
