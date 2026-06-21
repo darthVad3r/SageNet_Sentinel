@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "SageNetSentinel.Grpc.Protos";
+
+package sagenet.v1;
+
+import "Protos/transaction.proto";
+
+message FraudScoringRequest {
+  TransactionData transaction = 1;
+}
+
+message FraudScoringResponse {
+  string tenant_id = 1;
+  string transaction_id = 2;
+  bool is_fraudulent = 3;
+  float fraud_probability = 4;
+  float confidence_score = 5;
+  repeated string risk_factors = 6;
+  string recommended_action = 7;
+  string prediction_source = 8;
+}
+
+service FraudScoringService {
+  rpc Score(FraudScoringRequest) returns (FraudScoringResponse);
+}
