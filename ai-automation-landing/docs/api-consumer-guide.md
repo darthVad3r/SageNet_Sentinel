@@ -439,6 +439,8 @@ const workflows = await Promise.all(
 - Log API requests and responses (exclude sensitive data)
 - Track response times and error rates
 - Set up alerts for endpoint failures
+- Check `GET /api/health` for liveness
+- Check `GET /api/ready` before promoting across environments
 
 ```typescript
 class ApiLogger {

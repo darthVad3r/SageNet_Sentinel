@@ -41,6 +41,71 @@ X-Request-ID: req-1718456400000-abc12345
 
 This allows correlating all logs for a single request across services.
 
+## Health Endpoints
+
+Two unauthenticated operational endpoints are available for runtime checks:
+
+- `GET /api/health` for liveness
+- `GET /api/ready` for readiness
+
+### Liveness
+
+`/api/health` returns `200 OK` when the API runtime is up and able to respond.
+
+Example response:
+
+```json
+{
+  "status": "ok",
+  "service": "workflow-api",
+  "environment": "production",
+  "revision": "abc123def456",
+  "timestamp": "2026-06-21T03:15:00.000Z",
+  "uptimeSeconds": 42
+}
+```
+
+Use this for:
+
+- platform liveness probes
+- smoke checks after deploy
+- quick operator verification
+
+### Readiness
+
+`/api/ready` returns `200 OK` only when critical runtime dependencies are ready:
+
+- required Supabase environment variables are present
+- Supabase admin connectivity succeeds
+
+If a required dependency is unavailable, it returns `503 Service Unavailable` with per-check details.
+
+Example response:
+
+```json
+{
+  "status": "ready",
+  "service": "workflow-api",
+  "timestamp": "2026-06-21T03:15:00.000Z",
+  "checks": {
+    "environment": {
+      "status": "pass",
+      "detail": "Required environment variables are configured."
+    },
+    "supabase": {
+      "status": "pass",
+      "detail": "Supabase connectivity verified."
+    }
+  }
+}
+```
+
+Use this for:
+
+- deployment verification gates
+- promotion checks across `dev`, `qa`, `uat`, and `main`
+- alerting when critical dependencies become unavailable
+
 ## Metrics to Monitor
 
 ### Response Times
