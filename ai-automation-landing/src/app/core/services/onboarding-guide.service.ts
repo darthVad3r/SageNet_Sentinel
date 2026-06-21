@@ -151,7 +151,13 @@ export class OnboardingGuideService {
       return null;
     }
 
-    const raw = storage.getItem(this.storageKey(userId));
+    let raw: string | null;
+    try {
+      raw = storage.getItem(this.storageKey(userId));
+    } catch {
+      return null;
+    }
+
     if (!raw) {
       return null;
     }
