@@ -28,12 +28,9 @@ const STEP_DEFINITIONS: ReadonlyArray<{ id: OnboardingChecklistStepId; label: st
   { id: 'schedule-review-call', label: 'Schedule review call' },
 ];
 
-const DEFAULT_STEP_STATE: Record<OnboardingChecklistStepId, boolean> = {
-  'complete-questionnaire': false,
-  'connect-tools': false,
-  'review-roadmap': false,
-  'schedule-review-call': false,
-};
+const DEFAULT_STEP_STATE: Record<OnboardingChecklistStepId, boolean> = Object.fromEntries(
+  STEP_DEFINITIONS.map(({ id }) => [id, false])
+) as Record<OnboardingChecklistStepId, boolean>;
 
 @Injectable({ providedIn: 'root' })
 export class OnboardingGuideService {
