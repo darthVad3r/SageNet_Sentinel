@@ -9,3 +9,7 @@ Key features:
 - **Flexible & Extensible**: Designed for easy customization and expansion to fit a variety of fraud detection needs.
 
 This app is ideal for organizations seeking efficient, scalable, and accurate fraud detection with modern .NET and cloud-based ML workflows.
+
+## Platform Integration
+
+SageNet Sentinel now includes REST, gRPC, and Kinesis-ready scaffolding with observability and multi-tenant foundations. See `docs/PLATFORM_INTEGRATION.md` for endpoint and configuration details.

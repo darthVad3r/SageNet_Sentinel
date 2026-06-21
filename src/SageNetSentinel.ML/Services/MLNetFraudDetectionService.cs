@@ -3,7 +3,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.LightGbm;
 using SageNetSentinel.Contracts;
-using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.Core.Abstractions;
 using SageNetSentinel.ML.Models;
 using Microsoft.Extensions.Logging;
 
@@ -151,6 +151,7 @@ public class MLNetFraudDetectionService : IFraudDetectionService, IModelTrainer
 
             return new FraudPrediction
             {
+                TenantId = transaction.TenantId,
                 TransactionId = transaction.TransactionId,
                 IsFraudulent = output.IsFraud,
                 FraudProbability = output.Probability,

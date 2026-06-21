@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\SageNetSentinel.Contracts\SageNetSentinel.Contracts.csproj" />
-    <ProjectReference Include="..\SageNetSentinel.SageMaker\SageNetSentinel.SageMaker.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.Core\SageNetSentinel.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
     <PackageReference Include="Microsoft.ML" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.LightGbm" Version="5.0.0" />
   </ItemGroup>
@@ -15,5 +15,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
 </Project>

@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\SageNetSentinel.Contracts\SageNetSentinel.Contracts.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.Core\SageNetSentinel.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,5 +14,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
 </Project>

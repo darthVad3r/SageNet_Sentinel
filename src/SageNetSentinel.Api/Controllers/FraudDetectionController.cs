@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SageNetSentinel.Contracts;
-using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.Core.Abstractions;
+using SageNetSentinel.Observability.Logging;
 
 namespace SageNetSentinel.Api.Controllers;
 
@@ -11,92 +12,53 @@ public class FraudDetectionController : ControllerBase
     private readonly IFraudDetectionService _fraudDetectionService;
     private readonly ILogger<FraudDetectionController> _logger;
 
-    public FraudDetectionController(
-        IFraudDetectionService fraudDetectionService,
-        ILogger<FraudDetectionController> logger)
+    public FraudDetectionController(IFraudDetectionService fraudDetectionService, ILogger<FraudDetectionController> logger)
     {
-        _fraudDetectionService = fraudDetectionService ?? throw new ArgumentNullException(nameof(fraudDetectionService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _fraudDetectionService = fraudDetectionService;
+        _logger = logger;
     }
 
-    /// <summary>
-    /// Analyze a single transaction for fraud
-    /// </summary>
     [HttpPost("analyze")]
     [ProducesResponseType(typeof(FraudPrediction), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<FraudPrediction>> AnalyzeTransaction(
-        [FromBody] FraudDetectionRequest request)
+    public async Task<ActionResult<FraudPrediction>> AnalyzeTransaction([FromBody] FraudDetectionRequest request)
     {
         try
         {
-            _logger.LogInformation(
-                "Analyzing transaction {TransactionId} for fraud",
-                request.Transaction.TransactionId);
+            request.Transaction.TenantId = string.IsNullOrWhiteSpace(request.Transaction.TenantId)
+                ? request.TenantId
+                : request.Transaction.TenantId;
 
-            var prediction = await _fraudDetectionService.PredictAsync(
-                request.Transaction);
-
-            _logger.LogInformation(
-                "Transaction {TransactionId} analyzed: IsFraud={IsFraud}, Probability={Probability:F3}, Action={Action}",
-                request.Transaction.TransactionId,
-                prediction.IsFraudulent,
-                prediction.FraudProbability,
-                prediction.RecommendedAction);
-
+            using var _ = _logger.BeginTenantScope(request.Transaction);
+            var prediction = await _fraudDetectionService.PredictAsync(request.Transaction);
             return Ok(prediction);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error analyzing transaction {TransactionId}",
-                request.Transaction.TransactionId);
+            _logger.LogError(ex, "Error analyzing transaction {TransactionId}", request.Transaction.TransactionId);
             return BadRequest(new { error = ex.Message });
         }
     }
 
-    /// <summary>
-    /// Analyze multiple transactions in batch
-    /// </summary>
     [HttpPost("analyze/batch")]
     [ProducesResponseType(typeof(List<FraudPrediction>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<FraudPrediction>>> AnalyzeBatch(
-        [FromBody] List<TransactionData> transactions)
+    public async Task<ActionResult<List<FraudPrediction>>> AnalyzeBatch([FromBody] List<TransactionData> transactions)
     {
-        try
+        var predictions = new List<FraudPrediction>();
+
+        foreach (var transaction in transactions)
         {
-            _logger.LogInformation("Analyzing batch of {Count} transactions", transactions.Count);
-
-            var predictions = new List<FraudPrediction>();
-            
-            foreach (var transaction in transactions)
-            {
-                var prediction = await _fraudDetectionService.PredictAsync(transaction);
-                predictions.Add(prediction);
-            }
-
-            var fraudCount = predictions.Count(p => p.IsFraudulent);
-            _logger.LogInformation(
-                "Batch analysis complete: {Total} transactions, {Fraud} flagged as fraud",
-                predictions.Count, fraudCount);
-
-            return Ok(predictions);
+            using var _ = _logger.BeginTenantScope(transaction);
+            predictions.Add(await _fraudDetectionService.PredictAsync(transaction));
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error analyzing batch transactions");
-            return BadRequest(new { error = ex.Message });
-        }
+
+        return Ok(predictions);
     }
 
-    /// <summary>
-    /// Get fraud statistics summary
-    /// </summary>
     [HttpGet("statistics")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<object> GetStatistics()
     {
-        // In a real implementation, this would query a database
-        // For now, return mock statistics
         return Ok(new
         {
             totalTransactionsAnalyzed = 10523,
@@ -105,22 +67,6 @@ public class FraudDetectionController : ControllerBase
             averageResponseTimeMs = 45,
             modelAccuracy = 0.973,
             lastModelUpdate = DateTime.UtcNow.AddDays(-2)
-        });
-    }
-
-    /// <summary>
-    /// Health check endpoint
-    /// </summary>
-    [HttpGet("health")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult<object> HealthCheck()
-    {
-        return Ok(new
-        {
-            status = "Healthy",
-            timestamp = DateTime.UtcNow,
-            service = "SageNetSentinel Fraud Detection",
-            version = "1.0.0"
         });
     }
 }

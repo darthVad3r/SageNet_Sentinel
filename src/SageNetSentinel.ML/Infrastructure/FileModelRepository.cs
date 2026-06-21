@@ -6,7 +6,7 @@ namespace SageNetSentinel.ML.Infrastructure;
 /// <summary>
 /// File-based model repository implementation
 /// </summary>
-public class FileModelRepository : ML.Abstractions.IModelRepository
+public class FileModelRepository : Core.Abstractions.IModelRepository
 {
     private readonly MLContext _mlContext;
     private readonly string _modelPath;
