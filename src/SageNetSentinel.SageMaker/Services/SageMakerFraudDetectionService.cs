@@ -3,7 +3,7 @@ using Amazon.SageMaker.Model;
 using Amazon.SageMakerRuntime;
 using Amazon.SageMakerRuntime.Model;
 using SageNetSentinel.Contracts;
-using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.Core.Abstractions;
 using System.Text;
 using System.Text.Json;
 
@@ -237,6 +237,7 @@ public class SageMakerFraudDetectionService : IFraudDetectionService
 
             return new FraudPrediction
             {
+                TenantId = transaction.TenantId,
                 TransactionId = transaction.TransactionId,
                 IsFraudulent = probability >= 0.5f,
                 FraudProbability = probability,

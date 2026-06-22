@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.Api.Storage;
 
 namespace SageNetSentinel.Api.Controllers;
 
@@ -7,23 +7,21 @@ namespace SageNetSentinel.Api.Controllers;
 [Route("api/[controller]")]
 public class MetadataController : ControllerBase
 {
-    private readonly IModelTrainer _trainer;
+    private readonly IModelMetadataStore _modelMetadataStore;
+    private readonly ITenantStore _tenantStore;
 
-    public MetadataController(IModelTrainer trainer)
+    public MetadataController(IModelMetadataStore modelMetadataStore, ITenantStore tenantStore)
     {
-        _trainer = trainer;
+        _modelMetadataStore = modelMetadataStore;
+        _tenantStore = tenantStore;
     }
 
-    [HttpGet("model")]
-    public ActionResult<object> GetModelMetadata()
-    {
-        // Minimal metadata; extend as needed
-        return Ok(new
-        {
-            modelVersion = "1.0.0",
-            isLoaded = _trainer.IsModelLoaded,
-            framework = "ML.NET",
-            lastUpdated = DateTime.UtcNow.AddDays(-2)
-        });
-    }
+    [HttpGet("models")]
+    public ActionResult<object> GetModels() => Ok(_modelMetadataStore.GetModels());
+
+    [HttpGet("tenants")]
+    public ActionResult<object> GetTenants() => Ok(_tenantStore.GetTenantIds());
+
+    [HttpGet("version")]
+    public ActionResult<object> GetVersion() => Ok(new { apiVersion = "v1", runtime = ".NET 9.0" });
 }

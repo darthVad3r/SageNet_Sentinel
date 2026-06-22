@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "SageNetSentinel.Grpc.Protos";
+
+package sagenet.v1;
+
+message TransactionData {
+  string tenant_id = 1;
+  string transaction_id = 2;
+  double amount = 3;
+  string merchant_name = 4;
+  string merchant_category = 5;
+  string location = 6;
+  string country = 7;
+  string timestamp_utc = 8;
+  string user_id = 9;
+  string card_last_four = 10;
+  string transaction_type = 11;
+  double distance_from_last_transaction = 12;
+  double time_since_last_transaction = 13;
+  int32 transaction_count_last_24_hours = 14;
+  double amount_spent_last_24_hours = 15;
+  bool is_international = 16;
+  bool is_high_risk_merchant = 17;
+  string device_fingerprint = 18;
+  string ip_address = 19;
+}

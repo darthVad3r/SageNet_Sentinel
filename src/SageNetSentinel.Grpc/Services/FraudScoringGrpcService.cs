@@ -1,20 +1,17 @@
 using Grpc.Core;
-using SageNetSentinel.Contracts;
-using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.Core.Abstractions;
 
 namespace SageNetSentinel.Grpc.Services;
 
 /// <summary>
-/// gRPC service wrapper that delegates scoring requests to the existing IFraudDetectionService.
-/// This is intentionally thin: performance-sensitive mapping lives here; heavy work stays in the ML layer.
-/// TODO: Add mTLS server configuration hooks (platform team will provide certificates and registry info).
+/// gRPC service wrapper that delegates scoring requests to IFraudDetectionService.
 /// </summary>
-public class ScoringGrpcService : SageNetSentinel.Grpc.Protos.Scoring.ScoringBase
+public class FraudScoringGrpcService : SageNetSentinel.Grpc.Protos.Scoring.ScoringBase
 {
     private readonly IFraudDetectionService _detectionService;
-    private readonly ILogger<ScoringGrpcService> _logger;
+    private readonly ILogger<FraudScoringGrpcService> _logger;
 
-    public ScoringGrpcService(IFraudDetectionService detectionService, ILogger<ScoringGrpcService> logger)
+    public FraudScoringGrpcService(IFraudDetectionService detectionService, ILogger<FraudScoringGrpcService> logger)
     {
         _detectionService = detectionService ?? throw new ArgumentNullException(nameof(detectionService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -24,16 +21,11 @@ public class ScoringGrpcService : SageNetSentinel.Grpc.Protos.Scoring.ScoringBas
         SageNetSentinel.Grpc.Protos.FraudScoringRequest request,
         ServerCallContext context)
     {
-        // Map proto TransactionData to Contracts.TransactionData
         var txn = Map(request.Transaction);
-
-        // TenantId enforcement: ensure the request contains tenant information
         var tenantId = string.IsNullOrWhiteSpace(request.TenantId) ? "default" : request.TenantId;
 
         _logger.LogDebug("gRPC scoring request received for tenant {TenantId}, transaction {TransactionId}",
             tenantId, txn.TransactionId);
-
-        // Attach tenant metadata to logging or observability systems as needed (TODO)
 
         var prediction = await _detectionService.PredictAsync(txn);
 
@@ -42,8 +34,8 @@ public class ScoringGrpcService : SageNetSentinel.Grpc.Protos.Scoring.ScoringBas
             IsFraudulent = prediction.IsFraudulent,
             FraudProbability = prediction.FraudProbability,
             RecommendedAction = prediction.RecommendedAction ?? string.Empty,
-            ModelVersion = prediction.ModelVersion ?? string.Empty,
-            DebugInfo = prediction.DebugInfo ?? string.Empty
+            ModelVersion = prediction.PredictionSource ?? string.Empty,
+            DebugInfo = string.Join(",", prediction.RiskFactors)
         };
     }
 

@@ -111,3 +111,7 @@ Planned or proposed expansion areas include:
 - stronger observability and readiness checks
 - hardened platform integration endpoints
 - additional developer and deployment documentation
+
+## Platform Integration
+
+SageNet Sentinel now includes REST, gRPC, and Kinesis-ready scaffolding with observability and multi-tenant foundations. See `docs/PLATFORM_INTEGRATION.md` for endpoint and configuration details.

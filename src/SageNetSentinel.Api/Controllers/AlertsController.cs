@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SageNetSentinel.Api.Storage;
 
 namespace SageNetSentinel.Api.Controllers;
 
@@ -6,17 +7,13 @@ namespace SageNetSentinel.Api.Controllers;
 [Route("api/[controller]")]
 public class AlertsController : ControllerBase
 {
-    [HttpGet("summary/{tenantId}")]
-    public ActionResult<object> GetAlertSummary(string tenantId)
+    private readonly IAlertsRepository _repository;
+
+    public AlertsController(IAlertsRepository repository)
     {
-        // Placeholder summary
-        return Ok(new
-        {
-            tenantId,
-            activeAlerts = 3,
-            critical = 1,
-            warning = 2,
-            lastUpdated = DateTime.UtcNow
-        });
+        _repository = repository;
     }
+
+    [HttpGet("{tenantId}")]
+    public ActionResult<object> GetAlerts(string tenantId) => Ok(_repository.GetByTenant(tenantId));
 }

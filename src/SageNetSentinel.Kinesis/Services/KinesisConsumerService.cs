@@ -2,7 +2,7 @@ using Amazon.Kinesis;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SageNetSentinel.Contracts;
-using SageNetSentinel.ML.Abstractions;
+using SageNetSentinel.Core.Abstractions;
 
 namespace SageNetSentinel.Kinesis.Services;
 
