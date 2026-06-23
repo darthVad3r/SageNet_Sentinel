@@ -37,7 +37,7 @@ function readRequiredEnvStatus(): { check: ReadinessCheck; missing: string[] } {
 
 async function checkSupabase(): Promise<ReadinessCheck> {
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase.from('workflows').select('id', { head: true });
+  const { error } = await supabase.from('workflows').select('id', { head: true, count: 'exact' });
 
   if (error) {
     return {
