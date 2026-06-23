@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"TenancyContext","type":"object","required":["tenantId"],"properties":{"tenantId":{"type":"string","minLength":1}}}

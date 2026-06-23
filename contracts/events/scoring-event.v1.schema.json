@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"ScoringEventV1","type":"object","required":["tenantId","correlationId","score","modelVersion","timestampUtc"],"properties":{"tenantId":{"type":"string"},"correlationId":{"type":"string"},"score":{"type":"number"},"modelVersion":{"type":"string"},"timestampUtc":{"type":"string","format":"date-time"}}}

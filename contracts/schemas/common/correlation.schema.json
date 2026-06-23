@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"CorrelationContext","type":"object","required":["correlationId"],"properties":{"correlationId":{"type":"string","minLength":8}}}

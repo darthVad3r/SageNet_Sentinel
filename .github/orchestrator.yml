@@ -1,0 +1,23 @@
+version: 1
+platform:
+  owner: darthVad3r
+  repos:
+    - ai-automation-lab
+    - ai-automation-backend
+    - SageNet_Sentinel
+agents:
+  orchestrator:
+    name: Platform-Orchestrator
+    responsibilities:
+      - monitor_repositories
+      - coordinate_cross_repo_tasks
+      - enforce_architecture_rules
+      - manage_shared_contracts
+      - open_linked_issues_and_prs
+      - report_status
+    escalation:
+      require_human_approval_for:
+        - breaking_contract_changes
+        - tenancy_boundary_changes
+        - correlation_propagation_failures
+        - unresolved_cross_repo_ci_failures
