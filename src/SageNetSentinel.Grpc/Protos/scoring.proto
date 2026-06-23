@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package sagenet.sentinel;
+
+option csharp_namespace = "SageNetSentinel.Grpc.Protos";
+
+message TransactionData {
+  string transactionId = 1;
+  double amount = 2;
+  string merchantName = 3;
+  string merchantCategory = 4;
+  string location = 5;
+  string country = 6;
+  string timestamp = 7;
+  string userId = 8;
+  string cardLastFour = 9;
+  string transactionType = 10;
+  double distanceFromLastTransaction = 11;
+  double timeSinceLastTransaction = 12;
+  int32 transactionCountLast24Hours = 13;
+  double amountSpentLast24Hours = 14;
+  bool isInternational = 15;
+  bool isHighRiskMerchant = 16;
+  string deviceFingerprint = 17;
+  string ipAddress = 18;
+}
+
+message FraudScoringRequest {
+  TransactionData transaction = 1;
+  string tenantId = 2; // Tenant identifier for multi-tenant routing
+  bool includeFeatureImportance = 3;
+}
+
+message FraudScoringResponse {
+  bool isFraudulent = 1;
+  double fraudProbability = 2;
+  string recommendedAction = 3;
+  string modelVersion = 4;
+  string debugInfo = 5;
+}
+
+service Scoring {
+  // Unary RPC for real-time scoring
+  rpc Score (FraudScoringRequest) returns (FraudScoringResponse);
+}
