@@ -1,0 +1,94 @@
+@use './styles/design-system/index' as *;
+@use './styles/global';
+
+:root {
+  --ds-color-primary-500: #{$color-primary-500};
+  --ds-color-secondary-500: #{$color-secondary-500};
+  --ds-color-accent-500: #{$color-accent-500};
+
+  --ds-color-neutral-100: #{$color-neutral-100};
+  --ds-color-neutral-200: #{$color-neutral-200};
+  --ds-color-neutral-300: #{$color-neutral-300};
+  --ds-color-neutral-400: #{$color-neutral-400};
+  --ds-color-neutral-500: #{$color-neutral-500};
+  --ds-color-neutral-600: #{$color-neutral-600};
+  --ds-color-neutral-700: #{$color-neutral-700};
+  --ds-color-neutral-800: #{$color-neutral-800};
+  --ds-color-neutral-900: #{$color-neutral-900};
+
+  --ds-color-success-500: #{$color-success-500};
+  --ds-color-warning-500: #{$color-warning-500};
+  --ds-color-error-500: #{$color-error-500};
+  --ds-color-info-500: #{$color-info-500};
+
+  --ds-color-background-default: var(--lab-bg, #{$color-background-default});
+  --ds-color-background-subtle: var(--lab-bg-subtle, #{$color-background-subtle});
+  --ds-color-surface-default: var(--lab-surface, #{$color-surface-default});
+  --ds-color-surface-muted: var(--lab-surface-muted, #{$color-surface-muted});
+  --ds-color-border-default: var(--lab-line, #{$color-border-default});
+  --ds-color-divider-default: var(--lab-line, #{$color-divider-default});
+
+  --ds-space-2: #{$space-2};
+  --ds-space-4: #{$space-4};
+  --ds-space-8: #{$space-8};
+  --ds-space-12: #{$space-12};
+  --ds-space-16: #{$space-16};
+  --ds-space-20: #{$space-20};
+  --ds-space-24: #{$space-24};
+  --ds-space-32: #{$space-32};
+  --ds-space-40: #{$space-40};
+  --ds-space-48: #{$space-48};
+  --ds-space-64: #{$space-64};
+
+  --ds-space-xs: #{$space-xs};
+  --ds-space-sm: #{$space-sm};
+  --ds-space-md: #{$space-md};
+  --ds-space-lg: #{$space-lg};
+  --ds-space-xl: #{$space-xl};
+
+  --ds-font-family-sans: #{$font-family-sans};
+  --ds-font-family-mono: #{$font-family-mono};
+  --ds-font-size-xs: #{$font-size-xs};
+  --ds-font-size-sm: #{$font-size-sm};
+  --ds-font-size-md: #{$font-size-md};
+  --ds-font-size-lg: #{$font-size-lg};
+  --ds-font-size-xl: #{$font-size-xl};
+  --ds-font-size-h1: #{$font-size-h1};
+  --ds-font-size-h2: #{$font-size-h2};
+  --ds-font-size-h3: #{$font-size-h3};
+  --ds-font-size-h4: #{$font-size-h4};
+  --ds-font-size-h5: #{$font-size-h5};
+  --ds-font-size-h6: #{$font-size-h6};
+
+  --ds-line-height-tight: #{$line-height-tight};
+  --ds-line-height-snug: #{$line-height-snug};
+  --ds-line-height-normal: #{$line-height-normal};
+  --ds-line-height-relaxed: #{$line-height-relaxed};
+
+  --ds-font-weight-regular: #{$font-weight-regular};
+  --ds-font-weight-medium: #{$font-weight-medium};
+  --ds-font-weight-semibold: #{$font-weight-semibold};
+  --ds-font-weight-bold: #{$font-weight-bold};
+
+  --ds-radius-sm: #{$radius-sm};
+  --ds-radius-md: #{$radius-md};
+  --ds-radius-lg: #{$radius-lg};
+  --ds-radius-pill: #{$radius-pill};
+
+  --ds-shadow-sm: #{$shadow-sm};
+  --ds-shadow-md: #{$shadow-md};
+  --ds-shadow-lg: #{$shadow-lg};
+
+  --ds-breakpoint-xs: #{$breakpoint-xs};
+  --ds-breakpoint-sm: #{$breakpoint-sm};
+  --ds-breakpoint-md: #{$breakpoint-md};
+  --ds-breakpoint-lg: #{$breakpoint-lg};
+  --ds-breakpoint-xl: #{$breakpoint-xl};
+  --ds-breakpoint-xxl: #{$breakpoint-xxl};
+
+  --ds-zindex-base: #{$zindex-base};
+  --ds-zindex-dropdown: #{$zindex-dropdown};
+  --ds-zindex-modal: #{$zindex-modal};
+  --ds-zindex-toast: #{$zindex-toast};
+  --ds-zindex-overlay: #{$zindex-overlay};
+}

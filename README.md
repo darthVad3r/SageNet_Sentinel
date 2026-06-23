@@ -1,117 +1,270 @@
-# SageNet Sentinel
+# AI Automation Lab
 
-SageNet Sentinel is a .NET 9 fraud detection platform that exposes multiple integration surfaces over a shared scoring domain. The solution currently includes a REST API, a gRPC scoring service, shared contracts, ML-based fraud detection services, and optional AWS SageMaker integration.
+## Project Overview
 
-## Current Scope
+AI Automation Lab is a private Angular workspace for building and validating automation-focused web experiences, CI/CD workflows, and repository governance patterns in one place.
 
-The application is designed to:
-- score financial transactions for fraud risk
-- support local ML.NET-based inference
-- optionally integrate with AWS SageMaker
-- reduce false positives with an ensemble strategy
-- expose platform-facing REST endpoints for scoring, metadata, model management, tenant configuration, alerts, and history
-- provide a gRPC surface for real-time scoring
-- establish a basic multi-tenant foundation via tenant identifiers
+It solves a common problem for small teams and solo builders: project delivery slows down when frontend code, quality gates, and contribution standards evolve separately. This repository keeps those concerns integrated so features can move quickly without sacrificing maintainability.
 
-## Solution Structure
+This project is for:
 
-- `src/SageNetSentinel.Api` - ASP.NET Core REST API host
-- `src/SageNetSentinel.Grpc` - gRPC scoring host and protobuf contracts
-- `src/SageNetSentinel.Contracts` - shared request, response, and tenant contracts
-- `src/SageNetSentinel.ML` - ML.NET services, ensemble logic, risk analysis, and model repository implementation
-- `src/SageNetSentinel.SageMaker` - optional AWS SageMaker-backed fraud detection service
+- Engineers building Angular-based product surfaces.
+- Maintainers who want predictable pull request quality and CI enforcement.
+- Contributors who need a clear workflow for shipping changes safely.
 
-## REST API Surface
+Key goals and features:
 
-The REST API currently includes endpoints for:
-- `POST /api/FraudDetection/analyze` - analyze a single transaction
-- `POST /api/FraudDetection/analyze/batch` - analyze a batch of transactions
-- `GET /api/FraudDetection/statistics` - return placeholder fraud statistics
-- `GET /api/FraudDetection/health` - basic service health response
-- `GET /api/Metadata/model` - model metadata
-- `POST /api/ModelManagement/train` - trigger model training
-- `GET /api/ModelManagement/status` - model status
-- `POST /api/ModelManagement/retrain` - queue placeholder retraining
-- `GET /api/Tenant/{tenantId}` - fetch tenant configuration
-- `POST /api/Tenant/{tenantId}` - save tenant configuration
-- `GET /api/History/{tenantId}` - fetch placeholder tenant history
-- `POST /api/History/record` - record placeholder history entries
-- `GET /api/Alerts/summary/{tenantId}` - fetch placeholder alert summary
+- Standalone Angular application under `ai-automation-landing/`.
+- Shared UI primitives, feature modules, and application state wiring.
+- Automated CI pipeline for linting, type checking, testing, and build validation.
+- GitHub automation for labeling, project tracking, issue linking, and branch protection.
 
-Swagger is enabled in development.
+## Setup Instructions
 
-## gRPC Surface
+### Prerequisites
 
-The gRPC project currently exposes a unary scoring method:
-- `Scoring.Score(FraudScoringRequest) returns (FraudScoringResponse)`
+Install the following before starting:
 
-The request contract includes:
-- `transaction`
-- `tenantId`
-- `includeFeatureImportance`
+- Git
+- Node.js LTS (recommended: 20+)
+- npm (comes with Node.js)
+- Angular CLI (recommended: 21.x, can also be run via `npx`)
 
-The gRPC service maps protobuf messages into internal contracts before delegating to the fraud detection service.
+Verify your tooling:
 
-## Multi-Tenant Foundation
+```bash
+node -v
+npm -v
+git --version
+npx ng version
+```
 
-The solution currently includes basic tenant-aware plumbing:
-- REST requests can provide `X-Tenant-Id`
-- gRPC requests include `tenantId`
-- `TenantContext` defaults to `default` when tenant information is missing
+### Installation
 
-This is currently foundational only. Full tenant-aware model selection and tenant isolation are still future work.
+1. Clone the repository.
 
-## ML and Scoring Model
+```bash
+git clone https://github.com/darthVad3r/ai-automation-lab.git
+cd ai-automation-lab
+```
 
-The platform currently supports:
-- local ML.NET scoring
-- optional SageMaker-backed scoring
-- ensemble scoring with weighted combination
-- rule-based and risk-analysis helpers in the ML layer
+2. Install app dependencies.
 
-Configuration for model path, SageMaker settings, and false-positive reduction behavior is available in `src/SageNetSentinel.Api/appsettings.json`.
+```bash
+cd ai-automation-landing
+npm ci
+```
 
-## Observability and Platform Readiness
+### Environment Configuration
 
-Observability is scaffolded but not complete yet:
-- observability registration exists as a placeholder extension
-- OpenTelemetry exporters are still TODO
-- gRPC mTLS configuration is still TODO
-- service registry integration is still TODO
-- history, alerts, and tenant persistence are currently placeholder in-memory implementations
+The application currently runs without required environment variables for local development.
 
-## Getting Started
+This repository does not currently include `ai-automation-landing/src/environments/`.
+If you introduce environment-specific settings, create that directory and configure Angular file replacements as needed, then document new variables in this README and the related PR.
 
-### Run the REST API
+For repository automation workflows, these GitHub settings may be required depending on workflow usage:
 
-`dotnet run --project src/SageNetSentinel.Api`
+- Repository secret: `ADD_TO_PROJECT_PAT`
+- Repository secret: `REPO_ADMIN_TOKEN`
+- Repository variable: `GH_PROJECT_URL`
 
-### Run the gRPC Service
+### Run the Project
 
-`dotnet run --project src/SageNetSentinel.Grpc`
+From `ai-automation-landing/`:
 
-### Build the Solution
+```bash
+npm start
+```
 
-`dotnet build`
+Useful development commands:
 
-## Current Status
+```bash
+npm run lint
+npm run lint:fix
+npm run typecheck
+npm test
+npm run build
+```
 
-This repository is currently a working fraud detection platform scaffold with usable scoring paths and integration surfaces, but some areas are intentionally incomplete for future platform work. The main gaps today are:
-- production-grade tenant isolation
-- persistent storage for history, alerts, and tenant configuration
-- full observability/exporter setup
-- production gRPC security configuration
-- async ingestion surfaces such as Kinesis
+### Styling System
 
-## Roadmap Direction
+This project uses a SCSS-token-first design system (not TailwindCSS).
 
-Planned or proposed expansion areas include:
-- solution restructuring for clearer shared-core boundaries
-- Kinesis-based ingestion and async scoring
-- stronger observability and readiness checks
-- hardened platform integration endpoints
-- additional developer and deployment documentation
+- Core theme tokens (color, typography, spacing, radius, elevation, semantic states) live in `ai-automation-landing/src/styles/_tokens.scss`.
+- Global reset, base typography, layout primitives, and reusable component surface styles live in `ai-automation-landing/src/styles/global.scss`.
+- SCSS aliases and breakpoint utilities live in `ai-automation-landing/src/styles/_variables.scss` and `ai-automation-landing/src/styles/_mixins.scss`.
+- App-wide styles are loaded from `ai-automation-landing/src/styles.scss`.
 
-## Platform Integration
+Theme modes are controlled via `data-theme` on `:root` with supported values: `light`, `dark`, and `system`.
 
-SageNet Sentinel now includes REST, gRPC, and Kinesis-ready scaffolding with observability and multi-tenant foundations. See `docs/PLATFORM_INTEGRATION.md` for endpoint and configuration details.
+### Vercel Deployment (Optional)
+
+If you deploy this app with Vercel, use these project settings to avoid 404 errors on Angular client routes:
+
+1. Set Root Directory to `ai-automation-landing`.
+2. Set Install Command to `npm ci`.
+3. Set Build Command to `npm run build`.
+4. Set Output Directory to `dist/ai-automation-landing/browser`.
+5. Keep `ai-automation-landing/vercel.json` committed so direct route requests (for example `/login` or `/dashboard`) rewrite to `index.html`.
+
+## Folder Structure Explanation
+
+```text
+ai-automation-lab/
+├── .husky/
+├── .vscode/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── deploy.yml
+│   │   ├── labeler.yml
+│   │   ├── pr-linked-issue.yml
+│   │   ├── project-automation.yml
+│   │   ├── release.yml
+│   │   └── sync-branch-protection.yml
+│   ├── ISSUE_TEMPLATE/
+│   ├── agents/
+│   ├── skills/
+│   ├── CODEOWNERS
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── branch-protection-main.json
+│   ├── copilot-instructions.md
+│   └── labeler.yml
+├── ai-automation-landing/
+│   ├── public/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/
+│   │   │   │   ├── guards/
+│   │   │   │   │   └── auth.guard.ts
+│   │   │   │   ├── interceptors/
+│   │   │   │   │   └── http.interceptor.ts
+│   │   │   │   └── services/
+│   │   │   │       ├── landing-content.service.ts
+│   │   │   │       ├── landing-content.service.spec.ts
+│   │   │   │       └── seo.service.ts
+│   │   │   ├── features/
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── settings/
+│   │   │   │   └── workflows/
+│   │   │   ├── layout/
+│   │   │   │   ├── navigation/
+│   │   │   │   ├── shell/
+│   │   │   │   └── sidebar/
+│   │   │   ├── modules/
+│   │   │   │   ├── book/
+│   │   │   │   ├── kit/
+│   │   │   │   └── landing/
+│   │   │   ├── shared/
+│   │   │   │   ├── directives/
+│   │   │   │   ├── layout/
+│   │   │   │   ├── pipes/
+│   │   │   │   └── ui/
+│   │   │   ├── state/
+│   │   │   │   ├── app.state.ts
+│   │   │   │   ├── app.store.ts
+│   │   │   │   └── app.store.spec.ts
+│   │   │   ├── app.config.ts
+│   │   │   ├── app.html
+│   │   │   ├── app.routes.ts
+│   │   │   ├── app.scss
+│   │   │   ├── app.spec.ts
+│   │   │   └── app.ts
+│   │   ├── styles/
+│   │   ├── index.html
+│   │   ├── main.ts
+│   │   └── styles.scss
+│   ├── angular.json
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   └── tsconfig.spec.json
+├── docs/
+│   ├── ci-pipeline.md
+│   └── github-automation.md
+├── .gitattributes
+├── .gitignore
+└── README.md
+```
+
+### What Each Major Area Is For
+
+- `.github/workflows/`: CI/CD and automation workflows for validation, labeling, issue linkage, releases, and branch governance.
+- `.husky/`: Local Git hook bootstrap used to enforce quality checks before commits.
+- `.vscode/`: Shared editor settings and workspace-level development tooling configuration.
+- `.github/PULL_REQUEST_TEMPLATE.md`: Required PR checklist and issue-linking format.
+- `.github/CODEOWNERS`: Ownership and review routing configuration.
+- `ai-automation-landing/`: Main Angular application workspace.
+- `ai-automation-landing/src/app/core/`: Cross-cutting app concerns (guards, interceptors, and foundational services).
+- `ai-automation-landing/src/app/features/`: Feature-level containers such as dashboard, settings, and workflows.
+- `ai-automation-landing/src/app/layout/`: Application shell and navigation structure.
+- `ai-automation-landing/src/app/modules/`: Route-level page modules for product sections.
+- `ai-automation-landing/src/app/shared/`: Reusable directives, pipes, layout helpers, and UI components.
+- `ai-automation-landing/src/app/state/`: App-level state model, store logic, and associated tests.
+- `docs/`: Operational documentation for CI and GitHub automation.
+
+## Contribution Guidelines
+
+### Branching Strategy
+
+- Create all work on a short-lived branch from `main`.
+- Open pull requests targeting `main` unless maintainers explicitly request a different base branch.
+- Prefer descriptive branch names with an issue prefix, for example: `59-readme-enhancement`.
+- Keep branches focused on a single concern to simplify review and rollback.
+
+### Commit Message Style
+
+Use clear, imperative commit messages. Conventional Commit style is recommended:
+
+```text
+feat(readme): add setup and contribution sections
+fix(ci): align cache path to app lockfile
+docs(workflows): update CI trigger documentation
+```
+
+Guidelines:
+
+- Subject line <= 72 characters.
+- Explain what changed and why.
+- Avoid vague messages like "update" or "fix stuff".
+
+### Pull Request Expectations
+
+Every pull request should:
+
+1. Use `.github/PULL_REQUEST_TEMPLATE.md`.
+2. Include a linked issue with a closing keyword, such as `Closes #57`.
+3. Describe scope, risk, and any environment or deployment impact.
+4. Include documentation updates when behavior, tooling, or workflows change.
+5. Pass CI checks before requesting final review.
+
+Before opening a PR, run from `ai-automation-landing/`:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+### Code Review Requirements
+
+- At least one approving review is required before merge.
+- Resolve all review conversations.
+- Keep history linear and avoid force-pushing rewritten history after active review unless coordinated.
+- Address requested changes with follow-up commits and short reviewer notes.
+
+### Project-Specific Rules
+
+- Use standalone Angular components and prefer `ChangeDetectionStrategy.OnPush` for feature/page components.
+- Keep styling maintainable and purposeful; use SCSS for essential layout and component presentation.
+- For accessibility, correctly associate labels with form controls using `for`/`id` or wrapping.
+- Do not add or modify machine-local artifacts (for example `.vs/` workspace files) in feature PRs, and never commit secrets.
+
+---
+
+For deeper operational details, see:
+
+- `docs/ci-pipeline.md`
+- `docs/github-automation.md`

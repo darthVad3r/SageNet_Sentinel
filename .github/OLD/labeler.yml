@@ -1,0 +1,30 @@
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "ai-automation-landing/src/app/**"
+          - "ai-automation-landing/src/styles/**"
+          - "ai-automation-landing/src/**/*.scss"
+
+workflows:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "README.md"
+          - "ai-automation-landing/README.md"
+
+feature:
+  - head-branch: ["^feature/.+"]
+
+fix:
+  - head-branch: ["^fix/.+"]
+
+chore:
+  - head-branch: ["^chore/.+"]
+
+needs-review:
+  - head-branch: ["^.+$"]
