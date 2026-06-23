@@ -1,0 +1,7 @@
+{
+  "Observability": {
+    "TracingEnabled": true,
+    "MetricsEnabled": true,
+    "TODO": "Configure exporters, dashboards, and deployment telemetry settings"
+  }
+}

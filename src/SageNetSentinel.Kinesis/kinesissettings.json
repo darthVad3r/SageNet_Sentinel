@@ -1,0 +1,9 @@
+{
+  "Kinesis": {
+    "Enabled": false,
+    "StreamName": "sagenet-transactions",
+    "BatchSize": 25,
+    "PollIntervalSeconds": 5,
+    "TODO": "Configure IAM roles, credentials, and AWS runtime settings"
+  }
+}

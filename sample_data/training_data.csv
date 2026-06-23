@@ -1,0 +1,13 @@
+# Sample Training Data for Fraud Detection
+
+Amount,TransactionCountLast24Hours,AmountSpentLast24Hours,TimeSinceLastTransaction,DistanceFromLastTransaction,IsInternational,IsHighRiskMerchant,HourOfDay,DayOfWeek,IsFraud
+25.50,2,47.30,120,0,0,0,14,2,0
+1250.00,1,1250.00,1440,0,1,0,3,4,1
+45.99,5,234.50,30,5,0,0,18,5,0
+3500.00,15,8900.00,10,850,1,1,2,6,1
+12.00,3,67.50,180,2,0,0,12,1,0
+899.99,1,899.99,2880,0,0,0,15,3,0
+2100.00,8,5600.00,25,450,1,1,4,0,1
+67.25,4,189.75,60,8,0,0,11,4,0
+15.50,2,32.00,240,1,0,0,9,2,0
+5000.00,20,12000.00,5,1200,1,1,1,5,1
