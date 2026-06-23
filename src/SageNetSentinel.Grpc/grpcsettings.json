@@ -1,0 +1,8 @@
+{
+  "Grpc": {
+    "Enabled": true,
+    "Port": 5001,
+    "RequireSecureChannel": false,
+    "TODO": "Configure mTLS and service registry integration"
+  }
+}

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SageNetSentinel.Contracts\SageNetSentinel.Contracts.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.Core\SageNetSentinel.Core.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.Grpc\SageNetSentinel.Grpc.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.Kinesis\SageNetSentinel.Kinesis.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.ML\SageNetSentinel.ML.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.Observability\SageNetSentinel.Observability.csproj" />
+    <ProjectReference Include="..\SageNetSentinel.SageMaker\SageNetSentinel.SageMaker.csproj" />
+  </ItemGroup>
+</Project>
