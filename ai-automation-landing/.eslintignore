@@ -1,7 +1,0 @@
-coverage
-dist
-out-tsc
-node_modules
-.husky/_
-.vs
-src/assets/runtime/auth-config.js
