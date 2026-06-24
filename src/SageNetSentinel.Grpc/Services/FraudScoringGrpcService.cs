@@ -1,68 +1,64 @@
 using Grpc.Core;
+using SageNetSentinel.Contracts;
+using TransactionContract = SageNetSentinel.Contracts.TransactionData;
 using SageNetSentinel.Core.Abstractions;
+using SageNetSentinel.Grpc.Protos;
 
 namespace SageNetSentinel.Grpc.Services;
 
-/// <summary>
-/// gRPC service wrapper that delegates scoring requests to IFraudDetectionService.
-/// </summary>
-public class FraudScoringGrpcService : SageNetSentinel.Grpc.Protos.Scoring.ScoringBase
+public class FraudScoringGrpcService : Protos.FraudScoringService.FraudScoringServiceBase
 {
-    private readonly IFraudDetectionService _detectionService;
-    private readonly ILogger<FraudScoringGrpcService> _logger;
+    private readonly IFraudDetectionService _fraudDetectionService;
 
-    public FraudScoringGrpcService(IFraudDetectionService detectionService, ILogger<FraudScoringGrpcService> logger)
+    public FraudScoringGrpcService(IFraudDetectionService fraudDetectionService)
     {
-        _detectionService = detectionService ?? throw new ArgumentNullException(nameof(detectionService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _fraudDetectionService = fraudDetectionService;
     }
 
-    public override async Task<SageNetSentinel.Grpc.Protos.FraudScoringResponse> Score(
-        SageNetSentinel.Grpc.Protos.FraudScoringRequest request,
-        ServerCallContext context)
+    public override async Task<FraudScoringResponse> Score(FraudScoringRequest request, ServerCallContext context)
     {
-        var txn = Map(request.Transaction);
-        var tenantId = string.IsNullOrWhiteSpace(request.TenantId) ? "default" : request.TenantId;
+        // TODO(platform-team): Configure mTLS certificates for gRPC secure channels.
+        // TODO(platform-team): Integrate gRPC service with service registry/discovery.
 
-        _logger.LogDebug("gRPC scoring request received for tenant {TenantId}, transaction {TransactionId}",
-            tenantId, txn.TransactionId);
-
-        var prediction = await _detectionService.PredictAsync(txn);
-
-        return new SageNetSentinel.Grpc.Protos.FraudScoringResponse
+        var transaction = request.Transaction;
+        if (!DateTime.TryParse(transaction.TimestampUtc, out var parsedTimestamp))
         {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid transaction timestamp_utc."));
+        }
+
+        var prediction = await _fraudDetectionService.PredictAsync(new TransactionContract
+        {
+            TenantId = transaction.TenantId,
+            TransactionId = transaction.TransactionId,
+            Amount = (decimal)transaction.Amount,
+            MerchantName = transaction.MerchantName,
+            MerchantCategory = transaction.MerchantCategory,
+            Location = transaction.Location,
+            Country = transaction.Country,
+            Timestamp = parsedTimestamp,
+            UserId = transaction.UserId,
+            CardLastFour = transaction.CardLastFour,
+            TransactionType = transaction.TransactionType,
+            DistanceFromLastTransaction = transaction.DistanceFromLastTransaction == 0 ? null : (decimal?)transaction.DistanceFromLastTransaction,
+            TimeSinceLastTransaction = transaction.TimeSinceLastTransaction == 0 ? null : transaction.TimeSinceLastTransaction,
+            TransactionCountLast24Hours = transaction.TransactionCountLast24Hours,
+            AmountSpentLast24Hours = (decimal)transaction.AmountSpentLast24Hours,
+            IsInternational = transaction.IsInternational,
+            IsHighRiskMerchant = transaction.IsHighRiskMerchant,
+            DeviceFingerprint = transaction.DeviceFingerprint,
+            IpAddress = transaction.IpAddress
+        });
+
+        return new FraudScoringResponse
+        {
+            TenantId = prediction.TenantId,
+            TransactionId = prediction.TransactionId,
             IsFraudulent = prediction.IsFraudulent,
             FraudProbability = prediction.FraudProbability,
-            RecommendedAction = prediction.RecommendedAction ?? string.Empty,
-            ModelVersion = prediction.PredictionSource ?? string.Empty,
-            DebugInfo = string.Join(",", prediction.RiskFactors)
-        };
-    }
-
-    private static SageNetSentinel.Contracts.TransactionData Map(SageNetSentinel.Grpc.Protos.TransactionData src)
-    {
-        if (src == null) return new SageNetSentinel.Contracts.TransactionData();
-
-        return new SageNetSentinel.Contracts.TransactionData
-        {
-            TransactionId = src.TransactionId ?? string.Empty,
-            Amount = (decimal)src.Amount,
-            MerchantName = src.MerchantName ?? string.Empty,
-            MerchantCategory = src.MerchantCategory ?? string.Empty,
-            Location = src.Location ?? string.Empty,
-            Country = src.Country ?? string.Empty,
-            Timestamp = DateTime.TryParse(src.Timestamp, out var t) ? t : DateTime.UtcNow,
-            UserId = src.UserId ?? string.Empty,
-            CardLastFour = src.CardLastFour ?? string.Empty,
-            TransactionType = src.TransactionType ?? string.Empty,
-            DistanceFromLastTransaction = src.DistanceFromLastTransaction == 0 ? null : (decimal?)src.DistanceFromLastTransaction,
-            TimeSinceLastTransaction = src.TimeSinceLastTransaction == 0 ? null : (double?)src.TimeSinceLastTransaction,
-            TransactionCountLast24Hours = src.TransactionCountLast24Hours,
-            AmountSpentLast24Hours = (decimal)src.AmountSpentLast24Hours,
-            IsInternational = src.IsInternational,
-            IsHighRiskMerchant = src.IsHighRiskMerchant,
-            DeviceFingerprint = src.DeviceFingerprint ?? string.Empty,
-            IpAddress = src.IpAddress ?? string.Empty
+            ConfidenceScore = prediction.ConfidenceScore,
+            RecommendedAction = prediction.RecommendedAction,
+            PredictionSource = prediction.PredictionSource,
+            RiskFactors = { prediction.RiskFactors }
         };
     }
 }

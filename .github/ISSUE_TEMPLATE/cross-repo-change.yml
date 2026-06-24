@@ -1,0 +1,9 @@
+name: Cross-Repo Change
+description: Track coordinated work across repositories
+title: "[Cross-Repo] "
+labels: ["agent:auto", "cross-repo"]
+body:
+  - type: input
+    id: source_repo
+    attributes: { label: Source repository, placeholder: darthVad3r/ai-automation-backend }
+    validations: { required: true }

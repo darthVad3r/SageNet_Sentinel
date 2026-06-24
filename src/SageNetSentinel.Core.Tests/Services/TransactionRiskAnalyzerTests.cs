@@ -7,6 +7,7 @@ namespace SageNetSentinel.Core.Tests.Services;
 public class TransactionRiskAnalyzerTests
 {
     private readonly TransactionRiskAnalyzer _analyzer = new();
+    private static readonly DateTime BaselineTimestampUtc = new(2025, 11, 30, 14, 0, 0, DateTimeKind.Utc);
 
     private TransactionData CreateTestTransaction()
     {
@@ -19,7 +20,7 @@ public class TransactionRiskAnalyzerTests
             MerchantCategory = "Retail",
             Location = "Seattle, WA",
             Country = "USA",
-            Timestamp = DateTime.UtcNow,
+            Timestamp = BaselineTimestampUtc,
             UserId = "user-123",
             CardLastFour = "1234",
             TransactionType = "in-store",
@@ -138,7 +139,7 @@ public class TransactionRiskAnalyzerTests
         transaction.IsHighRiskMerchant = false;
         transaction.TransactionCountLast24Hours = 2;
         transaction.DistanceFromLastTransaction = 5;
-        transaction.Timestamp = DateTime.UtcNow.AddHours(-2);
+        transaction.Timestamp = BaselineTimestampUtc.AddHours(-2);
 
         var factors = _analyzer.IdentifyRiskFactors(transaction, 0.6f);
 
