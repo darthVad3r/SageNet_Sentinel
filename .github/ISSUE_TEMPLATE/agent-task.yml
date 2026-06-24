@@ -1,0 +1,9 @@
+name: Agent Task
+description: Task assigned to an agent
+title: "[Agent Task] "
+labels: ["agent:auto"]
+body:
+  - type: input
+    id: target_agent
+    attributes: { label: Target Agent, placeholder: Backend-Agent }
+    validations: { required: true }
