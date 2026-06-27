@@ -1,0 +1,156 @@
+name: platform-orchestration-validate
+
+on:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - ".github/orchestrator.yml"
+      - ".github/agents/**"
+      - ".github/pipelines/**"
+      - ".github/rules/**"
+  push:
+    branches: [main, dev]
+    paths:
+      - ".github/orchestrator.yml"
+      - ".github/agents/**"
+      - ".github/pipelines/**"
+      - ".github/rules/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-orchestration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate orchestrator.yml
+        shell: bash
+        run: |
+          echo "## Platform Orchestration Validation"
+
+          if [ ! -f .github/orchestrator.yml ]; then
+            echo "::error::.github/orchestrator.yml is missing"
+            exit 1
+          fi
+
+          python3 -c "
+          import yaml, sys
+          with open('.github/orchestrator.yml') as f:
+              config = yaml.safe_load(f)
+
+          errors = []
+
+          if 'version' not in config:
+              errors.append('Missing: version')
+          if 'platform' not in config:
+              errors.append('Missing: platform section')
+          elif 'repos' not in config.get('platform', {}):
+              errors.append('Missing: platform.repos')
+          if 'agents' not in config:
+              errors.append('Missing: agents section')
+          elif 'orchestrator' not in config.get('agents', {}):
+              errors.append('Missing: agents.orchestrator')
+
+          if errors:
+              for e in errors:
+                  print(f'::error::{e}')
+              sys.exit(1)
+
+          print('✓ orchestrator.yml structure is valid')
+          print(f'  Platform repos: {config[\"platform\"][\"repos\"]}')
+          print(f'  Orchestrator: {config[\"agents\"][\"orchestrator\"][\"name\"]}')
+          "
+
+      - name: Validate agent folder structure
+        shell: bash
+        run: |
+          REQUIRED_AGENTS=("coordinator" "architect" "compliance" "executor" "governance" "researcher" "reviewer" "risk_officer" "security" "strategist" "validator")
+          REQUIRED_FILES=("charter.md" "rules.md" "constraints.md" "handoffs.md" "skills.md" "examples.md")
+          ERRORS=0
+
+          for agent in "${REQUIRED_AGENTS[@]}"; do
+            AGENT_DIR=".github/agents/$agent"
+            if [ ! -d "$AGENT_DIR" ]; then
+              echo "::error::Missing agent directory: $AGENT_DIR"
+              ERRORS=$((ERRORS + 1))
+              continue
+            fi
+
+            for file in "${REQUIRED_FILES[@]}"; do
+              if [ ! -f "$AGENT_DIR/$file" ]; then
+                echo "::warning::Missing file: $AGENT_DIR/$file"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+            echo "✓ $agent agent validated"
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "::warning::$ERRORS agent structure issue(s) found"
+          fi
+
+          echo "Agent structure validation complete."
+
+      - name: Validate governance hooks
+        shell: bash
+        run: |
+          REQUIRED_GOVERNANCE=(
+            "access_control.md"
+            "audit.md"
+            "compliance_matrix.md"
+            "data_handling.md"
+            "risk_register.md"
+          )
+          ERRORS=0
+
+          if [ ! -d .github/governance ]; then
+            echo "::error::.github/governance/ directory is missing"
+            exit 1
+          fi
+
+          for file in "${REQUIRED_GOVERNANCE[@]}"; do
+            if [ ! -f ".github/governance/$file" ]; then
+              echo "::error::Missing governance file: $file"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✓ governance/$file"
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            exit 1
+          fi
+
+          echo "Governance hooks validated."
+
+      - name: Validate cross-repo-sync workflow
+        shell: bash
+        run: |
+          SYNC_FILES=$(find .github/workflows -name 'cross-repo-sync.*' -type f)
+
+          if [ -z "$SYNC_FILES" ]; then
+            echo "::error::No cross-repo-sync workflow found"
+            exit 1
+          fi
+
+          echo "Cross-repo sync workflows found:"
+          echo "$SYNC_FILES"
+
+          for f in $SYNC_FILES; do
+            python3 -c "
+          import yaml, sys
+          with open('$f') as file:
+              wf = yaml.safe_load(file)
+          if 'on' not in wf:
+              print(f'::error file=$f::Missing triggers')
+              sys.exit(1)
+          if 'jobs' not in wf:
+              print(f'::error file=$f::Missing jobs')
+              sys.exit(1)
+          print(f'✓ $f is valid YAML with triggers and jobs')
+          "
+          done

@@ -1,0 +1,107 @@
+name: contracts-validate
+
+on:
+  pull_request:
+    branches: [main, dev]
+    paths: ["contracts/**"]
+  push:
+    branches: [main, dev]
+    paths: ["contracts/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-schemas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install jsonschema
+        run: pip install jsonschema
+
+      - name: Validate all JSON schemas
+        shell: bash
+        run: |
+          echo "## Contract Schema Validation"
+          ERRORS=0
+
+          for schema in $(find contracts -name '*.schema.json' -type f); do
+            if python3 -c "
+          import json, sys
+          from jsonschema import Draft202012Validator
+          with open('$schema') as f:
+              s = json.load(f)
+          Draft202012Validator.check_schema(s)
+          " 2>&1; then
+              echo "✓ $schema"
+            else
+              echo "::error file=$schema::Invalid JSON Schema"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::$ERRORS schema(s) failed validation"
+            exit 1
+          fi
+
+          echo "All schemas valid."
+
+      - name: Validate version.json
+        shell: bash
+        run: |
+          if [ ! -f contracts/version.json ]; then
+            echo "::error::contracts/version.json is missing"
+            exit 1
+          fi
+
+          python3 -c "
+          import json, sys
+          with open('contracts/version.json') as f:
+              v = json.load(f)
+          required = ['name', 'version', 'compatibility']
+          missing = [k for k in required if k not in v]
+          if missing:
+              print(f'::error::version.json missing fields: {missing}')
+              sys.exit(1)
+          print(f'Contract version: {v[\"name\"]} v{v[\"version\"]} ({v[\"compatibility\"]})')
+          "
+
+      - name: Check required contract structure
+        shell: bash
+        run: |
+          REQUIRED_DIRS=("contracts/schemas/common" "contracts/events" "contracts/openapi" "contracts/types")
+          ERRORS=0
+
+          for dir in "${REQUIRED_DIRS[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "::error::Required directory missing: $dir"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✓ $dir exists"
+            fi
+          done
+
+          REQUIRED_SCHEMAS=("contracts/schemas/common/correlation.schema.json" "contracts/schemas/common/tenancy.schema.json")
+          for schema in "${REQUIRED_SCHEMAS[@]}"; do
+            if [ ! -f "$schema" ]; then
+              echo "::error::Required schema missing: $schema"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✓ $schema exists"
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            exit 1
+          fi
+
+          echo "Contract structure validated."

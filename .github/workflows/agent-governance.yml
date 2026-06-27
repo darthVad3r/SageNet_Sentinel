@@ -1,12 +1,97 @@
 name: Agent Governance
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
+    paths:
+      - ".github/agents/**"
+      - ".github/governance/**"
+      - ".github/orchestrator.yml"
+      - ".github/rules/**"
   push:
     branches: [main, master]
+    paths:
+      - ".github/agents/**"
+      - ".github/governance/**"
+      - ".github/orchestrator.yml"
+      - ".github/rules/**"
+
+permissions:
+  contents: read
+
 jobs:
   governance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: test -f .github/orchestrator.yml
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate orchestrator config
+        shell: bash
+        run: |
+          if [ ! -f .github/orchestrator.yml ]; then
+            echo "::error::.github/orchestrator.yml is missing"
+            exit 1
+          fi
+          python3 -c "
+          import yaml
+          with open('.github/orchestrator.yml') as f:
+              yaml.safe_load(f)
+          print('✓ orchestrator.yml parses successfully')
+          "
+
+      - name: Validate coordinator agent
+        shell: bash
+        run: |
+          ERRORS=0
+          for file in charter.md handoffs.md; do
+            if [ ! -f ".github/agents/coordinator/$file" ]; then
+              echo "::error::Missing .github/agents/coordinator/$file"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✓ coordinator/$file exists"
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then exit 1; fi
+
+      - name: Validate governance agent
+        shell: bash
+        run: |
+          if [ ! -f .github/agents/governance/charter.md ]; then
+            echo "::error::Missing .github/agents/governance/charter.md"
+            exit 1
+          fi
+          echo "✓ governance/charter.md exists"
+
+      - name: Validate escalation path integrity
+        shell: bash
+        run: |
+          HANDOFFS=".github/agents/coordinator/handoffs.md"
+          if [ ! -f "$HANDOFFS" ]; then
+            echo "::error::coordinator handoffs.md not found — cannot validate escalation paths"
+            exit 1
+          fi
+          ERRORS=0
+          for target in governance compliance; do
+            if grep -qi "$target" "$HANDOFFS"; then
+              echo "✓ Escalation path to $target found in coordinator handoffs"
+            else
+              echo "::error::No escalation path to $target in coordinator handoffs"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then exit 1; fi
+
+      - name: Validate governance directory
+        shell: bash
+        run: |
+          ERRORS=0
+          for file in access_control.md audit.md risk_register.md; do
+            if [ ! -f ".github/governance/$file" ]; then
+              echo "::error::Missing .github/governance/$file"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✓ governance/$file exists"
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then exit 1; fi
