@@ -1,12 +1,95 @@
 name: Cross-Repo Sync (Sentinel)
+
 on:
-  pull_request: { types: [opened, synchronize, reopened] }
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches: [main, master]
     paths: ["contracts/**", "**/*.cs", ".github/orchestrator.yml"]
+
+permissions:
+  contents: read
+
 jobs:
   scoring-impact:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: echo "Validate scoring downstream impact"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect contract changes
+        id: contract-changes
+        shell: bash
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q '^contracts/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Contract changes detected:"
+            git diff --name-only HEAD~1 HEAD | grep '^contracts/'
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No contract changes detected"
+          fi
+
+      - name: Detect orchestrator changes
+        id: orchestrator-changes
+        shell: bash
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q '.github/orchestrator.yml'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Orchestrator config changes detected"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No orchestrator changes detected"
+          fi
+
+      - name: Validate contract schemas
+        if: steps.contract-changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          ERRORS=0
+          for schema in $(find contracts -name '*.schema.json' -type f 2>/dev/null); do
+            if python3 -c "import json; json.load(open('$schema'))" 2>&1; then
+              echo "✓ $schema is valid JSON"
+            else
+              echo "::error file=$schema::Invalid JSON"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::$ERRORS schema(s) failed validation"
+            exit 1
+          fi
+          echo "All contract schemas valid."
+
+      - name: Validate orchestrator.yml
+        if: steps.orchestrator-changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          python3 -c "
+          import yaml, sys
+          with open('.github/orchestrator.yml') as f:
+              config = yaml.safe_load(f)
+          if not config:
+              print('::error::orchestrator.yml is empty')
+              sys.exit(1)
+          required = ['platform', 'agents']
+          missing = [k for k in required if k not in config]
+          if missing:
+              print(f'::error::orchestrator.yml missing required keys: {missing}')
+              sys.exit(1)
+          repos = config.get('platform', {}).get('repos', [])
+          print(f'✓ orchestrator.yml valid — repos: {repos}')
+          "
+
+      - name: Notify downstream impact
+        shell: bash
+        run: |
+          echo "## Downstream Impact Summary"
+          echo "Contract changes: ${{ steps.contract-changes.outputs.changed }}"
+          echo "Orchestrator changes: ${{ steps.orchestrator-changes.outputs.changed }}"
+          echo ""
+          echo "Affected downstream repos:"
+          echo "  - ai-automation-backend (scoring models, API contracts)"
+          echo "  - ai-automation-lab (experiment schemas, pipeline configs)"
